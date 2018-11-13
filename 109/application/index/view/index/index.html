@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width; initial-scale=1.0" />
+    <link rel="stylesheet" href="__CSS__/style.css" />
+    <meta charset="utf-8" />
+    <title>壹零玖</title>
+    <link rel="stylesheet" href="__CSS__/reset.css" type="text/css" />
+    <link rel="stylesheet" href="__CSS__/style.css" type="text/css" />
+    <link rel="stylesheet" href="__CSS__/three.css" type="text/css" />
+    <link rel="stylesheet" href="__STATIC__/dist/css/swiper.min.css">
+    <link rel="stylesheet" href="__STATIC__/layui/css/layui.css" type="text/css" />
+</head>
+
+<body>
+<div class="canvasImg" style="display: none;">
+    <img src="__IMG__/indexRain0.png" alt="" alt="" id="indexRain0" data_id="6">
+    <img src="__IMG__/indexRain1.png" alt="" alt="" id="indexRain1" data_id="6">
+    <img src="__IMG__/indexRain2.png" alt="" alt="" id="indexRain2" data_id="6">
+    <img src="__IMG__/indexRain3.png" alt="" alt="" id="indexRain3" data_id="6">
+    <img src="__IMG__/indexRain4.png" alt="" alt="" id="indexRain4" data_id="6">
+    <img src="__IMG__/indexRain5.png" alt="" alt="" id="indexRain5" data_id="6">
+    <img src="__IMG__/indexRain6.png" alt="" alt="" id="indexRain6" data_id="6">
+    <img src="__IMG__/indexRain7.png" alt="" alt="" id="indexRain7" data_id="6">
+</div>
+<div class="main_turn">
+    <div class="btns clearfixed">
+        <div class="li recording" onclick="popups(this)" data-class="recording"><img src="__IMG__/recording.png" alt=""></div>
+        <div class="rule fr" onclick="popups(this)" data-class="rule"><img src="__IMG__/rule.png" alt=""></div>
+    </div>
+    <div class="bg">
+        <img src="__IMG__/bg.png" alt="">
+    </div>
+    <div class="more">
+        <div class="clearfixed">
+            <div class="li">当前门店:</div>
+            <div class="li">小六子烧烤刷</div>
+            <div class="li white" onclick="jump(this)" data-href="{:url('index/more')}">点击查看更多</div>
+        </div>
+    </div>
+    <div class="limit clearfixed">
+        可抽奖次数: <span>3</span>次 第一次玩 <span>2</span>元
+    </div>
+    <div class="banner">
+        <div class="turnplate" style="background-image:url(__IMG__/yuan.png);background-size:100% 100%;">
+            <canvas class="item" id="wheelcanvas" width="516" height="516"></canvas>
+            <img id="tupBtn" class="pointer tupBtn" src="__IMG__/btn.png" />
+        </div>
+    </div>
+    <div class="infor">
+        <div class="inforTitle">
+            <img src="__IMG__/inforTitle.png" alt="">
+        </div>
+        <div class="inforCon">
+            <div class="clearfixed inforUl">
+                <div class="li inforImg">
+                    <img src="__IMG__/yuan.png" alt="">
+                </div>
+                <div class="li padding1 nick ellipsis">微信昵称</div>
+                <div class="li fr padding1 con ellipsis">矿泉水一瓶价值3元</div>
+            </div>
+            <div class="clearfixed inforUl">
+                <div class="li inforImg">
+                    <img src="__IMG__/yuan.png" alt="">
+                </div>
+                <div class="li padding1 nick ellipsis">微信昵称</div>
+                <div class="li fr padding1 con ellipsis">矿泉水一瓶价值3元</div>
+            </div>
+            <div class="clearfixed inforUl">
+                <div class="li inforImg">
+                    <img src="__IMG__/yuan.png" alt="">
+                </div>
+                <div class="li padding1 nick ellipsis">微信昵称</div>
+                <div class="li fr padding1 con ellipsis">矿泉水一瓶价值3元</div>
+            </div>
+            <div class="clearfixed inforUl">
+                <div class="li inforImg">
+                    <img src="__IMG__/yuan.png" alt="">
+                </div>
+                <div class="li padding1 nick ellipsis">微信昵称</div>
+                <div class="li fr padding1 con ellipsis">矿泉水一瓶价值3元</div>
+            </div>
+            <div class="clearfixed inforUl">
+                <div class="li inforImg">
+                    <img src="__IMG__/yuan.png" alt="">
+                </div>
+                <div class="li padding1 nick ellipsis">微信昵称</div>
+                <div class="li fr padding1 con ellipsis">矿泉水一瓶价值3元</div>
+            </div>
+        </div>
+    </div>
+    <div class="empty"></div>
+    <div class="footerBtn">
+        <div class="btnMoney tupBtn">立即抽奖￥<span>2.00</span>元</div>
+    </div>
+    <div id="rule" class="_popups">
+        <div class="clearfixed">
+            <div class="fr closex" onclick="close_popups(this)" data-class="_popups">
+                <img src="__IMG__/close.png" alt="">
+            </div>
+        </div>
+        <div class="rule_popupsImg">
+            <img src="__IMG__/rule_popups.png" alt="">
+        </div>
+    </div>
+    <div id="recording" class="_popups">
+        <div class="inforCon inforPopups">
+            <div class="clearfixed inforUl">
+                <div class="li inforImg">
+                    <img src="__IMG__/yuan.png" alt="">
+                </div>
+                <div class="li padding1 nick ellipsis">微信昵称</div>
+                <div class="li fr padding1 con ellipsis">矿泉水一瓶价值3元</div>
+            </div>
+            <div class="clearfixed inforUl">
+                <div class="li inforImg">
+                    <img src="__IMG__/yuan.png" alt="">
+                </div>
+                <div class="li padding1 nick ellipsis">微信昵称</div>
+                <div class="li fr padding1 con ellipsis">矿泉水一瓶价值3元</div>
+            </div>
+            <div class="clearfixed inforUl">
+                <div class="li inforImg">
+                    <img src="__IMG__/yuan.png" alt="">
+                </div>
+                <div class="li padding1 nick ellipsis">微信昵称</div>
+                <div class="li fr padding1 con ellipsis">矿泉水一瓶价值3元</div>
+            </div>
+            <div class="clearfixed inforUl">
+                <div class="li inforImg">
+                    <img src="__IMG__/yuan.png" alt="">
+                </div>
+                <div class="li padding1 nick ellipsis">微信昵称</div>
+                <div class="li fr padding1 con ellipsis">矿泉水一瓶价值3元</div>
+            </div>
+            <div class="clearfixed inforUl">
+                <div class="li inforImg">
+                    <img src="__IMG__/yuan.png" alt="">
+                </div>
+                <div class="li padding1 nick ellipsis">微信昵称</div>
+                <div class="li fr padding1 con ellipsis">矿泉水一瓶价值3元</div>
+            </div>
+        </div>
+    </div>
+    <div id="popus" class="_popups" style="top:40%;">
+        <div class="fr closex" onclick="close_popups(this)" data-class="_popups">
+            <img src="__IMG__/close.png" alt="">
+        </div>
+        <div class="popupsImg">
+            <img src="__IMG__/popups.png" alt="">
+            <div class="popupsCon">
+                <div class="li til">恭喜您获得</div>
+                <div class="prize">茅台酒一瓶</div>
+                <div class="prize">价值999元</div>
+                <div class="num">兑换编码: <span>32568792146</span></div>
+                <div class="tel">请联系门店工作人员兑奖</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mask" onclick="close_popups(this)" data-class="_popups"></div>
+</div>
+<script type="text/javascript" src="__JS__/jquery.js"></script>
+<script type="text/javascript" src="__JS__/award.js"></script>
+<script type="text/javascript" src="__JS__/awardRotate.js"></script>
+<script type="text/javascript" src="__JS__/rem.js"></script>
+<script type="text/javascript" src="__STATIC__/layui/layui.js"></script>
+<script src="/public/static/dist/js/swiper.min.js"></script>
+<script>
+    // 返回
+    function go() {
+        window.history.go(-1);
+    }
+    $(function() {
+        var height = $('.footerBtn').outerHeight()
+        $('.empty').height(height)
+        var he = $('._popups').height()
+        $('._popups').css({
+            'margin-top': -he / 2
+        })
+        //地址
+        var shopL = $('.address .dl .dt').height()
+        $('.address .dl .dd .li').css({
+            "height":shopL,
+            "line-height":shopL+'px'
+        })
+        // 底部
+        var footerEm = $('.footer').height()
+        $('.footerEm').height(footerEm)
+    })
+    //图片加载
+    var counter;
+    var imgLen = $('.canvasImg img')
+    for (var i = 0; i < imgLen.length; i++) {
+        var id = 'indexRain' + i
+        var img = document.getElementById(id);
+        var src = img.getAttribute('src');
+        img.setAttribute('src', '');
+        img.onload = function() {
+            counter = counter + 1
+            if (counter == imgLen.length) {
+                drawRouletteWheel();
+            }
+        };
+        img.setAttribute('src', src);
+    }
+    // 弹窗
+    function popups(e){
+        var cl = $(e).attr('data-class')
+        $('#'+cl).show()
+        $('.mask').show()
+    }
+    function close_popups(e){
+        var cl = $(e).attr('data-class')
+        $('.'+cl).hide()
+        $('.mask').hide()
+    }
+    //滑动
+    sweiperPage('dt');
+    var touchNum = 0;
+    function sweiperPage(name) {
+        var startX = 0;
+        var startY = 0;
+        var end = 0;
+        $('.' + name).off('touchstart').on('touchstart', function(e) {
+            var touch = e.originalEvent.targetTouches[0];
+            startY = touch.pageY
+            startX = touch.pageX
+        });
+        $('.' + name).off('touchmove').on('touchmove', function(e) {
+            var that = $(this);
+            var touch = e.originalEvent.targetTouches[0];
+            endY = touch.pageY;
+            endX = touch.pageX;
+            distanceX = endX - startX;
+            distanceY = endY - startY;
+            if (Math.abs(distanceY) < Math.abs(distanceX) && distanceY < 0) {
+                console.log(endX - startX)
+                if (endX - startX < -50) {
+                    touchNum ++
+                    if (touchNum == 1) {
+                        sideslip(that)
+                    }
+
+                }else if (endX - startX > 50) {
+                    touchNum ++
+                    if (touchNum == 1) {
+                        sideslipRight(that)
+                    }
+                }
+            }
+
+        });
+    }
+    function sideslip(that){
+        var left = that.siblings('.dd').width()
+        that.parent().animate({
+            "margin-left":-left
+        },200,function(){
+            touchNum = 0;
+        });
+
+    }
+    function sideslipRight(that){
+        that.parent().animate({
+            "margin-left":"0"
+        },200,function(){
+            touchNum = 0;
+        });
+
+    }
+    // tab
+    function tabs(e){
+        var idx = $(e).attr('data-idx')
+        $('.tabbodys').find('.shopListBox').eq(idx).addClass('show')
+        $('.tabbodys').find('.shopListBox').eq(idx).removeClass('hide')
+        $('.tabbodys').find('.shopListBox').eq(idx).siblings().removeClass('show')
+        $('.tabbodys').find('.shopListBox').eq(idx).siblings().addClass('hide')
+    }
+    // 跳页
+    function jump(e){
+        var href = $(e).attr('data-href')
+        window.location.href = href
+    }
+</script>
+</body>
+
+</html>
