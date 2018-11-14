@@ -1,0 +1,896 @@
+.white {
+    color: #fff;
+    text-decoration: underline;
+    margin-left: 0.2rem;
+}
+
+img {
+    width: 100%;
+    height: 100%;
+}
+
+/* 大转盘样式 */
+
+.banner {
+    display: block;
+    width: 95%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.banner .turnplate {
+    display: block;
+    width: 100%;
+    position: relative;
+}
+
+.banner .turnplate canvas.item {
+    width: 100%;
+}
+
+.banner .turnplate #tupBtn {
+    position: absolute;
+    width: 27.5%;
+    height: 33.5%;
+    left: 36%;
+    top: 30.5%;
+    border: 0;
+    background: none;
+}
+
+.banner .turnplate img {
+    width: 100%;
+    height: auto;
+}
+
+.main_turn {
+    position: relative;
+}
+
+.bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: -1;
+}
+
+.btns {
+    width: 90%;
+    margin: 0 auto;
+}
+
+.recording {
+    width: 1.3rem;
+}
+
+.rule {
+    width: 1.3rem;
+}
+
+.more {
+    margin-top: 2rem;
+    margin-left: 1.7rem;
+    text-align: center;
+    color: #f9fc27;
+    font-size: 0.4rem;
+}
+
+.limit {
+    width: 6.5rem;
+    text-align: center;
+    background: #f7fbed;
+    box-shadow: 0.1rem 0.1rem 0 0 #de4324;
+    border-radius: 0.5rem;
+    padding: 0.2rem;
+    margin: 0.3rem auto;
+    color: #ff7546;
+}
+
+.infor {
+    padding: 0 0.3rem;
+    margin-top: 2rem;
+}
+
+.inforUl {
+    padding: 0.2rem 0;
+    border-bottom: #F2BD15;
+}
+
+.inforImg {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 0.2rem;
+}
+
+.nick {
+    color: #a96d03;
+    width: 2rem;
+}
+
+.con {
+    color: #da343e;
+    width: 3.5rem;
+}
+
+.padding1 {
+    padding: 0.2rem 0;
+}
+
+.footerBtn {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background: #fff;
+    padding: 0.5rem 0;
+}
+
+.btnMoney {
+    background: #ff9c03;
+    border-radius: 1rem;
+    padding: 0.4rem;
+    margin: 0 auto;
+    width: 8rem;
+    text-align: center;
+    color: #fff;
+}
+
+.infor {
+    background-color: #FCC71F;
+}
+
+/*弹窗*/
+.mask {
+    display: none;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 99;
+}
+
+._popups {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: 100;
+    width: 80%;
+    margin-left: -40%;
+}
+
+.closex {
+    width: 1rem;
+    height: 1rem;
+    position: relative;
+    z-index: 1000;
+}
+
+.inforPopups {
+    background-color: #fff;
+    padding: 0.5rem;
+    height: 8rem;
+    overflow-x: scroll;
+}
+
+.popupsImg {
+    position: relative;
+    top: 0;
+    left: 0;
+}
+
+.popupsCon {
+    position: absolute;
+    top: 6.5rem;
+    left: 1rem;
+    width: 6rem;
+    text-align: center;
+}
+
+.til {
+    font-size: 0.4rem;
+    color: #000;
+    font-weight: bold;
+    padding: 0.2rem;
+}
+
+.prize {
+    font-size: 0.5rem;
+    color: #ec2e16;
+    font-weight: bold;
+}
+
+.num {
+    color: #ec2e16;
+    font-size: 0.3rem;
+    padding: 0.3rem;
+}
+
+.tel {
+    color: #ff5f02;
+    font-size: 0.3rem;
+}
+
+.ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap
+}
+
+/*更多门店*/
+.moreAdd {
+    margin-top: 0.3rem;
+}
+
+.ulAddress {
+    padding: 0.3rem;
+    background-color: #fff;
+    margin-bottom: 1px;
+}
+
+.addressText {
+    display: block;
+    width: 5rem;
+}
+
+.title_name {
+    max-width: 3.5rem;
+}
+
+.gray {
+    color: #a1a1a1;
+}
+
+.yell {
+    color: #f8a71a;
+    padding: 0.2rem 0;
+}
+
+/*详情*/
+.detail .ul {
+    padding: 0.3rem;
+    border-bottom: 1px solid #EFEFF4;
+    background-color: #fff;
+}
+
+.gr {
+    color: #979797;
+}
+
+.bl {
+    color: #04be02;
+}
+
+.weixin {
+    width: 1rem;
+    height: 1rem;
+    margin-right: 0.3rem;
+}
+
+.arrow {
+    width: 0.4rem;
+    height: 0.5rem;
+    margin-top: 0.3rem;
+}
+
+.wx {
+    width: 7.5rem;
+}
+
+.top {
+    margin-top: 0.3rem;
+}
+
+.title {
+    background-color: #EFEFF4 !important;
+}
+
+/*积分商城*/
+
+.blackImg {
+    width: 0.3rem;
+    margin-right: 0.3rem;
+}
+
+.topTitle {
+    text-align: center;
+    width: 8.5rem;
+}
+
+.shopTop {
+    padding: 0.3rem;
+    background: #fff;
+}
+
+.gray {
+    color: #969696;
+}
+
+.small {
+    font-size: 0.2rem;
+}
+
+.yellow {
+    color: #ff9a2e;
+}
+
+.smallBtn {
+    padding: 0 0.15rem;
+    border-radius: 0.1rem;
+    font-size: 0.2rem;
+    border: 1px solid #ff9a2e;
+}
+
+.font14 {
+    font-size: 0.5rem;
+}
+
+.pr2 {
+    padding-right: 0.2rem;
+}
+
+.itg {
+    margin-top: 0.15rem;
+}
+
+.eca {
+    margin-top: 0.1rem;
+}
+
+.ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap
+}
+
+.shopbor>.li {
+    width: 50%;
+}
+
+.padding15 {
+    padding: 15px;
+    border-right: 1px solid #e6eaef;
+    border-bottom: 1px solid #e6eaef;
+}
+
+.bottom3 {
+    padding-bottom: 3px;
+}
+
+.shopImg>img {
+    width: 100%;
+    height: 20vh;
+}
+
+/*商品详情*/
+.swiper-container {
+    width: 100%;
+    height: 100%;
+}
+
+.swiper-slide {
+    text-align: center;
+    font-size: 18px;
+    background: #fff;
+
+    /* Center slide text vertically */
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+}
+
+.h5 {
+    font-size: 0.6rem;
+}
+
+.padingtb {
+    padding: 15px 0;
+}
+
+.paddingLr {
+    padding: 0 15px;
+}
+
+.paddingTrbl {
+    padding: 15px;
+}
+
+.shoopDtlImg {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-top: 3px;
+    margin-right: 0.3rem;
+}
+
+.shopDetailCon>img {
+    width: 100%;
+}
+
+.shoopDtlImg>img {
+    width: 100%;
+    height: 100%;
+}
+
+.shopList {
+    border-bottom: 1px solid #CACACA;
+}
+
+.shopDetailmore {
+    margin-top: 0.58rem;
+}
+
+.shopDetailarrow {
+    width: 0.5rem;
+}
+
+.font12 {
+    font-size: 12px;
+}
+
+.shopBtn {
+    width: 80%;
+    margin: 0.3rem auto;
+    padding: 0.3rem;
+    text-align: center;
+    color: #fff;
+    font-size: 0.5rem;
+    border-radius: 0.1rem;
+    background: #FBC028;
+}
+
+.cancel {
+    background: #919191;
+}
+
+/*兑换详情*/
+
+.logistics {
+    background: #fff;
+}
+
+.cirle {
+    border-radius: 50%;
+    width: 0.3rem;
+    height: 0.3rem;
+    background: #24A2DF;
+    margin: 0.1rem;
+}
+
+.spot {
+    border: 1px solid #919191;
+    border-radius: 50%;
+    width: 0.5rem;
+    height: 0.5rem;
+}
+
+.line {
+    height: 0.1rem;
+    background: #24A2DF;
+    width: 3rem;
+    margin-top: 0.25rem;
+}
+
+.logisticsText {
+    margin-top: 0.1rem;
+}
+
+.cen {
+    text-align: center;
+}
+
+.spotOne {
+    width: 2rem;
+    left: -0.5rem;
+}
+
+.spotTwo {
+    right: -0.4rem;
+}
+
+.spotThree {
+    right: -0.2rem;
+}
+
+.spotLeft {
+    margin-left: 1rem;
+    margin-top: 0.5rem;
+    padding-bottom: 1rem;
+    background: #fff;
+
+}
+
+.left15 {
+    margin-left: 0.4rem;
+}
+
+/*灰色*/
+.lineGray .line {
+    background: #E6EAEF;
+}
+
+.lineGray .cirle {
+    background: #fff;
+}
+
+.yellow {
+    color: #FF6C46;
+}
+
+/*购买列表*/
+.shopListBox .dl .dt {
+    padding: 0.2rem;
+    margin-bottom: 0.1rem;
+    background: #fff;
+}
+
+.shopListBox .dl .dd {
+    padding: 0.2rem;
+    margin-bottom: 0.2rem;
+    background: #fff;
+}
+
+.shopListImg {
+    width: 2rem;
+    height: 2rem;
+}
+
+.pTB15 {
+    padding: 0.2rem 0;
+}
+
+.shopListext {
+    margin-left: 0.1rem;
+}
+
+.shopListBtn {
+    border-radius: 0.1rem;
+    padding: 0.1rem 0.2rem;
+    background: #90D977;
+    margin-top: 0.5rem;
+    color: #fff;
+}
+
+.red {
+    background-color: #EF394A;
+}
+
+.redT {
+    color: #EF394A;
+}
+
+/*地址*/
+.address {
+    width: 100vw;
+    overflow: hidden;
+}
+
+.pTRBL {
+    padding: 0.4rem;
+}
+
+.address .dl .dt {
+    background: #fff;
+    width: 100vw;
+    border-bottom: 1px solid #969696;
+}
+
+.left15 {
+    margin-left: 0.2rem;
+}
+
+.address .dl {
+    width: 200vw;
+}
+
+.address .dd>.li {
+    width: 20vw;
+    text-align: center;
+    color: #fff;
+}
+
+.shpopedits {
+    background: #969696;
+}
+
+.shpopdelet {
+    background: #EF394A;
+}
+
+/*门店首页*/
+.addressArrow {
+    width: 0.4rem;
+}
+
+.billTop {
+    background: #fff;
+    color: #FF9523;
+    padding-left: 0.3rem;
+    display: block;
+}
+
+.billAddress {
+    width: 0.4rem;
+    margin-top: 0.05rem;
+}
+
+.billPadd {
+    padding: 0 0.2rem;
+}
+
+.icon {
+    background: #fff;
+}
+
+.icon>.four {
+    width: 25%;
+}
+
+.icon>.four .dl {
+    padding: 0.3rem;
+}
+
+.icon>.four .dd {
+    border-radius: 50%;
+    width: 1rem;
+    height: 1rem;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.icon>.four .dd img {
+    width: 100%;
+    height: 100%;
+}
+
+.icon>.four .dt {
+    text-align: center;
+}
+
+/*底部按钮*/
+.footer {
+    background: #fff;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+}
+
+.footerImg {
+    width: 0.6rem;
+    height: 0.6rem;
+    padding: 0.2rem 0.8rem;
+}
+
+.footerText {
+    font-size: 12px;
+    color: #FF9523;
+}
+
+.footerImg>img {
+    height: auto;
+    -webkit-filter: grayscale(0%);
+    filter: grayscale(0%);
+}
+
+.activeFoot .footerImg>img {
+    -webkit-filter: grayscale(100%);
+    filter: grayscale(100%);
+}
+.activeFoot .footerText {
+	color: #000;
+}
+.discount {
+    background: #FF9523;
+    color: #fff;
+    font-size: 0.5rem;
+    padding: 0.45rem;
+}
+
+/*分享收益、*/
+.me {
+    background: #fff;
+    padding: 0.4rem;
+}
+
+.integbtn {
+    border: 1px solid #FFB032;
+    padding: 0.1rem .2rem;
+    border-radius: 0.1rem;
+}
+
+.llow {
+    color: #FFB032;
+}
+
+/*我的*/
+.myIcon {
+    width: 0.6rem;
+    margin-right: 0.1rem;
+}
+
+.myTop {
+    background: #fff;
+    padding: 0.3rem;
+}
+
+.myTopPortRait {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 0.3rem;
+}
+
+/*选项卡*/
+.two {
+    background: #fff;
+}
+
+.tabsTop .tabBtn {
+    padding: 0.3rem;
+    text-align: center;
+    border-bottom: 1px solid #fff;
+}
+
+/*会员卡详情*/
+.cardDetailsCon {
+    padding: 0.4rem;
+    border-left: 0.3rem solid #E15245;
+    border-bottom: 0.3rem solid #E15245;
+    border-right: 0.3rem solid #E15245;
+}
+
+.orange {
+    background: #FFA848;
+    color: #fff;
+    font-size: 1rem;
+    text-align: center;
+    font-weight: 900;
+    padding: 2rem 0;
+}
+
+.square {
+    height: 0.3rem;
+    width: 0.1rem;
+    background: #E15142;
+    margin-right: 0.3rem;
+}
+
+.balance {
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.cardDetailsCon .dl>.dt {
+    margin: 0.3rem 0;
+}
+
+.cardDetailsCon .dl>.dd {
+    margin: 0.18rem 0;
+}
+
+.businessTitel {
+    background: #fff;
+}
+
+/*加盟*/
+.joinIn {
+    top: 0;
+    left: 0;
+    width: 100vw;
+}
+
+.joinInBg {
+    width: 100vw;
+}
+
+.joinInCon {
+    top: 6rem;
+    z-index: 10;
+    width: 9rem;
+    left: 0.5rem;
+}
+
+.joinInConTitle {
+    font-size: 0.6rem;
+    font-weight: 900;
+    text-align: center;
+}
+
+/*优惠储值*/
+.atm {
+    background: #EFBF4B;
+    height: 3rem;
+    line-height: 3rem;
+    text-align: center;
+    color: #fff;
+    font-size: 0.6rem;
+}
+
+.active>.tabBtn {
+    color: #FF9A2D;
+    border-bottom: 1px solid #FF9A2D;
+}
+
+.disTitle {
+    border-left: 3px solid #FF9A2D;
+    border-bottom: 1px solid #E5E5E5;
+    padding: 0.3rem 0 0.3rem 0.1rem;
+}
+
+.discountTabs>.discountTabsBg {
+    background: #fff;
+    margin: 0.2rem;
+}
+
+.paddTb {
+    padding: 0.2rem 0;
+}
+
+.disCon {
+    padding: 0 0.2rem;
+}
+
+/*优惠买单*/
+.payment {
+    border-top: 1px solid #e5e5e5;
+    padding: 0.2rem;
+    background: #fff;
+}
+
+.paymentBalance {
+    background: #fff;
+    padding: 0.2rem;
+    border-top: 1px solid #e5e5e5;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.inputBox {
+    border: 1px solid #e5e5e5;
+    border-radius: 0.2rem;
+    padding: 0.4rem;
+}
+/*分享*/
+
+.shareIt {
+	top:0;
+	left: 0;
+	width:100vw;
+}
+.shareItCode {
+	top:5rem;
+	left: 0.5rem;
+	width:9rem;
+}
+.code {
+	width:5rem;
+	height: 5rem;
+	margin:0 auto;
+}
+.shareItTitel {
+	color: #fff;
+	font-size:0.8rem;
+	text-align: center;
+	margin-top:0.4rem;
+}
+.shareItCon {
+	top:13rem;
+	left: 1rem;
+	width:8rem;
+}

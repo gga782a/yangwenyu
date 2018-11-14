@@ -1,0 +1,33 @@
+﻿@charset "utf-8";
+/* Reset css*/
+body, h1, h2, h3, h4, h5, h6, div, hr, p, blockquote, dl, dt, dd, ul, ol, li, pre, form, fieldset, legend, button, input, textarea, th, td { margin: 0; padding: 0; }
+body { font-family: Tahoma,Arial,"微软雅黑","宋体"; font-size:0.4rem; color:#434343; }
+body { _overflow: auto; _height: 100%; margin: 0 auto; }
+html { _overflow: hidden; }
+h1, h2, h3, h4, h5, h6 { font-size: 100%; font-variant: normal; }
+address, cite, dfn, em, var { font-style: normal; }
+code, kbd, pre, samp { font-family: courier new,courier,monospace; }
+small { font-size: 0.4rem; }
+ul, ol, li, dl, dt, dd { list-style: none; }
+sup { vertical-align: text-top; }
+sub { vertical-align: text-bottom; }
+legend { color: #000; }
+fieldset, img { border: 0; }
+button, input, select, textarea { font: 0.4rem/1.5 tahoma,arial,sans-serif; vertical-align: middle; cursor: pointer; }
+table { border-collapse: collapse; border-spacing: 0; }
+.clear { clear: both; }
+.clearfixed:after { clear: both; content: "."; display: block; height: 0; line-height: 0; visibility: hidden; zoom: 1; }
+.clearfixed > .li {display: block;float: left;}
+.fr {display: block;float: right!important;}
+/*a*/
+a { text-decoration: none; }
+.a:hover .img { filter: alpha(opacity=80); -moz-opacity: 0.8; -khtml-opacity: 0.8; opacity: 0.8; -webkit-transition: all .2s linear; -moz-transition: all .2s linear; -ms-transition: all .2s linear; transition: all .2s linear; }
+.absolute {
+	position: absolute;
+}
+.relative {
+	position: relative;
+}
+.fixed {
+	position: fixed;
+}
