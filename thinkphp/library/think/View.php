@@ -48,6 +48,7 @@ class View
             '__CSS__'    => $root . '/static/css',
             '__JS__'     => $root . '/static/js',
             '__IMG__'    => $root . '/static/img',
+            '__ADMIN__'  => $root . '/static/admin',
         ];
         $this->replace = array_merge($baseReplace, (array) $replace);
     }

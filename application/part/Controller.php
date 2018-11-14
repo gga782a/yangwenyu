@@ -38,37 +38,7 @@ class Controller extends ErrorCode
         }
     }
 
-    public function abnormal($ErrorCode,$message){
-
-        $this->code     = $ErrorCode;
-        $this->ErrorMsg = $message;
-        $this->Returned = TRUE;
-        if(is_array($this->datas))
-        {
-            $this->datas    =   encode($this->datas);
-        }
-        $this->result($this->datas,$this->code,$this->ErrorMsg,'json');
-
-    }
-
-    public function SuccessReturn($message){
-
-        $this->abnormal($this->OK,$message);
-
-    }
-
-    public function DbSuccess($return)
-    {
-        $return ? $this->SuccessReturn('操作成功') : $this->ErrorMsg = $this->DbError;
-    }
-
     public function __destruct(){
-
-        if ($this->Returned === FALSE){
-
-            $this->SuccessReturn("访问成功!");
-
-        }
 
     }
 }
