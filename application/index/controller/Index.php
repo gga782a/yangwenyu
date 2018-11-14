@@ -21,3 +21,7 @@ class Index
         return view('more');
     }
 }
+
+
+
+
