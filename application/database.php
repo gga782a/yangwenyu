@@ -13,13 +13,13 @@ return [
     // 数据库类型
     'type'            => 'mysql',
     // 服务器地址
-    'hostname'        => 'sqld-gz.bcehost.com',
+    'hostname'        => '127.0.0.1',
     // 数据库名
-    'database'        => 'OJDLyOUjrLepESwoiRxA',
+    'database'        => 'gzx',
     // 用户名
-    'username'        => 'fd24bee316734145af50e2df7670b5c8',
+    'username'        => 'root',
     // 密码
-    'password'        => '749628330f4540a68d8f35d49b5fc416',
+    'password'        => '123456',
     // 端口
     'hostport'        => '3306',
     // 连接dsn
@@ -29,7 +29,7 @@ return [
     // 数据库编码默认采用utf8
     'charset'         => 'utf8',
     // 数据库表前缀
-    'prefix'          => 'ap_',
+    'prefix'          => 'shui_',
     // 数据库调试模式
     'debug'           => true,
     // 数据库部署方式:0 集中式(单一服务器),1 分布式(主从服务器)

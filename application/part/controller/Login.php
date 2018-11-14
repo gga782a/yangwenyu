@@ -54,9 +54,10 @@ class Login extends Controller
 
     public function register(){
         if(Request::instance()->isPost()){
+            //dd($this->parme('username'));
             $rule = [
-                'username' => 'require|exists:user,username|alphaDash|min:4|max:18',
-                'pwd' => 'require|confirm|alphaNum|min:4|max:18',
+               // 'username' => 'require|exists:user,username|chsDash|min:4|max:18',
+                //'pwd' => 'require|confirm:repwd|alphaNum|min:4|max:18',
             ];
             $field = [
                 'username' => '账号',
@@ -67,9 +68,12 @@ class Login extends Controller
                 $this->error($validate->getError());
             } else {
                 $data = [
-                    'username' => $this->parme('username'),
-                    'pwd'      => md5(sha1($this->parme('pwd')))
+                    'username'      => $this->parme('username'),
+                    'pwd'           => md5(sha1($this->parme('pwd'))),
+                    'created_at'    => $this->time,
                 ];
+                $id = db('user')->insertGetId($data);
+                dd($id);
             }
         }else{
             return view('part/register');
