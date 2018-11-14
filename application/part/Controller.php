@@ -22,10 +22,10 @@ class Controller extends ErrorCode
         $this->parme();
 
     }
-    public function parme($key = '',$value = '')
+    public function parme($key = '',$value = null)
     {
 
-        $this->parme    =   decode(input());
+        $this->parme    =  input();
         $this->parme    =   array_merge($this->parme);
         if($key)
         {
