@@ -3,10 +3,10 @@
  * Created by PhpStorm.
  * User: ztwl
  * Date: 2018/11/15
- * Time: 上午9:13
+ * Time: 上午9:33
  */
 
-namespace app\index\controller;
+namespace app\admin\controller;
 use think\Controller;
 use think\Request;
 use think\Session;
@@ -22,7 +22,7 @@ class Common extends Controller
 
     public function check(){
         if(empty($this->id)){
-           return $this->redirect('part/login/checklogin');
+            return $this->redirect('part/login/checklogin');
         }
     }
 }

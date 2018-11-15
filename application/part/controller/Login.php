@@ -30,7 +30,8 @@ class Login extends Controller
 
     public function index()
     {
-        return $this->redirect('index/index/controller');
+        //Session::set('user_id',null);
+        return $this->redirect('admin/index/index');
     }
     //登陆
     public function checklogin()
@@ -53,6 +54,7 @@ class Login extends Controller
                 $where = array(
                     'username'   => $this->parme('username'),
                     'type'       => $type,
+
                 );
                 $user = db(self::$table_user)
                     ->where($where)
@@ -65,7 +67,7 @@ class Login extends Controller
                                 Session::set('username',$user['username']);
                                 Session::set('user_id',$user['user_id']);
                                 //重定向到主页
-                                return $this->redirect('index/index/controller');
+                                return $this->redirect('admin/index/index');
                             }else{
                                $this->error('密码错误');
                             }
