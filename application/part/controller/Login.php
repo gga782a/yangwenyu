@@ -9,7 +9,6 @@ namespace app\part\controller;
 use app\DataAnalysis;
 use app\part\Controller;
 use think\Session;
-use think\Url;
 use think\Validate;
 use think\Request;
 
