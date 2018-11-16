@@ -18,6 +18,8 @@ class Index extends Common
 
     public static $table_user = 'user';
 
+    public static $table_slyderAdventures = 'slyderAdventures'; //大转盘
+
     public static $primarykey = 'user_id';
 
     public $time;
@@ -34,7 +36,7 @@ class Index extends Common
 
     public function index()
     {
-        //dd(1);
+        //dd(input('flag'));
         return view('index');
     }
 
@@ -79,4 +81,102 @@ class Index extends Common
             ]);
         }
     }
+
+    //大转盘设置  slyderAdventures
+
+    public function slyderAdventures()
+    {
+        //标识符区分添加修改
+        $flag = input('flag');
+        if(Request::instance()->isPost()){
+            $insert = [
+                'activetitle'   => $this->parme('activetitle'), //活动标题
+                'activeperiod'  => $this->parme('activeperiod'), // 活动时间段
+                'limit_collar'  => $this->parme('limit_collar'),//每人可抽奖次数 每次/每个时间段
+                'prize'         => $this->parme('prize'),//奖项礼品
+                'probability'   => $this->parme('probability'),//奖项概率
+                'updated_at'    => $this->time,
+            ];
+            if($flag == 'add'){
+                //$insert['deputy_id'] = $this->parme('deputy_id'); //代理ID
+                $insert['app_id']    = $this->parme('app_id'); //哪个平台
+                $insert['created_at']= $this->time;
+                $res = db(self::$table_slyderAdventures)->insertGetId($insert);
+            }else{
+                $where = [
+                    'app_id'    => $this->parme('app_id'),
+                    'active_id' => $this->parme('active_id')
+                ];
+                $res = db(self::$table_slyderAdventures)->where($where)->update($insert);
+            }
+            if($res){
+                return $this->redirect('index/slyderAdventures');
+            }else{
+                $this->error('操作失败');
+            }
+        }else{
+           if($flag == 'add'){
+                return view('addslyderAdventures');
+           }else if($flag == 'update'){
+               $data = db(self::$table_slyderAdventures)
+                   ->where(['id'=>$this->parme('id'),'app_id'=>$this->id])
+                   ->find();
+               return view('updateslyderAdventures',[
+                   'data'   => $data
+               ]);
+           }else{
+               $data = db(self::$table_slyderAdventures)
+                   ->where('app_id',$this->id)
+                   ->page(input('page',1),input('pageshow',15))
+                   ->select();
+               return view('listslyderAdventures',[
+                  'data'    => $data,
+               ]);
+           }
+        }
+    }
+
+    //删除大转盘
+
+    public function delslyderAdventures()
+    {
+        $rule = [
+            'active_id'   => 'require',
+            'app_id'      => 'require',
+        ];
+        $field = [
+            'active_id'   => '大转盘ID',
+            'app_id'      => '平台ID',
+        ];
+
+        $validate = new Validate($rule,self::$msg,$field);
+
+        if(!$validate->check($this->parme)){
+            $this->error($validate->getError());
+        }else{
+            $where = [
+                'app_id'    => $this->parme('app_id'),
+                'active_id' => $this->parme('active_id')
+            ];
+            $res = db(self::$table_slyderAdventures)->where($where)->delete();
+            if($res){
+                return $this->redirect('index/slyderAdventures');
+            }else{
+                $this->error('操作失败');
+            }
+        }
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
