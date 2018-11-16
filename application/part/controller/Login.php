@@ -120,6 +120,8 @@ class Login extends Controller
             return view('part/register');
         }
     }
+
+
 }
 
 
