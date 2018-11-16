@@ -7,11 +7,10 @@
  */
 
 namespace app\admin\controller;
-
-
 use app\DataAnalysis;
 use think\Session;
 use think\Request;
+use think\Validate;
 
 class Index extends Common
 {
@@ -71,10 +70,10 @@ class Index extends Common
                 }
             }
         }else{
-//            $username = db(self::$table_user)
-//                ->where(['user_id'=>$this->id])
-//                ->value('username');
-            $username = 'aa';
+            $username = db(self::$table_user)
+                ->where(['user_id'=>$this->id])
+                ->value('username');
+            //$username = 'aa';
             return view('resetpwd',[
                 'username' => $username
             ]);
