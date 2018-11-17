@@ -144,7 +144,7 @@ class Index extends Common
     {
         $rule = [
             'active_id'   => 'require',
-            'app_id'      => 'require',
+            //'app_id'      => 'require',
         ];
         $field = [
             'active_id'   => '大转盘ID',
@@ -205,6 +205,8 @@ class Index extends Common
                 $insert['pwd']      = $pwd;
                 $insert['app_id']   = $this->id;
                 $insert['created_at']= $this->time;
+                $insert['type_id']  = 0; //活动ID
+                $insert['type']     = 0; //活动类型
                 $result = db(self::$table_deputy)->insertGetId($insert);
             }else{
                 $result = db(self::$table_deputy)->where($where)->update($insert);
@@ -311,6 +313,77 @@ class Index extends Common
             return view('resetdeputypwd',[
                 'username' => $username
             ]);
+        }
+    }
+
+    //删除代理
+
+    public function deldeputy()
+    {
+        $rule = [
+            'deputy_id'   => 'require',
+            //'app_id'      => 'require',
+        ];
+        $field = [
+            'deputy_id'   => '代理ID',
+            'app_id'      => '平台ID',
+        ];
+
+        $validate = new Validate($rule,self::$msg,$field);
+
+        if(!$validate->check($this->parme)){
+            $this->error($validate->getError());
+        }else{
+            $where = [
+                'app_id'    => $this->id,
+                'deputy_id' => $this->parme('deputy_id')
+            ];
+            $res = db(self::$table_deputy)->where($where)->delete();
+            if($res){
+                return $this->redirect('index/setdeputy');
+            }else{
+                $this->error('操作失败');
+            }
+        }
+    }
+
+    //为代理选则大转盘 //活动类型为1
+
+    public function chooiceactive()
+    {
+        $rule = [
+            'type_id'     => 'require',
+            'deputy_id'   => 'require',
+            'type'        => 'require',
+        ];
+        $field = [
+            'type_id'     => '活动ID',
+            'deputy_id'   => '代理ID',
+            'type'        => '活动类型',
+        ];
+
+        $validate = new Validate($rule,self::$msg,$field);
+
+        if(!$validate->check($this->parme)){
+            $this->error($validate->getError());
+        }else{
+            $where = [
+                'app_id'    => $this->id,
+                'deputy_id' => $this->parme('deputy_id')
+            ];
+            $update = [
+                'type_id'   => $this->parme('type_id'),
+                'type'      => $this->parme('type'),
+                'updated_at'=> $this->time,
+            ];
+            $res = db(self::$table_deputy)
+                ->where($where)
+                ->update($update);
+            if($res){
+                return $this->redirect('index/setdeputy');
+            }else{
+                $this->error('操作失败');
+            }
         }
     }
 }
