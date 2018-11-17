@@ -11,6 +11,7 @@ use app\DataAnalysis;
 use think\Session;
 use think\Request;
 use think\Validate;
+use think\File;
 
 class Index extends Common
 {
@@ -21,6 +22,8 @@ class Index extends Common
     public static $table_slyderAdventures = 'slyderAdventures'; //大转盘
 
     public static $table_deputy = 'deputy'; //代理
+
+    public static $table_goods = 'goods'; // 商品
 
     public static $primarykey = 'user_id';
 
@@ -383,6 +386,157 @@ class Index extends Common
                 return $this->redirect('index/setdeputy');
             }else{
                 $this->error('操作失败');
+            }
+        }
+    }
+
+    //积分商城
+
+    //商品设置
+    public function setgoods()
+    {
+        //标识符区分添加修改
+        $flag = input('flag');
+        $where = [
+            'app_id'    => $this->id,
+            'goods_id'  => $this->parme('goods_id')
+        ];
+        if(Request::instance()->isPost()){
+            $return = $this->upload('image');
+            if($return == false){
+                $this->error('上传图片失败');
+            }
+            $insert = [
+                'sort'          => $this->parme('sort'), //排序
+                'goods_name'    => $this->parme('goods_name'), // 名称
+                'pic_arr'       => $return,//商品图片
+                'price'         => $this->parme('price'),//价格
+                'stock'         => $this->parme('stock'),//库存
+                'goods_desc'    => $this->parme('goods_desc'),//详情
+                'sales'         => $this->parme('sales'),//销量
+                'status'        => $this->parme('status'),//状态 //0上架 1售罄 2下架
+                //'shelves'       => 'true',//上下架
+                'updated_at'    => $this->time,
+            ];
+            if($flag == 'add'){
+                //$insert['deputy_id'] = $this->parme('deputy_id'); //代理ID
+                $insert['app_id']    = $this->id; //哪个平台
+                $insert['created_at']= $this->time;
+                $res = db(self::$table_goods)->insertGetId($insert);
+            }else{
+                $res = db(self::$table_goods)->where($where)->update($insert);
+            }
+            if($res){
+                return $this->redirect('index/setgoods');
+            }else{
+                $this->error('操作失败');
+            }
+        }else{
+            if($flag == 'add'){
+                return view('addgoods');
+            }else if($flag == 'update'){
+                $data = db(self::$table_goods)
+                    ->where($where)
+                    ->find();
+                return view('updategoods',[
+                    'data'   => $data
+                ]);
+            }else{
+                $wherelist = [
+                    'app_id' => $this->id,
+                ];
+                if($this->parme('status')){
+                   $where['status'] = $this->parme('status');  //下架或售罄商品
+                }
+                $data = db(self::$table_goods)
+                    ->where($wherelist)
+                    ->page(input('page',1),input('pageshow',15))
+                    ->select();
+                return view('listgoods',[
+                    'data'    => $data,
+                    'status'  => (int)$this->parme('status','0'),
+                ]);
+            }
+        }
+    }
+
+    //删除商品
+
+    public function delgoods()
+    {
+        $rule = [
+            'goods_id'   => 'require',
+            //'app_id'      => 'require',
+        ];
+        $field = [
+            'goods_id'   => '商品ID',
+            'app_id'     => '平台ID',
+        ];
+
+        $validate = new Validate($rule,self::$msg,$field);
+
+        if(!$validate->check($this->parme)){
+            $this->error($validate->getError());
+        }else{
+            $where = [
+                'app_id'    => $this->id,
+                'goods_id'  => $this->parme('goods_id')
+            ];
+            $res = db(self::$table_goods)->where($where)->delete();
+            if($res){
+                return $this->redirect('index/setgoods');
+            }else{
+                $this->error('操作失败');
+            }
+        }
+    }
+
+    //图片上传
+
+    public function upload($img = '',$validate = ['size'=>15678,'ext'=>'jpg,png,gif'])
+    {
+        if ($img == '') {
+            return false;
+        } else {
+            $pic_arr = '';
+            // 获取表单上传文件 例如上传了001.jpg
+            $files = request()->file($img);
+            //判断是不是多图上传
+            $dir = ROOT_PATH . 'public' . DS . 'uploads' . DS;
+            $date = date('Ymd', time()) . '/';
+            $path = $dir . $date;
+            if (file_exists($path)) {
+                mkdir($path, 0775, true);
+            }
+            if (empty($files)) {
+                return false;
+            } else {
+                if (is_array($files)) {
+                    foreach ($files as $file) {
+                        // 移动到框架应用根目录/public/uploads/ 目录下
+                        $info = $file->validate($validate)->rule('uniqid')->move($path);
+                        if ($info) {
+                            // 成功上传后 获取上传信息
+                            // 输出 jpg
+                            //echo $info->getExtension();
+                            // 输出 42a79759f284b767dfcb2a0197904287.jpg
+                            //echo $info->getFilename();
+                            $pic_arr .= $info->getFilename() . ',';
+                        } else {
+                            // 上传失败获取错误信息
+                            return false;
+                        }
+                    }
+                } else {
+                    $info = $files->validate($validate)->rule('uniqid')->move($path);
+                    if ($info) {
+                        $pic_arr = $info->getFilename();
+                    } else {
+                        // 上传失败获取错误信息
+                        return false;
+                    }
+                }
+                return trim($pic_arr);
             }
         }
     }
