@@ -25,6 +25,8 @@ class Index extends Common
 
     public static $table_goods = 'goods'; // 商品
 
+    public static $table_member = 'member'; //会员
+
     public static $primarykey = 'user_id';
 
     public $time;
@@ -570,6 +572,56 @@ class Index extends Common
             return view('updategoods',[
                 'data'   => $data
             ]);
+        }
+    }
+
+    //会员管理
+
+    public function membermanage()
+    {
+        //标识符区分添加修改
+        $flag = input('flag');
+        $where = [
+            'app_id'     => $this->id,
+            'member_id'  => $this->parme('member_id')
+        ];
+        if(Request::instance()->isPost()){
+            $insert = [
+                'sort'          => $this->parme('sort'), //排序
+                'nick_name'     => $this->parme('nick_name'), // 名称
+                'phone'         => $this->parme('phone'),//
+                'follow_time'   => $this->parme('follow_time'),
+                'app_id'        => $this->id,
+                'register_from' => $this->parme('register_from'),
+                'paymoney'      => floatval($this->parme('paymoney')),
+                'create_at'     => $this->time,
+            ];
+            $insert[] = ;
+            $insert['app_id']    = $this->id; //哪个平台
+            $insert['created_at']= $this->time;
+            $res = db(self::$table_member)->insertGetId($insert);
+
+
+            if($res){
+                return $this->redirect('index/membermanage');
+            }else{
+                $this->error('操作失败');
+            }
+        }else{
+            if($flag == 'add'){
+                return view('addmember');
+            }else{
+                $wherelist = [
+                    'app_id' => $this->id,
+                ];
+                $data = db(self::$table_member)
+                    ->where($wherelist)
+                    ->page(input('page',1),input('pageshow',15))
+                    ->select();
+                return view('listmember',[
+                    'data'    => $data,
+                ]);
+            }
         }
     }
 }
