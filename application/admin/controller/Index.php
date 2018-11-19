@@ -31,6 +31,8 @@ class Index extends Common
 
     public static $table_activity = 'activity';//活动
 
+    public static $table_chongzhi = 'chongzhi';//充值
+
     public static $primarykey = 'user_id';
 
     public $time;
@@ -771,6 +773,76 @@ class Index extends Common
             }
         }
     }
+
+    //充值管理
+
+    public function setchongzhi()
+    {
+        //标识符区分添加修改
+        $flag = input('flag');
+        $where = [
+            'app_id'    => $this->id,
+            'deputy_id' => $this->parme('deputy_id'),
+            'store_id'  => $this->parme('store_id'),
+            'id'        => $this->parme('id')
+        ];
+        if(Request::instance()->isPost()){
+            $insert = [
+                'sort'          => $this->parme('sort'), //排序
+                'needmoney'     => floatval($this->parme('needmoney')), // 金钱
+                //'erweima'       => $this,//二维码
+                'status'        => 1,//状态 //0关闭 1开启
+                //'shelves'       => 'true',//上下架
+                'updated_at'    => $this->time,
+            ];
+            if($flag == 'add'){
+                $insert['deputy_id'] = $this->parme('deputy_id'); //代理ID
+                $insert['store_id']  = $this->parme('store_id'); //商家ID
+                $insert['app_id']    = $this->id; //哪个平台
+                $insert['created_at']= $this->time;
+                $res = db(self::$table_chongzhi)->insertGetId($insert);
+            }else{
+                $res = db(self::$table_chongzhi)->where($where)->update($insert);
+            }
+            if($res){
+                return $this->redirect('index/setchongzhi');
+            }else{
+                $this->error('操作失败');
+            }
+        }else{
+            if($flag == 'add'){
+                return view('addchongzhi');
+            }else if($flag == 'update'){
+                $data = db(self::$table_chongzhi)
+                    ->where($where)
+                    ->find();
+                return view('updatechongzhi',[
+                    'data'   => $data
+                ]);
+            }else{
+                $wherelist = [
+                    'app_id'    => $this->id,
+                    'deputy_id' => $this->parme('deputy_id'),
+                    'store_id'  => $this->parme('store_id'),
+                ];
+                if($this->parme('status')){
+                    $where['status'] = $this->parme('status');  //下架或售罄商品
+                }
+                $data = db(self::$table_chongzhi)
+                    ->where($wherelist)
+                    ->page(input('page',1),input('pageshow',15))
+                    ->select();
+                return view('listchongzhi',[
+                    'data'    => $data,
+                    'status'  => (int)$this->parme('status','0'),
+                ]);
+            }
+        }
+    }
+
+    //设置优惠储值
+
+
 
     /***********************************商家后台结束**********************************************************/
 }
