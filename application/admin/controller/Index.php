@@ -174,7 +174,7 @@ class Index extends Common
 
     //代理设置
 
-    public function setdeputy()
+    public function c()
     {
         //标识符区分添加修改
         $flag = input('flag');
@@ -538,6 +538,38 @@ class Index extends Common
                 }
                 return trim($pic_arr);
             }
+        }
+    }
+
+    //dai代理商管理  绑定代理商
+
+    public function managedeputy()
+    {
+        $where = [
+            'app_id'    => $this->id,
+            'deputy_id'  => $this->parme('deputy_id')
+        ];
+        if(Request::instance()->isPost()){
+            $insert = [
+                'sale_id'      => $this->parme('sale_id'), //销售人员ID
+                'sale_phone'   => $this->parme('sale_phone'), //手机
+                'auth'         => $this->parme('auth'),//价格
+                'updated_at'   => $this->time,
+            ];
+
+            $res = db(self::$table_deputy)->where($where)->update($insert);
+            if($res){
+                return $this->redirect('index/setdeputy');
+            }else{
+                $this->error('操作失败');
+            }
+        }else{
+            $data = db(self::$table_deputy)
+                ->where($where)
+                ->find();
+            return view('updategoods',[
+                'data'   => $data
+            ]);
         }
     }
 }
