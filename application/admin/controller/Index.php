@@ -27,6 +27,10 @@ class Index extends Common
 
     public static $table_member = 'member'; //会员
 
+    public static $table_store = 'store'; // 门店
+
+    public static $table_activity = 'activity';//活动
+
     public static $primarykey = 'user_id';
 
     public $time;
@@ -619,6 +623,156 @@ class Index extends Common
             }
         }
     }
+
+    /***********************************商家后台开始**********************************************************/
+    //门店管理
+    public function storemanage()
+    {
+        //标识符区分添加修改
+        $flag = input('flag');
+        $where = [
+            'app_id'    => $this->id,
+            'deputy_id' => $this->parme('deputy_id'),
+            'store_id'  => $this->parme('store_id')
+        ];
+        if(Request::instance()->isPost()){
+            $return = $this->upload('image');
+            if($return == false){
+                $this->error('上传图片失败');
+            }
+            $insert = [
+                'sort'          => $this->parme('sort'), //排序
+                'store_name'    => $this->parme('store_name'), // 名称
+                'pic_arr'       => $return,//商品图片
+                'position'      => $this->parme('position'),//店铺地址
+                'longitude'     => $this->parme('longitude'),//经度
+                'latitude'      => $this->parme('latitude'),//纬度
+                'kefu_phone'    => $this->parme('kefu_phone'),//客服电话
+                //'erweima'       => $this,//二维码
+                'status'        => 1,//状态 //0关店 1营业
+                //'shelves'       => 'true',//上下架
+                'updated_at'    => $this->time,
+            ];
+            if($flag == 'add'){
+                $insert['deputy_id'] = $this->parme('deputy_id'); //代理ID
+                $insert['app_id']    = $this->id; //哪个平台
+                $insert['created_at']= $this->time;
+                $res = db(self::$table_store)->insertGetId($insert);
+            }else{
+                $res = db(self::$table_store)->where($where)->update($insert);
+            }
+            if($res){
+                return $this->redirect('index/storemanage');
+            }else{
+                $this->error('操作失败');
+            }
+        }else{
+            if($flag == 'add'){
+                return view('addstore');
+            }else if($flag == 'update'){
+                $data = db(self::$table_store)
+                    ->where($where)
+                    ->find();
+                return view('updatestore',[
+                    'data'   => $data
+                ]);
+            }else{
+                $wherelist = [
+                    'app_id'    => $this->id,
+                    'deputy_id' => $this->parme('deputy_id'),
+                ];
+                if($this->parme('status')){
+                    $where['status'] = $this->parme('status');  //下架或售罄商品
+                }
+                $data = db(self::$table_store)
+                    ->where($wherelist)
+                    ->page(input('page',1),input('pageshow',15))
+                    ->select();
+                return view('liststore',[
+                    'data'    => $data,
+                    'status'  => (int)$this->parme('status','0'),
+                ]);
+            }
+        }
+    }
+
+    //设置优惠活动
+    public function setactivity()
+    {
+        //标识符区分添加修改
+        $flag = input('flag');
+        $where = [
+            'app_id'    => $this->id,
+            'deputy_id' => $this->parme('deputy_id'),
+            'store_id'  => $this->parme('store_id'),
+            'active_id' => $this->parme('active_id')
+        ];
+        if(Request::instance()->isPost()){
+            $return = $this->upload('image');
+//            if($return == false){
+//                $this->error('上传图片失败');
+//            }
+            $insert = [
+                'sort'          => $this->parme('sort'), //排序
+                'name'          => $this->parme('name'), // 名称
+                'active_desc'   => $this->parme('active_desc'),//活动简介
+                'position'      => $this->parme('position'),//活动地点
+                'longitude'     => $this->parme('longitude'),//经度
+                'latitude'      => $this->parme('latitude'),//纬度
+                'kefu_phone'    => $this->parme('kefu_phone'),//活动方电话
+                'active_start_time' => $this->parme('active_start_time'),//活动开始时间
+                'active_end_time'=> $this->parme('active_end_time'),//活动结束时间
+                //'erweima'       => $this,//二维码
+                'status'        => 1,//状态 //0关闭 1开启
+                //'shelves'       => 'true',//上下架
+                'updated_at'    => $this->time,
+            ];
+            if($flag == 'add'){
+                $insert['deputy_id'] = $this->parme('deputy_id'); //代理ID
+                $insert['store_id']  = $this->parme('store_id'); //商家ID
+                $insert['app_id']    = $this->id; //哪个平台
+                $insert['created_at']= $this->time;
+                $res = db(self::$table_activity)->insertGetId($insert);
+            }else{
+                $res = db(self::$table_activity)->where($where)->update($insert);
+            }
+            if($res){
+                return $this->redirect('index/setactivity');
+            }else{
+                $this->error('操作失败');
+            }
+        }else{
+            if($flag == 'add'){
+                return view('addactivity');
+            }else if($flag == 'update'){
+                $data = db(self::$table_activity)
+                    ->where($where)
+                    ->find();
+                return view('updateactivity',[
+                    'data'   => $data
+                ]);
+            }else{
+                $wherelist = [
+                    'app_id'    => $this->id,
+                    'deputy_id' => $this->parme('deputy_id'),
+                    'store_id'  => $this->parme('store_id'),
+                ];
+                if($this->parme('status')){
+                    $where['status'] = $this->parme('status');  //下架或售罄商品
+                }
+                $data = db(self::$table_activity)
+                    ->where($wherelist)
+                    ->page(input('page',1),input('pageshow',15))
+                    ->select();
+                return view('listactivity',[
+                    'data'    => $data,
+                    'status'  => (int)$this->parme('status','0'),
+                ]);
+            }
+        }
+    }
+
+    /***********************************商家后台结束**********************************************************/
 }
 
 
