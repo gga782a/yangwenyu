@@ -596,12 +596,7 @@ class Index extends Common
                 'paymoney'      => floatval($this->parme('paymoney')),
                 'create_at'     => $this->time,
             ];
-            $insert[] = ;
-            $insert['app_id']    = $this->id; //哪个平台
-            $insert['created_at']= $this->time;
             $res = db(self::$table_member)->insertGetId($insert);
-
-
             if($res){
                 return $this->redirect('index/membermanage');
             }else{
