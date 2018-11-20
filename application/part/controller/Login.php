@@ -8,6 +8,7 @@
 namespace app\part\controller;
 use app\DataAnalysis;
 use app\part\Controller;
+use think\Db;
 use think\Session;
 use think\Validate;
 use think\Request;
@@ -37,7 +38,7 @@ class Login extends Controller
     //登陆
     public function checklogin()
     {
-        $type = input('type');
+        $type = input('type',1);
         if (Request::instance()->isPost()) {
             $rule = [
                 'username' => 'require',
@@ -57,13 +58,13 @@ class Login extends Controller
                     'type'       => $type,
 
                 );
-                $user = db(self::$table_user)
+                $user = Db::table('shui_user')
                     ->where($where)
                     ->find();
-                if(count($user) >0){
-                    if($user['del'] != 0 ){
-                        if($user['status'] != 1){
-                            if($user['pwd']!==md5(shar1($this->parme('pwd')))){
+                if($user){
+                    if($user['del'] == 0 ){
+                        if($user['status'] == 1){
+                            if($user['pwd']==md5(sha1($this->parme('pwd')))){
                                 //存入session
                                 Session::set('username',$user['username']);
                                 Session::set('user_id',$user['user_id']);
@@ -91,7 +92,7 @@ class Login extends Controller
         if(Request::instance()->isPost()){
             //dd($this->parme('username'));
             $rule = [
-                'username' => 'require|exists:user,username|chsDash|min:4|max:18',
+                'username' => 'require|unique|chsDash|min:4|max:18',
                 'pwd' => 'require|confirm:repwd|alphaNum|min:4|max:18',
             ];
             $field = [
@@ -99,14 +100,14 @@ class Login extends Controller
                 'pwd' => '密码',
             ];
             $validate = new Validate($rule, self::$msg, $field);
-            if (!$validate->check($this->parme)) {
-                $this->error($validate->getError());
-            } else {
+//            if (!$validate->check($this->parme)) {
+//                $this->error($validate->getError());
+//            } else {
                 $data = [
                     'username'      => $this->parme('username'),
                     'pwd'           => md5(sha1($this->parme('pwd'))),
                     'created_at'    => $this->time,
-                    'type'          => $this->parme('type'),//type区分登陆者类型 1app 2deputy 3store
+                    'type'          => $this->parme('type',1),//type区分登陆者类型 1app 2deputy 3store
                     'status'        => 1, //1可用 0 禁用
                     'del'           => 0, //1注销 0 可用
                 ];
@@ -116,7 +117,7 @@ class Login extends Controller
                 }else{
                     $this->error('操作失败','register','',1);
                 }
-            }
+            //}
         }else{
             return view('part/register');
         }

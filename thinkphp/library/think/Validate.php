@@ -259,7 +259,7 @@ class Validate
     {
         $this->data     =   $data;
         $this->error = [];
-
+        //dd($this->data);
         if (empty($rules)) {
             // 读取验证规则
             $rules = $this->rule;
@@ -280,9 +280,8 @@ class Validate
                 }
             }
         }
-
+//dd(22);
         foreach ($rules as $key => $item) {
-
             // field => rule1|rule2... field=>['rule1','rule2',...]
             if (is_numeric($key)) {
                 // [field,rule1|rule2,msg1|msg2]
@@ -317,19 +316,19 @@ class Validate
                     }
                 }
             }
-
             // 获取数据 支持二维数组
             $value = $this->getDataValue($data, $key);
 
             // 字段验证
             if ($rule instanceof \Closure) {
+                //dd(22);
                 // 匿名函数验证 支持传入当前字段和所有字段两个数据
                 $result = call_user_func_array($rule, [$value, $data]);
             } else {
+                //dd(222);
                 $result = $this->checkItem($key, $value, $rule, $data, $title, $msg);
 
             }
-
             if (true !== $result) {
                 // 没有返回true 则表示验证失败
 
@@ -405,9 +404,7 @@ class Validate
             $rules = explode('|', $rules);
         }
         $i = 0;
-
         foreach ($rules as $key => $rule) {
-
 
             if ($rule instanceof \Closure) {
                 $result = call_user_func_array($rule, [$value, $data]);
@@ -427,7 +424,9 @@ class Validate
                     $result = true;
                 }
             }
+
             $msg    =   array_merge($msg,$this->message);
+            //dd($msg);
             if (false === $result) {
                 if (isset($msg[$rule])) {
 
@@ -446,6 +445,7 @@ class Validate
                     $message = $this->getRuleMsg($field, $title, $info, $rule);
 
                 }
+
                 return $message;
             } elseif (true !== $result) {
                 // 返回自定义错误信息
