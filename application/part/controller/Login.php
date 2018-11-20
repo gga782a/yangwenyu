@@ -123,6 +123,15 @@ class Login extends Controller
         }
     }
 
+    //退出登陆
+
+    public function loginout()
+    {
+        Session::set('username',null);
+        Session::set('user_id',null);
+        return $this->redirect('checklogin',array('type'=>$this->parme('type')));
+    }
+
 
 }
 

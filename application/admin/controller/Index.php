@@ -8,6 +8,7 @@
 
 namespace app\admin\controller;
 use app\DataAnalysis;
+use think\Db;
 use think\Session;
 use think\Request;
 use think\Validate;
@@ -75,9 +76,12 @@ class Index extends Common
                 $this->error($validate->getError());
             } else {
                 $pwd = md5(sha1($this->parme('pwd')));
-                $res = db(self::$table_user)
+                //dd($pwd);
+                $res = Db::table('shui_user')
                     ->where(self::$primarykey,$this->id)
+                    //->select();
                     ->update(['pwd'=>$pwd,'updated_at'=>$this->time]);
+                dd($res);
                 if($res){
                     return $this->redirect('index/index');
                 }else{
