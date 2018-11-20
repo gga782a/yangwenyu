@@ -17,7 +17,7 @@
     <link href="__ADMIN__/css/plugins/iCheck/custom.css" rel="stylesheet">
     <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
     <link href="__ADMIN__/css/style.min-v=4.1.0.css" rel="stylesheet">
-
+    <link rel="stylesheet" href="__ADMIN__/src/css/layui.css">
 </head>
 
 <body class="gray-bg">
@@ -71,6 +71,10 @@
                         <div class="hr-line-dashed"></div>
                         <div class="form-group" >
                             <label class="col-sm-2 control-label">活动时间段</label>
+                            墨绿主题：
+                            <div class="layui-inline">
+                                <input type="text" class="layui-input" id="test6-1">
+                            </div>
                             <div class="col-sm-10">
                                 <input class="form-control layer-date" name="time[]" style="width: 45%;float: left;" type="text"   placeholder="请输入活动开始时间 如：08:00"/>
                                 <input class="form-control layer-date" name="time[]" type="text" style="width: 45%;float:left;margin: 0px 10px;"  placeholder="请输入活动结束时间 如：14:00"/>
@@ -94,7 +98,6 @@
 
                         <div class="form-group" id="time2" style="display: none">
                             <label class="col-sm-2 control-label">活动时间段</label>
-                            <input type="text" class="layui-input" id="test5" placeholder="yyyy-MM-dd HH:mm:ss">
                             <div class="col-sm-10">
                                 <input class="form-control layer-date"  name="time2[]" style="width: 45%;float: left;" type="text"   placeholder="请输入活动开始时间 如：08:00"/>
                                 <input class="form-control layer-date" name="time2[]" type="text" style="width: 45%;float:left;margin: 0px 10px;"  placeholder="请输入活动结束时间 如：14:00"/>
@@ -119,6 +122,7 @@
 <script src="https://cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 <script src="__ADMIN__/js/content.min-v=1.0.0.js"></script>
 <script src="__ADMIN__/js/plugins/iCheck/icheck.min.js"></script>
+<script src="__ADMIN__/src/layui.js" charset="utf-8"></script>
 <script>
     $(document).ready(function () {
         $(".i-checks").iCheck({checkboxClass: "icheckbox_square-green", radioClass: "iradio_square-green",})
@@ -132,157 +136,102 @@
     function show2() {
         document.getElementById('time2').style.display = 'block';
     }
+</script>
+<script>
     layui.use('laydate', function(){
         var laydate = layui.laydate;
 
-        //常规用法
+        //双控件
         laydate.render({
-            elem: '#test1'
+            elem: '#test1' //指定元素
+            ,type: 'datetime'
+            ,trigger: 'click'
+            ,lang: 'en'
+            //,lang: 'en'
+            ,range: true //开启日期范围，默认使用“_”分割
+            ,done: function(value, date, endDate){
+                console.log(value, date, endDate);
+            }
+            ,change: function(value, date, endDate){
+                console.log(value, date, endDate);
+            }
         });
 
-        //国际版
+        //单控件
         laydate.render({
-            elem: '#test1-1'
-            ,lang: 'en'
+            elem: '#test2'
+            //,format: 'yyyy年MM月dd日'
+            //,value: new Date(1989,9,14)
+            ,isInitValue: false
+            ,format: 'yyyyMMdd'
+            ,value: '20170910'
+
+            //,max: 0
+            //,min: '2016-10-14'
+            //,max: -1
+            //,value: '1989年10月14日'
+            ,ready: function(date){
+                console.log(date);
+            }
+            ,done: function(value, date, endDate){
+                console.log(value, date, endDate);
+            }
         });
 
         //年选择器
         laydate.render({
-            elem: '#test2'
+            elem: '#test3'
             ,type: 'year'
+            //,range: true
+            //,trigger: 'click'
+            ,done: function(value, date, endDate){
+                console.log(value, date, endDate);
+            }
+            ,change: function(value, date, endDate){
+                //this.elem.val(value)
+            }
         });
 
         //年月选择器
         laydate.render({
-            elem: '#test3'
+            elem: '#test4'
             ,type: 'month'
+            ,range: true
+            //,trigger: 'click'
+            ,max: -30
+            ,done: function(value, date, endDate){
+                console.log(value, date, endDate);
+            }
+            ,change: function(value, date, endDate){
+                this.elem.val(value)
+            }
         });
 
         //时间选择器
         laydate.render({
-            elem: '#test4'
-            ,type: 'time'
-        });
-
-        //日期时间选择器
-        laydate.render({
             elem: '#test5'
-            ,type: 'datetime'
-        });
-
-        //日期范围
-        laydate.render({
-            elem: '#test6'
-            ,range: true
-        });
-
-        //年范围
-        laydate.render({
-            elem: '#test7'
-            ,type: 'year'
-            ,range: true
-        });
-
-        //年月范围
-        laydate.render({
-            elem: '#test8'
-            ,type: 'month'
-            ,range: true
-        });
-
-        //时间范围
-        laydate.render({
-            elem: '#test9'
             ,type: 'time'
-            ,range: true
-        });
-
-        //日期时间范围
-        laydate.render({
-            elem: '#test10'
-            ,type: 'datetime'
-            ,range: true
-        });
-
-        //自定义格式
-        laydate.render({
-            elem: '#test11'
-            ,format: 'yyyy年MM月dd日'
-        });
-        laydate.render({
-            elem: '#test12'
-            ,format: 'dd/MM/yyyy'
-        });
-        laydate.render({
-            elem: '#test13'
-            ,format: 'yyyyMMdd'
-        });
-        laydate.render({
-            elem: '#test14'
-            ,type: 'time'
-            ,format: 'H点m分'
-        });
-        laydate.render({
-            elem: '#test15'
-            ,type: 'month'
-            ,range: '~'
-            ,format: 'yyyy-MM'
-        });
-        laydate.render({
-            elem: '#test16'
-            ,type: 'datetime'
-            ,range: '到'
-            ,format: 'yyyy年M月d日H时m分s秒'
-        });
-
-        //开启公历节日
-        laydate.render({
-            elem: '#test17'
-            ,calendar: true
-        });
-
-        //自定义重要日
-        laydate.render({
-            elem: '#test18'
-            ,mark: {
-                '0-10-14': '生日'
-                ,'0-12-31': '跨年' //每年的日期
-                ,'0-0-10': '工资' //每月某天
-                ,'0-0-15': '月中'
-                ,'2017-8-15': '' //如果为空字符，则默认显示数字+徽章
-                ,'2099-10-14': '呵呵'
-            }
-            ,done: function(value, date){
-                if(date.year === 2017 && date.month === 8 && date.date === 15){ //点击2017年8月15日，弹出提示语
-                    layer.msg('这一天是：中国人民抗日战争胜利72周年');
-                }
-            }
-        });
-
-        //限定可选日期
-        var ins22 = laydate.render({
-            elem: '#test-limit1'
-            ,min: '2016-10-14'
-            ,max: '2080-10-14'
-            ,ready: function(){
-                ins22.hint('日期可选值设定在 <br> 2016-10-14 到 2080-10-14');
-            }
-        });
-
-        //前后若干天可选，这里以7天为例
-        laydate.render({
-            elem: '#test-limit2'
-            ,min: -7
-            ,max: 7
-        });
-
-        //限定可选时间
-        laydate.render({
-            elem: '#test-limit3'
-            ,type: 'time'
+            //,range: true
+            //,trigger: 'click'
             ,min: '09:30:00'
             ,max: '17:30:00'
-            ,btns: ['clear', 'confirm']
+            ,done: function(value, date, endDate){
+                console.log(value, date, endDate);
+            }
+            ,change: function(value, date, endDate){
+                //this.elem.val(value)
+            }
+        });
+
+        //时间范围选择器
+        laydate.render({
+            elem: '#test55'
+            ,type: 'time'
+            ,range: true
+            //,trigger: 'click'
+            ,done: function(value, date, endDate){
+                console.log(value, date, endDate);
+            }
         });
 
         //同时绑定多个
@@ -293,115 +242,114 @@
             });
         });
 
-        //初始赋值
-        laydate.render({
-            elem: '#test19'
-            ,value: '1989-10-14'
-            ,isInitValue: true
-        });
-
-        //选中后的回调
-        laydate.render({
-            elem: '#test20'
-            ,done: function(value, date){
-                layer.alert('你选择的日期是：' + value + '<br>获得的对象是' + JSON.stringify(date));
+        //自定义重要日
+        var ins555 = laydate.render({
+            elem: '#test555'
+            //,calendar: true //是否开启公历重要节日
+            ,mark: { //标记重要日子
+                '0-8-15': '纪念' //0代表：每年
+                ,'0-0-15': '中旬'
+                ,'2017-8-20': '发布'
+                ,'2017-8-31': '月底'
             }
-        });
-
-        //日期切换的回调
-        laydate.render({
-            elem: '#test21'
-            ,change: function(value, date){
-                layer.msg('你选择的日期是：' + value + '<br><br>获得的对象是' + JSON.stringify(date));
+            ,done: function(value, date, endDate){
+                if(date.year == 2017 && date.month == 8 && date.date == 15){
+                    //console.log('中国人民战胜日本法西斯纪念日');
+                }
             }
-        });
-        //不出现底部栏
-        laydate.render({
-            elem: '#test22'
-            ,showBottom: false
-        });
-
-        //只出现确定按钮
-        laydate.render({
-            elem: '#test23'
-            ,btns: ['confirm']
-        });
-
-        //自定义事件
-        laydate.render({
-            elem: '#test24'
-            ,trigger: 'mousedown'
-        });
-
-        //点我触发
-        laydate.render({
-            elem: '#test25'
-            ,eventElem: '#test25-1'
-            ,trigger: 'click'
-        });
-
-        //双击我触发
-        lay('#test26-1').on('dblclick', function(){
-            laydate.render({
-                elem: '#test26'
-                ,show: true
-                ,closeStop: '#test26-1'
-            });
-        });
-
-        //日期只读
-        laydate.render({
-            elem: '#test27'
-            ,trigger: 'click'
-        });
-
-        //非input元素
-        laydate.render({
-            elem: '#test28'
+            ,change: function(value, date, endDate){
+                console.log(value)
+            }
         });
 
         //墨绿主题
         laydate.render({
-            elem: '#test29'
+            elem: '#test6-1' //指定元素
+            ,type: 'datetime'
             ,theme: 'molv'
+            ,value: 20180115
+            ,isInitValue: true
+            //,range: true
+            ,trigger: 'click'
         });
 
-        //自定义颜色
+        //自定义背景色主题
         laydate.render({
-            elem: '#test30'
+            elem: '#test6-2' //指定元素
+            ,type: 'datetime'
             ,theme: '#393D49'
+            //,range: true
+            ,trigger: 'click'
         });
 
         //格子主题
         laydate.render({
-            elem: '#test31'
+            elem: '#test6-3' //指定元素
+            //,type: 'datetime'
             ,theme: 'grid'
+            //,range: true
+            ,trigger: 'click'
         });
 
-
-        //直接嵌套显示
+        //其它元素触发
         laydate.render({
-            elem: '#test-n1'
-            ,position: 'static'
-        });
-        laydate.render({
-            elem: '#test-n2'
-            ,position: 'static'
+            elem: '#test6' //指定元素
+            ,eventElem: '#test7' //绑定执行事件的元素
             ,lang: 'en'
         });
-        laydate.render({
-            elem: '#test-n3'
-            ,type: 'month'
-            ,position: 'static'
+
+        //外部事件
+        lay('#test9').on('click', function(e){
+            laydate.render({
+                elem: '#test8'
+                ,type: 'datetime'
+                ,show: true
+                //,min: '2017-08-12 00:10:00'
+                //,max: '2017-08-12 23:10:10'
+                ,closeStop: '#test9' //点击 #test6 所在元素区域不关闭控件
+                ,change: function(value, date){
+                    console.log(value, date)
+                }
+                ,done: function(value, date){
+                    console.log(value, date)
+                }
+            });
         });
-        laydate.render({
-            elem: '#test-n4'
-            ,type: 'time'
+
+        //直接嵌套在指定容器中
+        var ins10 = laydate.render({
+            elem: '#test10'
             ,position: 'static'
+            ,calendar: true //是否开启公历重要节日
+            ,mark: { //标记重要日子
+                '2017-8-20': ''
+                ,'2017-8-21': ''
+            }
+            ,done: function(value, date, endDate){
+                if(date.year == 2017 && date.month == 8 && date.date == 20){
+                    ins10.hint('XX活动日');
+                }
+            }
+            ,change: function(value, date, endDate){
+                console.log(value)
+            }
+        });
+
+        laydate.render({
+            elem: '#test11'
+            ,position: 'static'
+            ,lang: 'en'
+            ,type: 'datetime'
+            ,calendar: true //是否开启公历重要节日
+            ,done: function(value, date, endDate){
+                //console.log(value, date, endDate);
+            }
+            ,change: function(value, date, endDate){
+                console.log(value)
+            }
         });
     });
 </script>
-
 </body>
 
 </html>
