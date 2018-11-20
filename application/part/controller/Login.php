@@ -31,6 +31,8 @@ class Login extends Controller
     {
         //Session::set('user_id',null);
         return $this->redirect('admin/index/index');
+        //$list = db('student')->select();
+        //dd($list);
     }
     //登陆
     public function checklogin()
