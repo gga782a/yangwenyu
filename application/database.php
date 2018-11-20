@@ -14,12 +14,16 @@ return [
     'type'            => 'mysql',
     // 服务器地址
     'hostname'        => 'localhost',
+    //'hostname'        => 'sqld-gz.bcehost.com',
     // 数据库名
     'database'        => 'test',
+    //'database'        => 'OJDLyOUjrLepESwoiRxA',
     // 用户名
     'username'        => 'root',
+    //'username'        => 'fd24bee316734145af50e2df7670b5c8',
     // 密码
     'password'        => 'root',
+    //'password'        => '749628330f4540a68d8f35d49b5fc416',
     // 端口
     'hostport'        => '3306',
     // 连接dsn

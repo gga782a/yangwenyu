@@ -20,7 +20,7 @@ class Index extends Common
 
     public static $table_user = 'user';
 
-    public static $table_slyderAdventures = 'slyderAdventures'; //大转盘
+    public static $table_slyderAdventures = 'slyderadventures'; //大转盘
 
     public static $table_deputy = 'deputy'; //代理
 
@@ -81,9 +81,9 @@ class Index extends Common
                     ->where(self::$primarykey,$this->id)
                     //->select();
                     ->update(['pwd'=>$pwd,'updated_at'=>$this->time]);
-                dd($res);
-                if($res){
-                    return $this->redirect('index/index');
+                //dd($res);
+                if($res!==false){
+                    $this->success('操作成功');
                 }else{
                     $this->error('操作失败');
                 }
@@ -110,6 +110,7 @@ class Index extends Common
             'active_id' => $this->parme('active_id')
         ];
         if(Request::instance()->isPost()){
+            dd($this->parme);
             $insert = [
                 'activetitle'   => $this->parme('activetitle'), //活动标题
                 'activeperiod'  => $this->parme('activeperiod'), // 活动时间段
