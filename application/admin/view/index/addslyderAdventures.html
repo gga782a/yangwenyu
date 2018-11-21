@@ -71,13 +71,9 @@
                         <div class="hr-line-dashed"></div>
                         <div class="form-group" >
                             <label class="col-sm-2 control-label">活动时间段</label>
-                            墨绿主题：
-                            <div class="layui-inline">
-                                <input type="text" class="layui-input" id="test6-1">
-                            </div>
                             <div class="col-sm-10">
-                                <input class="form-control layer-date" name="time[]" style="width: 45%;float: left;" type="text"   placeholder="请输入活动开始时间 如：08:00"/>
-                                <input class="form-control layer-date" name="time[]" type="text" style="width: 45%;float:left;margin: 0px 10px;"  placeholder="请输入活动结束时间 如：14:00"/>
+                                <input class="form-control layui-input"  id="test1" name="time"
+                                       style="width: 50%;float: left;margin: 0px 10px;" type="text"  />
                                 <div class="input-group-btn">
                                     <button  class="btn btn-white" type="button" onclick="show1()">添加时间段</button>
                                 </div>
@@ -87,8 +83,8 @@
                         <div class="form-group" id="time1" style="display: none">
                             <label class="col-sm-2 control-label">活动时间段</label>
                             <div class="col-sm-10">
-                                <input class="form-control layer-date" name="time1[]" style="width: 45%;float: left;" type="text"   placeholder="请输入活动开始时间 如：08:00"/>
-                                <input class="form-control layer-date" name="time1[]" type="text" style="width: 45%;float:left;margin: 0px 10px;"  placeholder="请输入活动结束时间 如：14:00"/>
+                                <input class="form-control layui-input"  id="test2" name="time1"
+                                       style="width: 50%;float: left;margin: 0px 10px;" type="text"  />
                                 <div class="input-group-btn">
                                     <button  class="btn btn-white" type="button" onclick="show2()">添加时间段</button>
                                 </div>
@@ -99,8 +95,8 @@
                         <div class="form-group" id="time2" style="display: none">
                             <label class="col-sm-2 control-label">活动时间段</label>
                             <div class="col-sm-10">
-                                <input class="form-control layer-date"  name="time2[]" style="width: 45%;float: left;" type="text"   placeholder="请输入活动开始时间 如：08:00"/>
-                                <input class="form-control layer-date" name="time2[]" type="text" style="width: 45%;float:left;margin: 0px 10px;"  placeholder="请输入活动结束时间 如：14:00"/>
+                                <input class="form-control layui-input"  id="test3" name="time2"
+                                       style="width: 50%;float: left;margin: 0px 10px;" type="text"  />
                             </div>
                         </div>
                         <div class="hr-line-dashed"></div>
@@ -146,9 +142,11 @@
             elem: '#test1' //指定元素
             ,type: 'datetime'
             ,trigger: 'click'
-            ,lang: 'en'
             //,lang: 'en'
-            ,range: true //开启日期范围，默认使用“_”分割
+            //,lang: 'en'
+            ,format: 'yyyy-MM-dd HH:mm:ss'
+            ,min:0
+            ,range: '~' //开启日期范围，默认使用“_”分割
             ,done: function(value, date, endDate){
                 console.log(value, date, endDate);
             }
@@ -156,196 +154,36 @@
                 console.log(value, date, endDate);
             }
         });
-
-        //单控件
         laydate.render({
-            elem: '#test2'
-            //,format: 'yyyy年MM月dd日'
-            //,value: new Date(1989,9,14)
-            ,isInitValue: false
-            ,format: 'yyyyMMdd'
-            ,value: '20170910'
-
-            //,max: 0
-            //,min: '2016-10-14'
-            //,max: -1
-            //,value: '1989年10月14日'
-            ,ready: function(date){
-                console.log(date);
-            }
-            ,done: function(value, date, endDate){
-                console.log(value, date, endDate);
-            }
-        });
-
-        //年选择器
-        laydate.render({
-            elem: '#test3'
-            ,type: 'year'
-            //,range: true
-            //,trigger: 'click'
-            ,done: function(value, date, endDate){
-                console.log(value, date, endDate);
-            }
-            ,change: function(value, date, endDate){
-                //this.elem.val(value)
-            }
-        });
-
-        //年月选择器
-        laydate.render({
-            elem: '#test4'
-            ,type: 'month'
-            ,range: true
-            //,trigger: 'click'
-            ,max: -30
-            ,done: function(value, date, endDate){
-                console.log(value, date, endDate);
-            }
-            ,change: function(value, date, endDate){
-                this.elem.val(value)
-            }
-        });
-
-        //时间选择器
-        laydate.render({
-            elem: '#test5'
-            ,type: 'time'
-            //,range: true
-            //,trigger: 'click'
-            ,min: '09:30:00'
-            ,max: '17:30:00'
-            ,done: function(value, date, endDate){
-                console.log(value, date, endDate);
-            }
-            ,change: function(value, date, endDate){
-                //this.elem.val(value)
-            }
-        });
-
-        //时间范围选择器
-        laydate.render({
-            elem: '#test55'
-            ,type: 'time'
-            ,range: true
-            //,trigger: 'click'
-            ,done: function(value, date, endDate){
-                console.log(value, date, endDate);
-            }
-        });
-
-        //同时绑定多个
-        lay('.test-item').each(function(){
-            laydate.render({
-                elem: this
-                ,trigger: 'click'
-            });
-        });
-
-        //自定义重要日
-        var ins555 = laydate.render({
-            elem: '#test555'
-            //,calendar: true //是否开启公历重要节日
-            ,mark: { //标记重要日子
-                '0-8-15': '纪念' //0代表：每年
-                ,'0-0-15': '中旬'
-                ,'2017-8-20': '发布'
-                ,'2017-8-31': '月底'
-            }
-            ,done: function(value, date, endDate){
-                if(date.year == 2017 && date.month == 8 && date.date == 15){
-                    //console.log('中国人民战胜日本法西斯纪念日');
-                }
-            }
-            ,change: function(value, date, endDate){
-                console.log(value)
-            }
-        });
-
-        //墨绿主题
-        laydate.render({
-            elem: '#test6-1' //指定元素
+            elem: '#test2' //指定元素
             ,type: 'datetime'
-            ,theme: 'molv'
-            ,value: 20180115
-            ,isInitValue: true
-            //,range: true
             ,trigger: 'click'
-        });
-
-        //自定义背景色主题
-        laydate.render({
-            elem: '#test6-2' //指定元素
-            ,type: 'datetime'
-            ,theme: '#393D49'
-            //,range: true
-            ,trigger: 'click'
-        });
-
-        //格子主题
-        laydate.render({
-            elem: '#test6-3' //指定元素
-            //,type: 'datetime'
-            ,theme: 'grid'
-            //,range: true
-            ,trigger: 'click'
-        });
-
-        //其它元素触发
-        laydate.render({
-            elem: '#test6' //指定元素
-            ,eventElem: '#test7' //绑定执行事件的元素
-            ,lang: 'en'
-        });
-
-        //外部事件
-        lay('#test9').on('click', function(e){
-            laydate.render({
-                elem: '#test8'
-                ,type: 'datetime'
-                ,show: true
-                //,min: '2017-08-12 00:10:00'
-                //,max: '2017-08-12 23:10:10'
-                ,closeStop: '#test9' //点击 #test6 所在元素区域不关闭控件
-                ,change: function(value, date){
-                    console.log(value, date)
-                }
-                ,done: function(value, date){
-                    console.log(value, date)
-                }
-            });
-        });
-
-        //直接嵌套在指定容器中
-        var ins10 = laydate.render({
-            elem: '#test10'
-            ,position: 'static'
-            ,calendar: true //是否开启公历重要节日
-            ,mark: { //标记重要日子
-                '2017-8-20': ''
-                ,'2017-8-21': ''
-            }
+            ,format: 'yyyy-MM-dd HH:mm:ss'
+            ,min:0
+            //,lang: 'en'
+            //,lang: 'en'
+            ,range: '~' //开启日期范围，默认使用“_”分割
             ,done: function(value, date, endDate){
-                if(date.year == 2017 && date.month == 8 && date.date == 20){
-                    ins10.hint('XX活动日');
-                }
+                console.log(value, date, endDate);
             }
             ,change: function(value, date, endDate){
-                console.log(value)
+                console.log(value, date, endDate);
             }
         });
-
         laydate.render({
-            elem: '#test11'
-            ,position: 'static'
-            ,lang: 'en'
+            elem: '#test3' //指定元素
             ,type: 'datetime'
-            ,calendar: true //是否开启公历重要节日
+            ,trigger: 'click'
+            ,format: 'yyyy-MM-dd HH:mm:ss'
+            ,min:0
+            //,lang: 'en'
+            //,lang: 'en'
+            ,range: '~'  //开启日期范围，默认使用“_”分割
             ,done: function(value, date, endDate){
-                //console.log(value, date, endDate);
+                console.log(value, date, endDate);
             }
             ,change: function(value, date, endDate){
-                console.log(value)
+                console.log(value, date, endDate);
             }
         });
     });
