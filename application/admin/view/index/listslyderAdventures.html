@@ -56,7 +56,11 @@
                         {volist name='data' id="vo"}
                         <tr class="gradeX">
                             <td>{$vo.activetitle}</td>
-                            <td>{$vo.activetitle}</td>
+                            <td>
+                                {volist name="$vo.activeperiod" id="vol"}
+                                     {$vol[0]}----{$vol[1]}<br/>
+                                {/volist}
+                            </td>
                             <td>{$vo.limit_collar}</td>
                             <td>{$vo.prize}</td>
                             <td>{$vo.probability}%</td>

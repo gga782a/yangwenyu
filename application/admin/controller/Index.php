@@ -174,9 +174,15 @@ class Index extends Common
                    foreach ($data as $k=>$v){
                        $activeperiod = json_decode($v['activeperiod'],true);
                        foreach ($activeperiod as $key=>$val){
-
+                            $val = explode(',',$val);
+                            foreach ($val as $ke=>$va){
+                                $val[$ke] = date("Y-m-d H:i:s",$va);
+                            }
+                            $activeperiod[$key] = $val;
                        }
+                       $data[$k]['activeperiod'] = $activeperiod;
                    }
+                   //dd($data);
                }
                return view('listslyderAdventures',[
                   'data'    => $data,
