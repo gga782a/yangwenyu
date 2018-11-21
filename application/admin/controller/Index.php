@@ -168,7 +168,16 @@ class Index extends Common
            }else{
                $data = db(self::$table_slyderAdventures)
                    ->where('app_id',$this->id)
-                   ->paginate(1,false);
+                   ->page(input('page',1),input('pageshow',15))
+                   ->select();
+               if(!empty($data)){
+                   foreach ($data as $k=>$v){
+                       $activeperiod = json_decode($v['activeperiod'],true);
+                       foreach ($activeperiod as $key=>$val){
+
+                       }
+                   }
+               }
                return view('listslyderAdventures',[
                   'data'    => $data,
                ]);
