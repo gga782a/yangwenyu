@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>H+ 后台主题UI框架 - 基本表单</title>
+    <meta name="keywords" content="H+后台主题,后台bootstrap框架,会员中心主题,后台HTML,响应式后台">
+    <meta name="description" content="H+是一个完全响应式，基于Bootstrap3最新版本开发的扁平化主题，她采用了主流的左右两栏式布局，使用了Html5+CSS3等现代技术">
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.staticfile.org/font-awesome/4.4.0/css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="__ADMIN__/css/plugins/iCheck/custom.css" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="__ADMIN__/css/style.min-v=4.1.0.css" rel="stylesheet">
+    <link rel="stylesheet" href="__ADMIN__/src/css/layui.css">
+</head>
+
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>大转盘
+                        <small>修改</small>
+                    </h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <form method="post" class="form-horizontal" action="{:url('index/slyderAdventures',array('flag'=>'add'))}">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">活动标题</label>
+
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" value="{$data.activetitle}" name="activetitle" required>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">每人可抽奖次数 </label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="limit_collar" value="{$data.limit_collar}" required>
+                                <span class="help-block m-b-none">每次/每个时间段</span>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">奖项礼品</label>
+
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="prize" required>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">奖项概率</label>
+
+                            <div class="col-sm-10">
+                                <input type="text" placeholder="奖项概率0-100之间的数字，俩位小数" class="form-control" name="probability" required>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group" >
+                            <label class="col-sm-2 control-label">活动时间段</label>
+                            <div class="col-sm-10">
+                                <input class="form-control layui-input"  id="test1" name="time"
+                                       style="width: 50%;float: left;margin: 0px 10px;" type="text" required />
+                                <div class="input-group-btn">
+                                    <button  class="btn btn-white" type="button" onclick="show1()">添加时间段</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="time1" style="display: none">
+                            <label class="col-sm-2 control-label">活动时间段</label>
+                            <div class="col-sm-10">
+                                <input class="form-control layui-input"  id="test2" name="time1"
+                                       style="width: 50%;float: left;margin: 0px 10px;" type="text"  />
+                                <div class="input-group-btn">
+                                    <button  class="btn btn-white" type="button" onclick="show2()">添加时间段</button>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="form-group" id="time2" style="display: none">
+                            <label class="col-sm-2 control-label">活动时间段</label>
+                            <div class="col-sm-10">
+                                <input class="form-control layui-input"  id="test3" name="time2"
+                                       style="width: 50%;float: left;margin: 0px 10px;" type="text"  />
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-2">
+                                <button class="btn btn-primary" type="submit">保存内容</button>
+                                <button class="btn btn-white" type="button" onclick="jump()">取消</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.staticfile.org/jquery/2.1.4/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script src="__ADMIN__/js/content.min-v=1.0.0.js"></script>
+<script src="__ADMIN__/js/plugins/iCheck/icheck.min.js"></script>
+<script src="__ADMIN__/src/layui.js" charset="utf-8"></script>
+<script>
+    $(document).ready(function () {
+        $(".i-checks").iCheck({checkboxClass: "icheckbox_square-green", radioClass: "iradio_square-green",})
+    });
+    function jump() {
+        window.location.href="{:url('index/slyderAdventures')}";
+    }
+    function show1() {
+        document.getElementById('time1').style.display = 'block';
+    }
+    function show2() {
+        document.getElementById('time2').style.display = 'block';
+    }
+</script>
+<script>
+    layui.use('laydate', function(){
+        var laydate = layui.laydate;
+
+        //双控件
+        laydate.render({
+            elem: '#test1' //指定元素
+            ,type: 'datetime'
+            ,trigger: 'click'
+            //,lang: 'en'
+            //,lang: 'en'
+            ,format: 'yyyy-MM-dd HH:mm:ss'
+            ,min:0
+            ,range: '~' //开启日期范围，默认使用“_”分割
+            ,done: function(value, date, endDate){
+                console.log(value, date, endDate);
+            }
+            ,change: function(value, date, endDate){
+                console.log(value, date, endDate);
+            }
+        });
+        laydate.render({
+            elem: '#test2' //指定元素
+            ,type: 'datetime'
+            ,trigger: 'click'
+            ,format: 'yyyy-MM-dd HH:mm:ss'
+            ,min:0
+            //,lang: 'en'
+            //,lang: 'en'
+            ,range: '~' //开启日期范围，默认使用“_”分割
+            ,done: function(value, date, endDate){
+                console.log(value, date, endDate);
+            }
+            ,change: function(value, date, endDate){
+                console.log(value, date, endDate);
+            }
+        });
+        laydate.render({
+            elem: '#test3' //指定元素
+            ,type: 'datetime'
+            ,trigger: 'click'
+            ,format: 'yyyy-MM-dd HH:mm:ss'
+            ,min:0
+            //,lang: 'en'
+            //,lang: 'en'
+            ,range: '~'  //开启日期范围，默认使用“_”分割
+            ,done: function(value, date, endDate){
+                console.log(value, date, endDate);
+            }
+            ,change: function(value, date, endDate){
+                console.log(value, date, endDate);
+            }
+        });
+    });
+</script>
+</body>
+
+</html>
