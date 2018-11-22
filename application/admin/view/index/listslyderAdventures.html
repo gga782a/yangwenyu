@@ -43,18 +43,21 @@
                     <table class="table table-striped table-bordered table-hover " id="editable">
                         <thead>
                         <tr>
+                            <th>活动序号</th>
                             <th>活动标题</th>
                             <th>活动时间段</th>
                             <th>每人可抽奖次数 每次/每个时间段</th>
                             <th>奖项礼品</th>
                             <th>奖项概率</th>
+                            <th>操作</th>
                         </tr>
                         </thead>
                         <tbody>
                         {empty name="$data"}
                         {else /}
                         {volist name='data' id="vo"}
-                        <tr class="gradeX">
+                        <tr class="">
+                            <td>{$vo.active_id}</td>
                             <td>{$vo.activetitle}</td>
                             <td>
                                 {volist name="$vo.activeperiod" id="vol"}
@@ -64,6 +67,10 @@
                             <td>{$vo.limit_collar}</td>
                             <td>{$vo.prize}</td>
                             <td>{$vo.probability}%</td>
+                            <td>
+                                <span><a href="{:url('index/slyderAdventures',array('flag'=>'update','active_id'=>$vo['active_id']))}">编辑</a></span>
+                                |<span><a>删除</a></span>
+                            </td>
                             <!--<td>Internet Explorer 4.0-->
                             <!--</td>-->
                             <!--<td>Win 95+</td>-->
@@ -90,18 +97,18 @@
     $(document).ready(function () {
         $(".dataTables-example").dataTable();
         var oTable = $("#editable").dataTable();
-        oTable.$("td").editable("../example_ajax.php", {
-            "callback": function (sValue, y) {
-                var aPos = oTable.fnGetPosition(this);
-                oTable.fnUpdate(sValue, aPos[0], aPos[1])
-            }, "submitdata": function (value, settings) {
-                return {"row_id": this.parentNode.getAttribute("id"), "column": oTable.fnGetPosition(this)[2]}
-            }, "width": "90%", "height": "100%"
-        })
+        // oTable.$("td").editable("../example_ajax.php", {
+        //     "callback": function (sValue, y) {
+        //         var aPos = oTable.fnGetPosition(this);
+        //         oTable.fnUpdate(sValue, aPos[0], aPos[1])
+        //     }, "submitdata": function (value, settings) {
+        //         return {"row_id": this.parentNode.getAttribute("id"), "column": oTable.fnGetPosition(this)[2]}
+        //     }, "width": "90%", "height": "100%"
+        // })
     });
 
     function fnClickAddRow() {
-        $("#editable").dataTable().fnAddData(["Custom row", "New row", "New row", "New row", "New row"])
+        $("#editable").dataTable().fnAddData(["Custom row", "New row", "New row", "New row", "New row", "New row", "New row"])
     };
 </script>
 
