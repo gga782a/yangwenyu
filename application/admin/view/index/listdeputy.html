@@ -46,12 +46,12 @@
                     <table class="table table-striped table-bordered table-hover " id="editable">
                         <thead>
                         <tr>
-                            <th>活动序号</th>
-                            <th>活动标题</th>
-                            <th>活动时间段</th>
-                            <th>每人可抽奖次数 每次/每个时间段</th>
-                            <th>奖项礼品</th>
-                            <th>奖项概率</th>
+                            <th>代理序号</th>
+                            <th>代理名称</th>
+                            <th>代理电话</th>
+                            <th>代理省市区</th>
+                            <th>代理等级</th>
+                            <!--<th>状态</th>-->
                             <th>创建时间</th>
                             <th>操作</th>
                         </tr>
@@ -61,21 +61,24 @@
                         {else /}
                         {volist name='data' id="vo"}
                         <tr class="">
-                            <td>{$vo.active_id}</td>
-                            <td>{$vo.activetitle}</td>
+                            <td>{$vo.deputy_id}</td>
+                            <td>{$vo.deputy_name}</td>
                             <td>
-                                {volist name="$vo.activeperiod" id="vol"}
-                                {$vol[0]}----{$vol[1]}<br/>
-                                {/volist}
+                                {$vo.phone}
                             </td>
-                            <td>{$vo.limit_collar}</td>
-                            <td>{$vo.prize}</td>
-                            <td>{$vo.probability}%</td>
+                            <td>{$vo.position}</td>
+                            <td>{$vo.level == 1?'分公司':'普通代理'}</td>
+                            <!--<td>{$vo.status == 1?'开启':'封禁'}</td>-->
                             <td>{$vo.created_at|date="Y-m-d H:i:s",###}</td>
                             <td>
-                                <span><a href="{:url('index/slyderAdventures',array('flag'=>'update','active_id'=>$vo['active_id']))}">编辑</a></span>
+                                <span><a href="{:url('index/setdeputy',array('flag'=>'update','deputy_id'=>$vo['deputy_id']))}">编辑</a></span>
                                 |<span>
-                                <a href="{:url('index/delslyderAdventures',array('active_id'=>$vo['active_id']))}">删除</a>
+                                <a href="{:url('index/deldeputy',array('deputy_id'=>$vo['deputy_id']))}">删除</a>
+                                <!--{if condition=" $vo['status'] == 1 "}-->
+                                <!--<a onclick="return fengjin()">封禁</a>-->
+                                <!--{else /}-->
+                                <!--<a onclick="return jiefeng()">解封</a>-->
+                                <!--{/if}-->
                             </span>
                             </td>
                             <!--<td>Internet Explorer 4.0-->
@@ -117,6 +120,16 @@
     function fnClickAddRow() {
         $("#editable").dataTable().fnAddData(["Custom row", "New row", "New row", "New row", "New row", "New row", "New row"])
     };
+    // function fengjin() {
+    //     if(confirm('确定要封禁吗')){
+    //         alert(11);
+    //     }
+    // }
+    // function jiefeng() {
+    //     if(confirm('确定要封禁吗')){
+    //         alert(11);
+    //     }
+    // }
 </script>
 
 

@@ -257,34 +257,48 @@ class Index extends Common
             'deputy_id' => $this->parme('deputy_id')
         ];
         if(Request::instance()->isPost()){
+            $province = $this->parme('province');
+            $city     = $this->parme('city');
+            $county   = $this->parme('county');
+            if($province == "请选择"){
+                $province = '';
+            }
+            if($city == "请选择"){
+                $city = '';
+            }
+            if($county == "请选择"){
+                $county = '';
+            }
+            $position = $province.$city.$county;
             if($flag == 'add'){
                 //dd($this->parme);
-                $rule = [
-                    'username' => 'require|unique|chsDash|min:4|max:18',
-                    'pwd' => 'require|confirm:repwd|alphaNum|min:4|max:18',
-                    'province' => 'require',
-                ];
-                $field = [
-                    'username' => '账号',
-                    'pwd' => '密码',
-                    'province' => '省',
-                ];
-                $validate = new Validate($rule, self::$msg, $field);
-                if (!$validate->check($this->parme)) {
-                    $this->error($validate->getError());
-                } else {
-                    $return = $this->checkdeputy($this->parme('position'));
-                }
+//                $rule = [
+//                    'username' => 'require|unique|chsDash|min:4|max:18',
+//                    'pwd' => 'require|confirm:repwd|alphaNum|min:4|max:18',
+//                    'province' => 'require',
+//                ];
+//                $field = [
+//                    'username' => '账号',
+//                    'pwd' => '密码',
+//                    'province' => '省',
+//                ];
+//                $validate = new Validate($rule, self::$msg, $field);
+//                if (!$validate->check($this->parme)) {
+//                    $this->error($validate->getError());
+//                } else {
+                    $return = $this->checkdeputy($position);
+               // }
             }else{
-               $return = $this->checkdeputy($this->parme('position'),$this->parme('deputy_id'));
+               $return = $this->checkdeputy($position,$this->parme('deputy_id'));
             }
             if($return === false){
                 $this->error('当前城市已存在代理');
             }
+
             $insert = [
                 'deputy_name'   => $this->parme('deputy_name'),
                 'phone'         => $this->parme('phone'),
-                'position'      => $this->parme('position'),
+                'position'      => $position,
                 'updated_at'    => $this->time,
             ];
             //检测当前账号是否可用
@@ -348,6 +362,7 @@ class Index extends Common
         if($deputyid){
             $where['deputy_id'] = ['notIn',$deputyid];
         }
+
         $count = db(self::$table_deputy)
             ->where($where)
             ->count();
