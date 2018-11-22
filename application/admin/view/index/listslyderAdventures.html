@@ -49,6 +49,7 @@
                             <th>每人可抽奖次数 每次/每个时间段</th>
                             <th>奖项礼品</th>
                             <th>奖项概率</th>
+                            <th>创建时间</th>
                             <th>操作</th>
                         </tr>
                         </thead>
@@ -67,6 +68,7 @@
                             <td>{$vo.limit_collar}</td>
                             <td>{$vo.prize}</td>
                             <td>{$vo.probability}%</td>
+                            <td>{$vo.created_at|date="Y-m-d H:i:s",###}</td>
                             <td>
                                 <span><a href="{:url('index/slyderAdventures',array('flag'=>'update','active_id'=>$vo['active_id']))}">编辑</a></span>
                                 |<span><a>删除</a></span>

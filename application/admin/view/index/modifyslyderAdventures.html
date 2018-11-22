@@ -36,7 +36,8 @@
                     </div>
                 </div>
                 <div class="ibox-content">
-                    <form method="post" class="form-horizontal" action="{:url('index/slyderAdventures',array('flag'=>'add'))}">
+                    <form method="post" class="form-horizontal" action="{:url('index/slyderAdventures',array('flag'=>'update'))}">
+                        <input type="hidden" value="{$data.active_id}" name="active_id">
                         <div class="form-group">
                             <label class="col-sm-2 control-label">活动标题</label>
 
@@ -57,7 +58,7 @@
                             <label class="col-sm-2 control-label">奖项礼品</label>
 
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="prize" required>
+                                <input type="text" class="form-control" value="{$data.prize}"  name="prize" required>
                             </div>
                         </div>
                         <div class="hr-line-dashed"></div>
@@ -65,7 +66,7 @@
                             <label class="col-sm-2 control-label">奖项概率</label>
 
                             <div class="col-sm-10">
-                                <input type="text" placeholder="奖项概率0-100之间的数字，俩位小数" class="form-control" name="probability" required>
+                                <input type="text"  value="{$data.probability}" placeholder="奖项概率0-100之间的数字，俩位小数" class="form-control" name="probability" required>
                             </div>
                         </div>
                         <div class="hr-line-dashed"></div>
@@ -73,7 +74,7 @@
                             <label class="col-sm-2 control-label">活动时间段</label>
                             <div class="col-sm-10">
                                 <input class="form-control layui-input"  id="test1" name="time"
-                                       style="width: 50%;float: left;margin: 0px 10px;" type="text" required />
+                                       style="width: 50%;float: left;margin: 0px 10px;" type="text"  />
                                 <div class="input-group-btn">
                                     <button  class="btn btn-white" type="button" onclick="show1()">添加时间段</button>
                                 </div>

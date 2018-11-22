@@ -131,7 +131,14 @@ class Index extends Common
                 $activeperiod[count($activeperiod)] = $returntime2;
             }
             //转换成json字符串
-            $activeperiod = json_encode($activeperiod);
+            //dd($activeperiod);
+            if(!empty($activeperiod)){
+                $activeperiod = json_encode($activeperiod);
+            }else{
+                $activeperiod = db(self::$table_slyderAdventures)
+                    ->where($where)
+                    ->value('activeperiod');
+            }
             //dd($activeperiod);
             $insert = [
                 'activetitle'   => $this->parme('activetitle'), //活动标题
@@ -162,12 +169,13 @@ class Index extends Common
                $data = db(self::$table_slyderAdventures)
                    ->where($where)
                    ->find();
-               return view('updateslyderAdventures',[
+               return view('modifyslyderAdventures',[
                    'data'   => $data
                ]);
            }else{
                $data = db(self::$table_slyderAdventures)
                    ->where('app_id',$this->id)
+                   ->order('created_at desc')
                    ->page(input('page',1),input('pageshow',15))
                    ->select();
                if(!empty($data)){
