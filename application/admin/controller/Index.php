@@ -258,13 +258,16 @@ class Index extends Common
         ];
         if(Request::instance()->isPost()){
             if($flag == 'add'){
+                //dd($this->parme);
                 $rule = [
                     'username' => 'require|unique|chsDash|min:4|max:18',
                     'pwd' => 'require|confirm:repwd|alphaNum|min:4|max:18',
+                    'province' => 'require',
                 ];
                 $field = [
                     'username' => '账号',
                     'pwd' => '密码',
+                    'province' => '省',
                 ];
                 $validate = new Validate($rule, self::$msg, $field);
                 if (!$validate->check($this->parme)) {
