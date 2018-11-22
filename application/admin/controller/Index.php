@@ -286,10 +286,10 @@ class Index extends Common
 //                if (!$validate->check($this->parme)) {
 //                    $this->error($validate->getError());
 //                } else {
-                    $return = $this->checkdeputy($position);
+                    $return = $this->checkdeputy($province,$city,$county);
                // }
             }else{
-               $return = $this->checkdeputy($position,$this->parme('deputy_id'));
+               $return = $this->checkdeputy($province,$city,$county,$this->parme('deputy_id'));
             }
             if($return === false){
                 $this->error('当前城市已存在代理');
@@ -298,7 +298,9 @@ class Index extends Common
             $insert = [
                 'deputy_name'   => $this->parme('deputy_name'),
                 'phone'         => $this->parme('phone'),
-                'position'      => $position,
+                'province'      => $province,
+                'city'          => $city,
+                'county'        => $county,
                 'updated_at'    => $this->time,
             ];
             //检测当前账号是否可用
@@ -333,6 +335,7 @@ class Index extends Common
                 $data = db(self::$table_deputy)
                     ->where($where)
                     ->find();
+                //dd($data);
                 return view('updatedeputy',[
                     'data'   => $data
                 ]);
@@ -352,11 +355,13 @@ class Index extends Common
 
     //查找当前省市区是否有代理
 
-    private function checkdeputy($position,$deputyid=null)
+    private function checkdeputy($province,$city,$county,$deputyid=null)
     {
         $where = [
             'app_id'    => $this->id,
-            'position'  => $position,
+            'province'      => $province,
+            'city'          => $city,
+            'county'        => $county,
             'status'    => 1,
         ];
         if($deputyid){

@@ -66,7 +66,7 @@
                             <td>
                                 {$vo.phone}
                             </td>
-                            <td>{$vo.position}</td>
+                            <td>{$vo.province.$vo.city.$vo.county}</td>
                             <td>{$vo.level == 1?'分公司':'普通代理'}</td>
                             <!--<td>{$vo.status == 1?'开启':'封禁'}</td>-->
                             <td>{$vo.created_at|date="Y-m-d H:i:s",###}</td>

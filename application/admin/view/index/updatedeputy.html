@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>H+ 后台主题UI框架 - 基本表单</title>
+    <meta name="keywords" content="H+后台主题,后台bootstrap框架,会员中心主题,后台HTML,响应式后台">
+    <meta name="description" content="H+是一个完全响应式，基于Bootstrap3最新版本开发的扁平化主题，她采用了主流的左右两栏式布局，使用了Html5+CSS3等现代技术">
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.staticfile.org/font-awesome/4.4.0/css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="__ADMIN__/css/plugins/iCheck/custom.css" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="__ADMIN__/css/style.min-v=4.1.0.css" rel="stylesheet">
+    <link rel="stylesheet" href="__ADMIN__/src/css/layui.css">
+</head>
+
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>代理
+                        <small>修改</small>
+                    </h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <form method="post" class="form-horizontal" action="{:url('index/setdeputy',array('flag'=>'update'))}">
+                        <input type="hidden" name="deputy_id" value="{$data.deputy_id}">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">代理名</label>
+
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" value="{$data.deputy_name}" name="deputy_name" required>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">代理电话 </label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" value="{$data.phone}" name="phone" required>
+
+                            </div>
+                        </div>
+
+
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group" >
+                            <label class="col-sm-2 control-label">代理省市区</label>
+                            <div class="col-sm-10">
+                                <ul style="display:flex;margin-top: 5px;">
+                                    <li style="float: left;margin-right: 30px;">
+                                        <select id="province" name="province" required>
+                                            <option value="{$data.province}">{$data.province}</option>
+                                        </select>
+                                    </li>
+                                    <li style="float: left;margin-right: 30px;">
+                                        <select id="city" name="city">
+                                            <option value="{$data.city}">{$data.city?$data.city:'请选择'}</option>
+                                        </select>
+                                    </li>
+                                    <li style="float: left;margin-right: 30px;">
+                                        <select id="county" name="county">
+                                            <option value="{$data.county}">{$data.county?$data.county:'请选择'}</option>
+                                        </select>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-2">
+                                <button class="btn btn-primary" type="submit">保存内容</button>
+                                <button class="btn btn-white" type="button" onclick="jump()">取消</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.staticfile.org/jquery/2.1.4/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script src="__ADMIN__/js/content.min-v=1.0.0.js"></script>
+<script src="__ADMIN__/js/plugins/iCheck/icheck.min.js"></script>
+<script src="__ADMIN__/src/layui.js" charset="utf-8"></script>
+<script src="__ADMIN__/js/sitedata_bas.js">
+
+</script>
+<script>
+    /**加载省份列表到选择框*/
+   // $("#province").empty();
+    for(var i=0,length=arrCity.length; i<length; i++)
+    {
+        $("#province").append("<option value='"+arrCity[i].name+"'>"+arrCity[i].name+"</option>");
+    }
+    var province;
+    var city;
+    var county;
+    /**省份选择后加载城市数据*/
+    $("#province").on("change",function()
+    {
+        console.log("省份:" + $("#province").val());
+        for(var i=0,length=arrCity.length; i<length; i++){
+            if($("#province").val()==arrCity[i].name){
+                city = arrCity[i].sub; break; }
+        } $("#city").empty();
+        for(var i=0,length=city.length; i<length; i++){
+            $("#city").append("<option value='"+city[i].name+"'>"+city[i].name+"</option>");
+        }
+    })
+    /**城市选择后加载区县数据*/
+    $("#city").on("change",function(){
+        console.log("城市:"+$("#city").val());
+        for(var i=0,length=city.length;i<length;i++){
+            if($("#city").val()==city[i].name){
+                county = city[i].sub; break;
+            }
+        } $("#county").empty();
+        for(var i=0,length=county.length; i<length; i++){
+            $("#county").append("<option value='"+county[i].name+"'>"+county[i].name+"</option>");
+        }
+    })
+    $(document).ready(function () {
+        $(".i-checks").iCheck({checkboxClass: "icheckbox_square-green", radioClass: "iradio_square-green",})
+    });
+    function jump() {
+        window.location.href="{:url('index/slyderAdventures')}";
+    }
+    function show1() {
+        document.getElementById('time1').style.display = 'block';
+    }
+    function show2() {
+        document.getElementById('time2').style.display = 'block';
+    }
+</script>
+<script>
+    layui.use('laydate', function(){
+        var laydate = layui.laydate;
+
+        //双控件
+        laydate.render({
+            elem: '#test1' //指定元素
+            ,type: 'datetime'
+            ,trigger: 'click'
+            //,lang: 'en'
+            //,lang: 'en'
+            ,format: 'yyyy-MM-dd HH:mm:ss'
+            ,min:0
+            ,range: '~' //开启日期范围，默认使用“_”分割
+            ,done: function(value, date, endDate){
+                console.log(value, date, endDate);
+            }
+            ,change: function(value, date, endDate){
+                console.log(value, date, endDate);
+            }
+        });
+        laydate.render({
+            elem: '#test2' //指定元素
+            ,type: 'datetime'
+            ,trigger: 'click'
+            ,format: 'yyyy-MM-dd HH:mm:ss'
+            ,min:0
+            //,lang: 'en'
+            //,lang: 'en'
+            ,range: '~' //开启日期范围，默认使用“_”分割
+            ,done: function(value, date, endDate){
+                console.log(value, date, endDate);
+            }
+            ,change: function(value, date, endDate){
+                console.log(value, date, endDate);
+            }
+        });
+        laydate.render({
+            elem: '#test3' //指定元素
+            ,type: 'datetime'
+            ,trigger: 'click'
+            ,format: 'yyyy-MM-dd HH:mm:ss'
+            ,min:0
+            //,lang: 'en'
+            //,lang: 'en'
+            ,range: '~'  //开启日期范围，默认使用“_”分割
+            ,done: function(value, date, endDate){
+                console.log(value, date, endDate);
+            }
+            ,change: function(value, date, endDate){
+                console.log(value, date, endDate);
+            }
+        });
+    });
+</script>
+</body>
+
+</html>
