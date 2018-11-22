@@ -251,13 +251,27 @@ class Index extends Common
     {
         //标识符区分添加修改
         $flag = input('flag');
+        $level = input('level',0);
         $where = [
             'app_id'    => $this->id,
             'deputy_id' => $this->parme('deputy_id')
         ];
         if(Request::instance()->isPost()){
             if($flag == 'add'){
-                $return = $this->checkdeputy($this->parme('position'));
+                $rule = [
+                    'username' => 'require|unique|chsDash|min:4|max:18',
+                    'pwd' => 'require|confirm:repwd|alphaNum|min:4|max:18',
+                ];
+                $field = [
+                    'username' => '账号',
+                    'pwd' => '密码',
+                ];
+                $validate = new Validate($rule, self::$msg, $field);
+                if (!$validate->check($this->parme)) {
+                    $this->error($validate->getError());
+                } else {
+                    $return = $this->checkdeputy($this->parme('position'));
+                }
             }else{
                $return = $this->checkdeputy($this->parme('position'),$this->parme('deputy_id'));
             }
@@ -306,12 +320,14 @@ class Index extends Common
                     'data'   => $data
                 ]);
             }else{
+                $where['parentid'] = (int)$this->parme('parentid','0');
                 $data = db(self::$table_deputy)
                     ->where('app_id',$this->id)
                     ->page(input('page',1),input('pageshow',15))
                     ->select();
                 return view('listdeputy',[
                     'data'    => $data,
+                    'level'   => $level,
                 ]);
             }
         }
