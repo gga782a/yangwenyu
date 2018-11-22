@@ -247,7 +247,7 @@ class Index extends Common
 
     //代理设置
 
-    public function c()
+    public function setdeputy()
     {
         //标识符区分添加修改
         $flag = input('flag');
@@ -283,6 +283,9 @@ class Index extends Common
                 $insert['created_at']= $this->time;
                 $insert['type_id']  = 0; //活动ID
                 $insert['type']     = 0; //活动类型
+                $insert['level']    = 0;//0普通代理 1分公司级
+                $insert['parentid'] = 0;//上级代理ID
+                $insert['status']   = 1;//状态
                 $result = db(self::$table_deputy)->insertGetId($insert);
             }else{
                 $result = db(self::$table_deputy)->where($where)->update($insert);
@@ -321,6 +324,7 @@ class Index extends Common
         $where = [
             'app_id'    => $this->id,
             'position'  => $position,
+            'status'    => 1,
         ];
         if($deputyid){
             $where['deputy_id'] = ['notIn',$deputyid];
