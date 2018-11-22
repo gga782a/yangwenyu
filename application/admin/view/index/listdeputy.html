@@ -20,6 +20,7 @@
 
     <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
     <link href="__ADMIN__/css/style.min-v=4.1.0.css" rel="stylesheet">
+    <link href="__ADMIN__/src/css/modules/layer/default/layer.css" rel="stylesheet">
 
 </head>
 
@@ -80,6 +81,9 @@
                                 <!--<a onclick="return jiefeng()">解封</a>-->
                                 <!--{/if}-->
                             </span>
+                                |<span>
+                                <a onclick="updatelevel()">更改权限</a>
+                            </span>
                             </td>
                             <!--<td>Internet Explorer 4.0-->
                             <!--</td>-->
@@ -103,6 +107,9 @@
 <script src="__ADMIN__/js/plugins/dataTables/jquery.dataTables.js"></script>
 <script src="__ADMIN__/js/plugins/dataTables/dataTables.bootstrap.js"></script>
 <script src="__ADMIN__/js/content.min-v=1.0.0.js"></script>
+<script src="__ADMIN__/src/layui.js" charset="utf-8"></script>
+<script src="__ADMIN__/src/lay/modules/layer.js" charset="utf-8"></script>
+
 <script>
     $(document).ready(function () {
         $(".dataTables-example").dataTable();
@@ -130,6 +137,12 @@
     //         alert(11);
     //     }
     // }
+    function updatelevel() {
+        layer.open({
+            title: '在线调试'
+            ,content: '可以填写任意的layer代码'
+        });
+    }
 </script>
 
 
