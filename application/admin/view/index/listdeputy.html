@@ -74,7 +74,7 @@
                             <td>
                                 <span><a href="{:url('index/setdeputy',array('flag'=>'update','deputy_id'=>$vo['deputy_id']))}">编辑</a></span>
                                 |<span>
-                                <a href="{:url('index/deldeputy',array('deputy_id'=>$vo['deputy_id']))}">删除</a>
+                                <a onclick="return del({$vo['deputy_id']});">删除</a>
                                 <!--{if condition=" $vo['status'] == 1 "}-->
                                 <!--<a onclick="return fengjin()">封禁</a>-->
                                 <!--{else /}-->
@@ -126,7 +126,25 @@
 
     function fnClickAddRow() {
         $("#editable").dataTable().fnAddData(["Custom row", "New row", "New row", "New row", "New row", "New row", "New row"])
-    };
+    }
+    function del($id)
+    {
+        if(confirm('确定要删除吗')){
+            $.ajax({
+                type:'post',
+                url:'deldeputy',
+                data:{'deputy_id':$id},
+                dataType:'json',
+                success:function(data){
+                    layer.msg(data.msg);
+                    setTimeout(function (){window.location.reload();},1000);
+                },
+                error:function(data){
+                    console.log(data);
+                }
+            })
+        }
+    }
     // function fengjin() {
     //     if(confirm('确定要封禁吗')){
     //         alert(11);

@@ -439,29 +439,17 @@ class Index extends Common
 
     public function deldeputy()
     {
-        $rule = [
-            'deputy_id'   => 'require',
-            //'app_id'      => 'require',
-        ];
-        $field = [
-            'deputy_id'   => '代理ID',
-            'app_id'      => '平台ID',
-        ];
-
-        $validate = new Validate($rule,self::$msg,$field);
-
-        if(!$validate->check($this->parme)){
-            $this->error($validate->getError());
-        }else{
+        //dd(222);
+        if(Request::instance()->isAjax()) {
             $where = [
-                'app_id'    => $this->id,
+                'app_id' => $this->id,
                 'deputy_id' => $this->parme('deputy_id')
             ];
             $res = db(self::$table_deputy)->where($where)->delete();
-            if($res){
-                return $this->redirect('index/setdeputy');
-            }else{
-                $this->error('操作失败');
+            if ($res) {
+                return json(['msg'=>'操作成功']);
+            } else {
+                return json(['msg'=>'操作失败']);
             }
         }
     }
