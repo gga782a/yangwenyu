@@ -163,15 +163,25 @@
     //     }
     // }
     function updatelevel($id,$level) {
+        // console.log($level)
+        var status = $level;
         layui.use(['form','layer'],function(){
             var form = layui.form;
             var layer = layui.layer;
-
+            var s1 = '';
+            var s2 = '';
+            if(status == 0){
+                s1 = 'selected="selected"';
+                s2 = '';
+            }else{
+                s1 = '';
+                s2 = 'selected="selected"';
+            }
             str = '<div>';
             str += "<label for='level'>选择权限：</label>";
             str += "<select name='level' id='level'>";
-            str += "<option value='0' {if condition=' $level == 0 '}selected{else /}{/if}>普通代理</option>";
-            str += "<option value='1' {if condition=' $level == 1 '}selected{else /}{/if}>分公司</option>";
+            str += "<option value='0' "+ s1 +" >普通代理</option>";
+            str += "<option value='1' "+ s2 +" >分公司</option>";
             str += '</select>';
             str += '</div>';
             var index = layer.open({
