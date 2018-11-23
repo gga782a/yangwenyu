@@ -447,9 +447,28 @@ class Index extends Common
             ];
             $res = db(self::$table_deputy)->where($where)->delete();
             if ($res) {
-                return json(['msg'=>'操作成功']);
+                return json(['code'=>200,'msg'=>'操作成功']);
             } else {
-                return json(['msg'=>'操作失败']);
+                return json(['code'=>400,'msg'=>'操作失败']);
+            }
+        }
+    }
+
+    //更改代理权限
+
+    public function updatelevel()
+    {
+        if(Request::instance()->isAjax()) {
+            $where = [
+                'app_id' => $this->id,
+                'deputy_id' => $this->parme('deputy_id')
+            ];
+            $update = ['level'=>$this->parme('level'),'updated_at'=>$this->time];
+            $res = db(self::$table_deputy)->where($where)->update($update);
+            if ($res!==false) {
+                return json(['code'=>200,'msg'=>'操作成功']);
+            } else {
+                return json(['code'=>400,'msg'=>'操作失败']);
             }
         }
     }

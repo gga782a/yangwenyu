@@ -82,7 +82,7 @@
                                 <!--{/if}-->
                             </span>
                                 |<span>
-                                <a onclick="updatelevel()">更改权限</a>
+                                <a onclick="updatelevel({$vo['deputy_id']},{$vo['level']})">更改权限</a>
                             </span>
                             </td>
                             <!--<td>Internet Explorer 4.0-->
@@ -136,8 +136,15 @@
                 data:{'deputy_id':$id},
                 dataType:'json',
                 success:function(data){
-                    layer.msg(data.msg);
-                    setTimeout(function (){window.location.reload();},1000);
+                    if(data.code==200) {
+                        layer.msg(data.msg);
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 1000);
+                    }else{
+                        layer.msg(data.msg);
+
+                    }
                 },
                 error:function(data){
                     console.log(data);
@@ -155,12 +162,59 @@
     //         alert(11);
     //     }
     // }
-    function updatelevel() {
-        layer.open({
-            title: '在线调试'
-            ,content: '可以填写任意的layer代码'
+    function updatelevel($id,$level) {
+        layui.use(['form','layer'],function(){
+            var form = layui.form;
+            var layer = layui.layer;
+
+            str = '<div>';
+            str += "<label for='level'>选择权限：</label>";
+            str += "<select name='level' id='level'>";
+            str += "<option value='0' {if condition=' $level == 0 '}selected{else /}{/if}>普通代理</option>";
+            str += "<option value='1' {if condition=' $level == 1 '}selected{else /}{/if}>分公司</option>";
+            str += '</select>';
+            str += '</div>';
+            var index = layer.open({
+                title:"选择权限",
+                area:['325px'],
+                content:str,
+                btn:['确定','取消'],
+                yes:function(){
+                    var level = $("#level").val();
+                    alert(level);
+                    $.ajax({
+                        type:'post',
+                        url:'updatelevel',
+                        data:{'deputy_id':$id,'level':level},
+                        dataType:'json',
+                        success:function(data){
+                            if(data.code==200) {
+                                layer.msg(data.msg);
+                                setTimeout(function () {
+                                    window.location.reload();
+                                }, 1000);
+                            }else{
+                                layer.msg(data.msg);
+
+                            }
+                        },
+                        error:function(data){
+                            console.log(data);
+                        }
+                    })
+                },
+                btn2:function(){
+                    layer.closeAll(index); //关闭当前窗口
+                }
+            });
+
+// 渲染表单
+            form.render();
         });
     }
+</script>
+<script>
+
 </script>
 
 
