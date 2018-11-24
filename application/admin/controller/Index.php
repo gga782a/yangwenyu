@@ -343,8 +343,17 @@ class Index extends Common
                 $where['parentid'] = (int)$this->parme('parentid','0');
                 $data = db(self::$table_deputy)
                     ->where('app_id',$this->id)
+                    ->order('created_at desc')
                     ->page(input('page',1),input('pageshow',15))
                     ->select();
+                if(!empty($data)){
+                    foreach($data as $k=>$v){
+                        $data[$k]['parentname'] = db(self::$table_deputy)
+                            ->where(['app_id'=>$this->id,'deputy_id'=>$v['parentid']])
+                            ->value('deputy_name');
+                    }
+                }
+
                 return view('listdeputy',[
                     'data'    => $data,
                     'level'   => $level,
@@ -470,6 +479,30 @@ class Index extends Common
             } else {
                 return json(['code'=>400,'msg'=>'操作失败']);
             }
+        }
+    }
+
+    //为代理选择分公司
+
+    public function choicecompany(){
+        $deputy_id = $this->parme('deputy_id');
+        $parentid  = $this->parme('parentid');
+        if(Request::instance()->isPost()){
+            dd($this->parme('parentid'));
+        }else{
+            $where = [
+                'app_id'    => $this->id,
+                'level'     => 1,
+                'status'    => 1,
+            ];
+            $company = db(self::$table_deputy)
+               ->where($where)
+               ->page(input('page',1),input('pageshow',15))
+               ->select();
+            return view('index/choicecompany',[
+                'data' => $company,
+                'parentid' => $parentid,
+            ]);
         }
     }
 

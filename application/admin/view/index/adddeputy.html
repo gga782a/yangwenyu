@@ -137,7 +137,7 @@
         for(var i=0,length=city.length; i<length; i++){
             $("#city").append("<option value='"+city[i].name+"'>"+city[i].name+"</option>");
         }
-    })
+    });
     /**城市选择后加载区县数据*/
     $("#city").on("change",function(){
         console.log("城市:"+$("#city").val());
@@ -149,12 +149,12 @@
         for(var i=0,length=county.length; i<length; i++){
             $("#county").append("<option value='"+county[i].name+"'>"+county[i].name+"</option>");
         }
-    })
+    });
     $(document).ready(function () {
         $(".i-checks").iCheck({checkboxClass: "icheckbox_square-green", radioClass: "iradio_square-green",})
     });
     function jump() {
-        window.location.href="{:url('index/slyderAdventures')}";
+        window.location.href="{:url('index/setdeputy')}";
     }
     function show1() {
         document.getElementById('time1').style.display = 'block';
