@@ -351,6 +351,9 @@ class Index extends Common
                         $data[$k]['parentname'] = db(self::$table_deputy)
                             ->where(['app_id'=>$this->id,'deputy_id'=>$v['parentid']])
                             ->value('deputy_name');
+                        $data[$k]['activetitle'] = db(self::$table_slyderAdventures)
+                            ->where(['app_id'=>$this->id,'active_id'=>$v['type_id']])
+                            ->value('activetitle');
                     }
                 }
 
@@ -488,7 +491,18 @@ class Index extends Common
         $deputy_id = $this->parme('deputy_id');
         $parentid  = $this->parme('parentid');
         if(Request::instance()->isPost()){
-            dd($this->parme('parentid'));
+            $where = [
+                'app_id'    => $this->id,
+                'deputy_id' => $deputy_id,
+            ];
+            $res = db(self::$table_deputy)
+                ->where($where)
+                ->update(['parentid'=>$parentid,'updated_at'=>$this->time]);
+            if($res!==false){
+                return $this->redirect('index/setdeputy');
+            }else{
+                $this->error('操作失败');
+            }
         }else{
             $where = [
                 'app_id'    => $this->id,
@@ -502,6 +516,57 @@ class Index extends Common
             return view('index/choicecompany',[
                 'data' => $company,
                 'parentid' => $parentid,
+                'deputy_id'=> $deputy_id,
+            ]);
+        }
+    }
+
+    //为代理选择大转盘
+
+    public function choicedzp(){
+        $deputy_id = $this->parme('deputy_id');
+        $active_id = $this->parme('active_id');
+        //dd($active_id);
+        $type      = $this->parme('type');
+        if(Request::instance()->isPost()){
+            $where = [
+                'app_id'    => $this->id,
+                'deputy_id' => $deputy_id,
+            ];
+            //dd($active_id);
+            $res = db(self::$table_deputy)
+                ->where($where)
+                ->update(['type_id'=>$active_id,'type'=>$type,'updated_at'=>$this->time]);
+            if($res!==false){
+                return $this->redirect('index/setdeputy');
+            }else{
+                $this->error('操作失败');
+            }
+        }else{
+            $where = [
+                'app_id'    => $this->id,
+            ];
+            $dzp = db(self::$table_slyderAdventures)
+                ->where($where)
+                ->page(input('page',1),input('pageshow',15))
+                ->select();
+            if(!empty($dzp)) {
+                foreach ($dzp as $k => $v) {
+                    $activeperiod = json_decode($v['activeperiod'], true);
+                    foreach ($activeperiod as $key => $val) {
+                        $val = explode(',', $val);
+                        foreach ($val as $ke => $va) {
+                            $val[$ke] = date("Y-m-d H:i:s", $va);
+                        }
+                        $activeperiod[$key] = $val;
+                    }
+                    $dzp[$k]['activeperiod'] = $activeperiod;
+                }
+            }
+            return view('index/choicedzp',[
+                'data' => $dzp,
+                'active_id' => $active_id,
+                'deputy_id'=> $deputy_id,
             ]);
         }
     }

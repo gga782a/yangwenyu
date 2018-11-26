@@ -40,6 +40,7 @@
                 <div class="ibox-content">
                     <form method="post" action="{:url('index/choicecompany')}">
                     <table class="table table-striped table-bordered table-hover " id="editable">
+                        <input type="hidden" name="deputy_id" value="{$deputy_id}">
                         <thead>
                         <tr>
                             <th>选择分公司</th>
@@ -56,7 +57,12 @@
                         {else /}
                         {volist name='data' id="vo"}
                         <tr class="">
-                            <td><input type="radio" name="parentid" value="{$vo['deputy_id']}"></td>
+                            <td><input type="radio" name="parentid" value="{$vo['deputy_id']}"
+                                       {if condition=" $parentid == $vo['deputy_id'] "}
+                                       checked
+                                       {else/}
+                                {/if}
+                            ></td>
                             <td>{$vo.deputy_name}</td>
                             <td>
                                 {$vo.phone}
