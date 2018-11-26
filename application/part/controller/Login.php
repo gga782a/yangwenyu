@@ -53,38 +53,68 @@ class Login extends Controller
             if (!$validate->check($this->parme)) {
                 $this->error($validate->getError());
             } else {
-                $where = array(
-                    'username'   => $this->parme('username'),
-                    'type'       => $type,
+                if($type == 1) {
+                    $where = array(
+                        'username' => $this->parme('username'),
+                        'type' => $type,
 
-                );
-                $user = Db::table('shui_user')
-                    ->where($where)
-                    ->find();
-                if($user){
-                    if($user['del'] == 0 ){
-                        if($user['status'] == 1){
-                            if($user['pwd']==md5(sha1($this->parme('pwd')))){
-                                //存入session
-                                Session::set('username',$user['username']);
-                                Session::set('user_id',$user['user_id']);
-                                //重定向到主页
-                                return $this->redirect('admin/index/index');
-                            }else{
-                               $this->error('密码错误');
+                    );
+                    $user = Db::table('shui_user')
+                        ->where($where)
+                        ->find();
+                    if ($user) {
+                        if ($user['del'] == 0) {
+                            if ($user['status'] == 1) {
+                                if ($user['pwd'] == md5(sha1($this->parme('pwd')))) {
+                                    //存入session
+                                    Session::set('username', $user['username']);
+                                    Session::set('user_id', $user['user_id']);
+                                    //重定向到主页
+                                    return $this->redirect('admin/index/index');
+                                } else {
+                                    $this->error('密码错误');
+                                }
+                            } else {
+                                $this->error('账号被封禁');
                             }
-                        }else{
-                           $this->error('账号被封禁');
+                        } else {
+                            $this->error('账号已被注销');
                         }
-                    }else{
-                        $this->error('账号已被注销');
+                    } else {
+                        $this->error('账号不存在');
+                    }
+                }else if($type==2){
+                    $where = array(
+                        'username' => $this->parme('username'),
+                    );
+                    $deputy = Db::table('shui_deputy')
+                        ->where($where)
+                        ->find();
+                    if ($deputy) {
+                        if ($deputy['status'] == 1) {
+                            if ($deputy['pwd'] == md5(sha1($this->parme('pwd')))) {
+                                //存入session
+                                Session::set('username', $deputy['username']);
+                                Session::set('user_id', $deputy['deputy_id']);
+                                //重定向到主页
+                                return $this->redirect('admin/index/deputyindex');
+                            } else {
+                                $this->error('密码错误');
+                            }
+                        } else {
+                            $this->error('账号被封禁');
+                        }
+                    } else {
+                        $this->error('账号不存在');
                     }
                 }else{
-                    $this->error('账号不存在');
+                    //商家登陆
                 }
             }
         } else {
-            return view('part/login');
+            return view('part/login',[
+                'type'   => $type,
+            ]);
         }
     }
     // 注册  注册成功跳转到登陆页

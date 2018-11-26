@@ -55,6 +55,12 @@ class Index extends Common
         return view('index');
     }
 
+    public function deputyindex()
+    {
+        //dd(input('flag'));
+        return view('deputyindex');
+    }
+
     public function more()
     {
         return view('more');
