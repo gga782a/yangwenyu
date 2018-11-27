@@ -346,6 +346,7 @@ class Index extends Common
                     'data'   => $data
                 ]);
             }else{
+                //var_dump($level);
                 $where['parentid'] = (int)$this->parme('parentid','0');
                 $data = db(self::$table_deputy)
                     ->where(['app_id'=>$this->id,'level'=>$level])
