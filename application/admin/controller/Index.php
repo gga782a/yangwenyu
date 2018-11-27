@@ -348,7 +348,7 @@ class Index extends Common
             }else{
                 $where['parentid'] = (int)$this->parme('parentid','0');
                 $data = db(self::$table_deputy)
-                    ->where('app_id',$this->id)
+                    ->where(['app_id'=>$this->id,'level'=>$level])
                     ->order('created_at desc')
                     ->page(input('page',1),input('pageshow',15))
                     ->select();
