@@ -36,7 +36,7 @@ class Authorize extends Controller
         $redirect_uri = $redirect_uri?$redirect_uri:'http://www.yilingjiu.cn/wechat/authorize/get_url_s';
         $redirect_uri = urlencode($redirect_uri);
         $url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=".$this->appId."&redirect_uri=".$redirect_uri."&response_type=code&scope=snsapi_userinfo&state={$state}#wechat_redirect";
-        //dd($url);
+        dd($url);
         header("location:".$url);
     }
 
