@@ -10,6 +10,7 @@ namespace app\index\controller;
 use think\Controller;
 use think\Cookie;
 use think\Request;
+use think\Session;
 
 class Common extends Controller
 {
@@ -20,16 +21,8 @@ class Common extends Controller
     }
 
     public function check(){
-//        var_dump(input('member_id'));
-//        if(input('member_id')<=0){
-//            dd(333333);
-//           return $this->redirect('wechat/authorize/get_url');
-//        }else{
-            //Cookie::set('member_id',input('member_id'),365*86400);
-            //dd(Cookie::get('member_id'));
-        $url = 'http://www.yilingjiu.cn/index/index/index';
-        header("location:".$url);
-        exit();
-        //}
+        $member_id = Session::get('member_id');
+        //dd($member_id);
+        return $member_id;
     }
 }

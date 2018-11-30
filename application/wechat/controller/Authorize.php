@@ -8,6 +8,7 @@
 
 namespace app\wechat\controller;
 use think\Controller;
+use think\Cookie;
 use think\Request;
 use think\Session;
 
@@ -15,7 +16,7 @@ class Authorize extends Controller
 {
     public $appId;
     public $appSecret;
-    public $id;
+   // public $id;
     public static $table_member = 'member';
 
     public function __construct(Request $request = null)
@@ -23,7 +24,7 @@ class Authorize extends Controller
         parent::__construct($request);
         $this->appId     = _config('AppId');
         $this->appSecret = _config('AppSecret');
-        $this->id        = Session::get('user_id');
+        //$this->id        = Session::get('user_id');
     }
     //第一步：用户同意授权，获取code
 
@@ -33,11 +34,12 @@ class Authorize extends Controller
      */
     public function get_url($redirect_uri ='',$state='STATE')
     {
-        $redirect_uri = $redirect_uri?$redirect_uri:'http://www.yilingjiu.cn/wechat/authorize/get_url_s';
+        //dd(input('redirecturl'));
+        $redirect_uri = $redirect_uri ? $redirect_uri : 'http://www.yilingjiu.cn/wechat/authorize/get_url_s?redirecturl='.input('redirecturl');
         $redirect_uri = urlencode($redirect_uri);
-        $url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=".$this->appId."&redirect_uri=".$redirect_uri."&response_type=code&scope=snsapi_userinfo&state={$state}#wechat_redirect";
+        $url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" . $this->appId . "&redirect_uri=" . $redirect_uri . "&response_type=code&scope=snsapi_userinfo&state={$state}#wechat_redirect";
         //dd($url);
-        header("location:".$url);
+        return $this->redirect($url);
     }
 
     public function get_url_s($code='')
@@ -46,37 +48,28 @@ class Authorize extends Controller
             $code = input('code');
         }
         //获取网页授权token  openid
-        if(cache('access_token'))
-        {
-            $accesstoken = cache('access_token');
+        $data = json_decode($this->get_access_token($this->appId,$this->appSecret,$code),true);
+        if($data['code'] == 200){
+            $openid = $data['data']['openid'];
+            $accesstoken = $data['data']['access_token'];
         }else{
-            $data = json_decode($this->get_access_token($this->appId,$this->appSecret,$code),true);
-            if($data['code'] == 200){
-                $openid = $data['data']['openid'];
-                $accesstoken = $data['data']['access_token'];
+            //刷新access_token
+            $accesstoken_s = json_decode($this->get_access_token_s(),true);
+            if($accesstoken_s['code'] != 200){
+                return $this->error($this->get_access_token_s());
             }else{
-                //刷新access_token
-                $accesstoken_s = json_decode($this->get_access_token_s(),true);
-                if($accesstoken_s['code'] != 200){
-                    $this->error($this->get_access_token_s());
-                    exit;
-                }else{
-                    $access_token_s = $accesstoken_s['data'];
-                }
+                $access_token_s = $accesstoken_s['data'];
             }
         }
         $access_token=$accesstoken?$accesstoken:$access_token_s;
         //根据openid获取用户信息
         $user = json_decode($this->get_user($access_token,$openid),true);
         if($user['code'] != 200){
-            $this->error($this->get_user($access_token,$openid));
-            exit;
+            return $this->error($this->get_user($access_token,$openid));
         }else{
             $userdata = $user['data'];
         }
-        //dd($userdata);
         $where = [
-            'app_id' => $this->id,
             'openid' => $userdata['openid'],
             'status' => 1,
         ];
@@ -87,7 +80,7 @@ class Authorize extends Controller
         }else{
             //插入数据到数据库 用户不存在添加
             $ini['openid'] = $userdata['openid'];
-            $ini['app_id'] = $this->id;
+            //$ini['app_id'] = $this->id;
             $ini['name']   = $userdata['nickname'];
             $ini['cover']  = $userdata['headimgurl'];
             $ini['updated_at'] = time();
@@ -96,15 +89,16 @@ class Authorize extends Controller
             $member_id    = db(self::$table_member)->insertGetId($ini);
         }
         if($member_id){
-            $url = 'http://www.yilingjiu.cn/index/common/check?member_id='.$member_id;
-            header("location:".$url);
+            Session::set("member_id",$member_id);
+            if(input('redirecturl')){
+                $url = 'http://www.yilingjiu.cn/index/index/'.input('redirecturl').'?member_id='.$member_id;
+            }else{
+                $url = 'http://www.yilingjiu.cn/index/index/index?member_id='.$member_id;
+            }
+            return $this->redirect($url);
         }else{
-
+            return $this->error();
         }
-        //dd($member_id);
-
-
-        //dd($access_token);
     }
 
     /**
@@ -162,9 +156,7 @@ class Authorize extends Controller
     {
         $http = "https://api.weixin.qq.com/sns/userinfo?access_token={$access_token}&openid={$openid}&lang=zh_CN";
         $data = json_decode(curl_request($http));
-        //dd($data);
         if(array_key_exists('errcode',$data)){
-            //dd($data_token->access_token);
             return json_encode(['code'=>$data->errcode,'msg'=>$data->errmsg]);
         }else{
             return json_encode(['code'=>'200','data'=>$data]);

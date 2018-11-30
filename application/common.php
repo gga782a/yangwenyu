@@ -36,5 +36,11 @@ function curl_request($url, $post = [])
     return $data;
 }
 
+//跳转url
+
+function redirecturl($var){
+    return redirect('wechat/authorize/get_url',['redirecturl'=>$var]);
+}
+
 
 
