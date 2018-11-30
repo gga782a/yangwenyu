@@ -88,8 +88,8 @@ class Authorize extends Controller
             $ini['status']    = 1;
             $member_id    = db(self::$table_member)->insertGetId($ini);
         }
-        $url = 'http://www.yilingjiu.cn/';
-        header("location:".$url."member_id=".$member_id);
+        $url = 'http://www.yilingjiu.cn/index/common/check?member_id='.$member_id;
+        header("location:".$url);
         //dd($member_id);
 
 

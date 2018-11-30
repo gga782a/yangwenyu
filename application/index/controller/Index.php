@@ -8,10 +8,23 @@
 
 namespace app\index\controller;
 
+use think\Cookie;
+use think\Request;
+
 class Index extends Common
 {
+//    public $member_id;
+//    public function __construct(Request $request = null)
+//    {
+//        parent::__construct($request);
+//        $this->member_id = Session::get('member_id');
+//    }
+
     public function index()
     {
+        dd(2223333);
+        dd(Cookie::get('member_id'));
+        var_dump(22111);
         return view('index');
     }
 
