@@ -70,7 +70,7 @@ class Authorize extends Controller
         //dd($userdata);
         $where = [
             'app_id' => $this->id,
-            'openid' => $userdata->openid,
+            'openid' => $userdata['openid'],
             'status' => 1,
         ];
         $userone = db(self::$table_member)->where($where)->find();
