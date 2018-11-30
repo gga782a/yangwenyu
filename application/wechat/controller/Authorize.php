@@ -59,6 +59,7 @@ class Authorize extends Controller
                 $accesstoken_s = json_decode($this->get_access_token_s(),true);
                 if($accesstoken_s['code'] != 200){
                     $this->error($this->get_access_token_s());
+                    exit;
                 }else{
                     $access_token_s = $accesstoken_s['data'];
                 }
@@ -69,6 +70,7 @@ class Authorize extends Controller
         $user = json_decode($this->get_user($access_token,$openid),true);
         if($user['code'] != 200){
             $this->error($this->get_user($access_token,$openid));
+            exit;
         }else{
             $userdata = $user['data'];
         }
@@ -93,8 +95,12 @@ class Authorize extends Controller
             $ini['status']    = 1;
             $member_id    = db(self::$table_member)->insertGetId($ini);
         }
-        $url = 'http://www.yilingjiu.cn/index/common/check?member_id='.$member_id;
-        header("location:".$url);
+        if($member_id){
+            $url = 'http://www.yilingjiu.cn/index/common/check?member_id='.$member_id;
+            header("location:".$url);
+        }else{
+
+        }
         //dd($member_id);
 
 
