@@ -36,7 +36,7 @@ class Authorize extends Controller
         $redirect_uri = $redirect_uri?$redirect_uri:'http://www.yilingjiu.cn/wechat/authorize/get_url_s';
         $redirect_uri = urlencode($redirect_uri);
         $url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=".$this->appId."&redirect_uri=".$redirect_uri."&response_type=code&scope=snsapi_userinfo&state={$state}#wechat_redirect";
-        dd($url);
+        //dd($url);
         header("location:".$url);
     }
 
@@ -88,7 +88,9 @@ class Authorize extends Controller
             $ini['status']    = 1;
             $member_id    = db(self::$table_member)->insertGetId($ini);
         }
-        dd($member_id);
+        $url = 'http://www.yilingjiu.cn/';
+        header("location:".$url."member_id=".$member_id);
+        //dd($member_id);
 
 
         //dd($access_token);
