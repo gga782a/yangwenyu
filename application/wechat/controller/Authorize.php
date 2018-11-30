@@ -36,7 +36,7 @@ class Authorize extends Controller
         $redirect_uri = $redirect_uri?$redirect_uri:'http://www.yilingjiu.cn/wechat/authorize/get_url_s';
         $redirect_uri = urlencode($redirect_uri);
         $url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=".$this->appId."&redirect_uri=".$redirect_uri."&response_type=code&scope=snsapi_userinfo&state={$state}#wechat_redirect";
-        dd($url);
+        //dd($url);
         header("location:".$url);
     }
 
@@ -46,17 +46,22 @@ class Authorize extends Controller
             $code = input('code');
         }
         //获取网页授权token  openid
-        $data = json_decode($this->get_access_token($this->appId,$this->appSecret,$code),true);
-        if($data['code'] == 200){
-            $openid = $data['data']['openid'];
-            $accesstoken = $data['data']['access_token'];
+        if(cache('access_token'))
+        {
+            $accesstoken = cache('access_token');
         }else{
-            //刷新access_token
-            $accesstoken_s = json_decode($this->get_access_token_s(),true);
-            if($accesstoken_s['code'] != 200){
-                $this->error($this->get_access_token_s());
+            $data = json_decode($this->get_access_token($this->appId,$this->appSecret,$code),true);
+            if($data['code'] == 200){
+                $openid = $data['data']['openid'];
+                $accesstoken = $data['data']['access_token'];
             }else{
-                $access_token_s = $accesstoken_s['data'];
+                //刷新access_token
+                $accesstoken_s = json_decode($this->get_access_token_s(),true);
+                if($accesstoken_s['code'] != 200){
+                    $this->error($this->get_access_token_s());
+                }else{
+                    $access_token_s = $accesstoken_s['data'];
+                }
             }
         }
         $access_token=$accesstoken?$accesstoken:$access_token_s;
