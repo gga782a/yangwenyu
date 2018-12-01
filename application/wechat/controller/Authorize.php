@@ -52,18 +52,18 @@ class Authorize extends Controller
             $code = input('code');
         }
         //获取网页授权token  openid
-        $data = json_decode($this->get_access_token($this->appId,$this->appSecret,$code),true);
+        $data = $this->get_access_token($this->appId,$this->appSecret,$code);
 
-        $openid = $data['openid'];
+        $openid = $data->openid;
 
         //获取access_token
         $access_token = $this->get_access_token_s();
 
         //根据openid获取用户信息
-        $userdata = json_decode($this->get_user($access_token,$openid),true);
+        $userdata = $this->get_user($access_token,$openid);
 
         $where = [
-            'openid' => $userdata['openid'],
+            'openid' => $userdata->openid,
             'status' => 1,
         ];
         $userone = db(self::$table_member)->where($where)->find();
@@ -72,10 +72,10 @@ class Authorize extends Controller
             $member_id = $userone['member_id'];
         }else{
             //插入数据到数据库 用户不存在添加
-            $ini['openid'] = $userdata['openid'];
+            $ini['openid'] = $userdata->openid;
             //$ini['app_id'] = $this->id;
-            $ini['name']   = $userdata['nickname'];
-            $ini['cover']  = $userdata['headimgurl'];
+            $ini['name']   = $userdata->nickname;
+            $ini['cover']  = $userdata->headimgurls;
             $ini['updated_at'] = time();
             $ini['created_at'] = time();
             $ini['status']    = 1;
@@ -105,6 +105,7 @@ class Authorize extends Controller
     {
         $url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=".$this->appId."&secret=".$this->appSecret."&code={$code}&grant_type=authorization_code";
         $data_token = json_decode(curl_request($url,true));
+        //var_dump($data_token);
         if(array_key_exists('errcode',$data_token)){
             return $this->error(json_encode(['code'=>$data_token->errcode,'data'=>$data_token->errmsg]));
         }else{
