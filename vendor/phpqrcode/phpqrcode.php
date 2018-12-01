@@ -2965,7 +2965,12 @@
     
         public $version;
         public $width;
-        public $data; 
+        public $data;
+        /////////////////////////////////////////////////////////////
+        public function index()
+        {
+            dd(222);
+        }
         
         //----------------------------------------------------------------------
         public function encodeMask(QRinput $input, $mask)
