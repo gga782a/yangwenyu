@@ -96,8 +96,9 @@ class Login extends Controller
                                 //存入session
                                 Session::set('username', $deputy['username']);
                                 Session::set('user_id', $deputy['deputy_id']);
+                                Session::set('app_id',$deputy['app_id']);
                                 //重定向到主页
-                                return $this->redirect('admin/index/deputyindex');
+                                return $this->redirect('admin/deputy/index');
                             } else {
                                 $this->error('密码错误');
                             }
@@ -109,6 +110,31 @@ class Login extends Controller
                     }
                 }else{
                     //商家登陆
+                    $where = array(
+                        'username' => $this->parme('username'),
+                    );
+                    $store = Db::table('shui_store')
+                        ->where($where)
+                        ->find();
+                    if ($store) {
+                        if ($store['status'] == 1) {
+                            if ($store['pwd'] == md5(sha1($this->parme('pwd')))) {
+                                //存入session
+                                Session::set('username', $store['username']);
+                                Session::set('user_id', $store['store_id']);
+                                Session::set('deputy_id', $store['deputy_id']);
+                                Session::set('app_id',$store['app_id']);
+                                //重定向到主页
+                                return $this->redirect('admin/store/index');
+                            } else {
+                                $this->error('密码错误');
+                            }
+                        } else {
+                            $this->error('账号被封禁');
+                        }
+                    } else {
+                        $this->error('账号不存在');
+                    }
                 }
             }
         } else {

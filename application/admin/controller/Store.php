@@ -9,9 +9,31 @@
 namespace app\admin\controller;
 
 
-class Store
+use app\DataAnalysis;
+use think\Request;
+use think\Session;
+
+class Store extends Common
 {
-   //生成门店二维码
+    public $deputy_id;
+    public $app_id;
+    public $store_id;
+    public static $msg;
+    public function __construct(Request $request = null)
+    {
+        parent::__construct($request);
+        $this->app_id = Session::get('app_id');
+        $this->deputy_id = Session::get('deputy_id');
+        $this->store_id = Session::get('store_id');
+        self::$msg = array_merge(DataAnalysis::$msg,self::$msg);
+    }
+
+    public function index()
+    {
+        return view('store/index');
+    }
+
+    //生成门店二维码
 
     public function qr_code($url='',$level=3,$size=7)
     {
