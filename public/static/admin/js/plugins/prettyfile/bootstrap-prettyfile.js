@@ -8,6 +8,7 @@
 ( function( $ ) {
 	$.fn.extend({
 		prettyFile: function( options ) {
+			console.log(101);
 			var defaults = {
 				text : "选择文件"
 			};
@@ -29,9 +30,8 @@
 				' );
 
 				return $el.parent();
-			};
-
-			function bind_change( $wrap, multiple ) {
+            }
+            function bind_change( $wrap, multiple ) {
 				$wrap.find( 'input[type="file"]' ).change(function () {
 					// When original file input changes, get its value, show it in the fake input
 					var files = $( this )[0].files,
@@ -50,16 +50,14 @@
 
 					$wrap.find('.input-append input').val( info );
 				});
-			};
-
-			function bind_button( $wrap, multiple ) {
+            }
+            function bind_button( $wrap, multiple ) {
 				$wrap.find( '.input-append' ).click( function( e ) {
 					e.preventDefault();
 					$wrap.find( 'input[type="file"]' ).click();
 				});
-			};
-
-			return plugin.each( function() {
+            }
+            return plugin.each( function() {
 				$this = $( this );
 
 				if ( $this ) {

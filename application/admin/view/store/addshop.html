@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>H+ 后台主题UI框架 - 高级表单</title>
+    <meta name="keywords" content="H+后台主题,后台bootstrap框架,会员中心主题,后台HTML,响应式后台">
+    <meta name="description" content="H+是一个完全响应式，基于Bootstrap3最新版本开发的扁平化主题，她采用了主流的左右两栏式布局，使用了Html5+CSS3等现代技术">
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.staticfile.org/font-awesome/4.4.0/css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="__ADMIN__/css/style.min-v=4.1.0.css" rel="stylesheet">
+    <link href="__ADMIN__/css/plugins/iCheck/custom.css" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="__ADMIN__/src/css/layui.css">
+
+</head>
+
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>门店
+                        <small>新增</small>
+                    </h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <form method="post" class="form-horizontal" action="{:url('store/setshop',array('flag'=>'add'))}">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">门店名</label>
+
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="shop_name" required>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">客服电话 </label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="kefu_phone" required>
+
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">门店地址</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="position" required>
+                                <span class="help-block m-b-none">汉字、字母、数字,长度4-18位</span>
+
+                            </div>
+                            <input type="hidden" name="longitude" value="" />
+                            <input type="hidden" name="latitude" value="" />
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div id="file-pretty">
+                            <div class="form-group">
+                                <label class="font-noraml col-sm-2 control-label">上传图片</label>
+                                <div class="col-sm-10">
+                                     <input type="file" name="img" class="form-control" multiple="multiple">
+                                </div>
+                            </div>
+                            <!--<div class="form-group">-->
+                                <!--<label class="font-noraml">文件选择（多选）</label>-->
+                                <!--<input type="file" multiple="multiple" class="form-control">-->
+                            <!--</div>-->
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">门店状态</label>
+
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="pwd" required>
+                                <span class="help-block m-b-none"> 字母、数字,长度4-18位</span>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">门店排序</label>
+
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="pwd" required>
+                                <span class="help-block m-b-none"> 字母、数字,长度4-18位</span>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-2">
+                                <button class="btn btn-primary" type="submit">保存内容</button>
+                                <button class="btn btn-white" type="button" onclick="jump()">取消</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.staticfile.org/jquery/2.1.4/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script src="__ADMIN__/js/content.min-v=1.0.0.js"></script>
+<!--<script src="__ADMIN__/js/plugins/chosen/chosen.jquery.js"></script>-->
+<!--<script src="__ADMIN__/js/plugins/jsKnob/jquery.knob.js"></script>-->
+<!--<script src="__ADMIN__/js/plugins/jasny/jasny-bootstrap.min.js"></script>-->
+<!--<script src="__ADMIN__/js/plugins/datapicker/bootstrap-datepicker.js"></script>-->
+<!--<script src="__ADMIN__/js/plugins/prettyfile/bootstrap-prettyfile.js"></script>-->
+<!--<script src="__ADMIN__/js/plugins/nouslider/jquery.nouislider.min.js"></script>-->
+<!--<script src="__ADMIN__/js/plugins/switchery/switchery.js"></script>-->
+<!--<script src="__ADMIN__/js/plugins/ionRangeSlider/ion.rangeSlider.min.js"></script>-->
+<!--<script src="__ADMIN__/js/plugins/iCheck/icheck.min.js"></script>-->
+<!--<script src="__ADMIN__/js/plugins/metisMenu/jquery.metisMenu.js"></script>-->
+<!--<script src="__ADMIN__/js/plugins/colorpicker/bootstrap-colorpicker.min.js"></script>-->
+<!--<script src="__ADMIN__/js/plugins/clockpicker/clockpicker.js"></script>-->
+<!--<script src="__ADMIN__/js/plugins/cropper/cropper.min.js"></script>-->
+<script src="__ADMIN__/js/demo/form-advanced-demo.min.js"></script>
+<script>
+    function jump() {
+        window.location.href="{:url('store/setshop')}";
+    }
+    </script>
+</body>
+
+</html>

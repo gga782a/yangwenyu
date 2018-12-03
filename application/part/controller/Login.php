@@ -185,6 +185,8 @@ class Login extends Controller
     {
         Session::set('username',null);
         Session::set('user_id',null);
+        Session::set('deputy_id',null);
+        Session::set('app_id',null);
         return $this->redirect('checklogin',array('type'=>$this->parme('type')));
     }
 
