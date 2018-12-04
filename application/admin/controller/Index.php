@@ -886,7 +886,10 @@ class Index extends Common
             if($flag == 'add'){
                 return view('addprize');
             }else if($flag == 'update'){
-
+                $data = db(self::$table_prize)->where($where)->find();
+                return view('editprize',[
+                    'data'    => $data,
+                ]);
             }else{
                 $wherelist = [
                     'app_id' => $this->id,
@@ -899,6 +902,24 @@ class Index extends Common
                 return view('listprize',[
                     'data'    => $data,
                 ]);
+            }
+        }
+    }
+
+    //删除商品
+
+    public function delprize()
+    {
+        if(Request::instance()->isAjax()) {
+            $where = [
+                'app_id' => $this->id,
+                'prize_id' => $this->parme('prize_id')
+            ];
+            $res = db(self::$table_prize)->where($where)->delete();
+            if ($res) {
+                return json(['code'=>200,'msg'=>'操作成功']);
+            } else {
+                return json(['code'=>400,'msg'=>'操作失败']);
             }
         }
     }
