@@ -18,6 +18,15 @@
     <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
     <link href="__ADMIN__/css/style.min-v=4.1.0.css" rel="stylesheet">
     <link rel="stylesheet" href="__ADMIN__/src/css/layui.css">
+
+
+
+
+
+    <!-- Data Tables -->
+    <link href="__ADMIN__/css/plugins/dataTables/dataTables.bootstrap.css" rel="stylesheet">
+
+    <link href="__ADMIN__/src/css/modules/layer/default/layer.css" rel="stylesheet">
 </head>
 
 <body class="gray-bg">
@@ -56,22 +65,25 @@
                         <div class="form-group">
                             <label class="col-sm-2 control-label">奖项礼品</label>
 
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" name="prize" required>
-                            </div>
-                        </div>
-                        <div class="hr-line-dashed"></div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">奖项概率</label>
+                                <button style="margin-left: 1.5%;" class="btn btn-white" type="button" onclick="choicelipin()">去选择礼品</button>
 
-                            <div class="col-sm-10">
-                                <input type="text" placeholder="奖项概率0-100之间的数字，俩位小数" class="form-control" name="probability" required>
+
+                            <div class="col-sm-10" style="border: 1px solid #eee;min-height:100px;margin-left: 18%;">
+
                             </div>
                         </div>
+                        <!--<div class="hr-line-dashed"></div>-->
+                        <!--<div class="form-group">-->
+                            <!--<label class="col-sm-2 control-label">奖项概率</label>-->
+
+                            <!--<div class="col-sm-10">-->
+                                <!--<input type="text" placeholder="奖项概率0-100之间的数字，俩位小数" class="form-control" name="probability" required>-->
+                            <!--</div>-->
+                        <!--</div>-->
                         <div class="hr-line-dashed"></div>
                         <div class="form-group" >
                             <label class="col-sm-2 control-label">活动时间段</label>
-                            <div class="col-sm-10">
+                            <div class="col-sm-10" style="margin-left: -1.5%;">
                                 <input class="form-control layui-input"  id="test1" name="time"
                                        style="width: 50%;float: left;margin: 0px 10px;" type="text" required />
                                 <div class="input-group-btn">
@@ -119,6 +131,56 @@
 <script src="__ADMIN__/js/content.min-v=1.0.0.js"></script>
 <script src="__ADMIN__/js/plugins/iCheck/icheck.min.js"></script>
 <script src="__ADMIN__/src/layui.js" charset="utf-8"></script>
+<script src="__ADMIN__/js/plugins/jeditable/jquery.jeditable.js"></script>
+<script src="__ADMIN__/js/plugins/dataTables/jquery.dataTables.js"></script>
+<script src="__ADMIN__/js/plugins/dataTables/dataTables.bootstrap.js"></script>
+<script src="__ADMIN__/src/lay/modules/layer.js" charset="utf-8"></script>
+
+<script>
+    function choicelipin() {
+        layui.use(['form','layer'],function(){
+            str = '<div>';
+            str += "<label for='level'>选择礼品：</label>";
+            str += "<input type='checkbox' name='prize'>";
+            str += '</div>';
+            var index = layer.open({
+                title:"选择礼品",
+                area:['80%','80%'],
+                content:str,
+                btn:['确定','取消'],
+                yes:function(){
+                    $.ajax({
+                        type:'post',
+                        url:'listprize',
+                        data:'',
+                        dataType:'json',
+                        success:function(data){
+                            if(data.code==200) {
+                                layer.msg(data.msg);
+                                setTimeout(function () {
+                                    window.location.reload();
+                                }, 1000);
+                            }else{
+                                layer.msg(data.msg);
+
+                            }
+                        },
+                        error:function(data){
+                            console.log(data);
+                        }
+                    })
+                },
+                btn2:function(){
+                    layer.closeAll(index); //关闭当前窗口
+                }
+            });
+
+            // 渲染表单
+            form.render();
+        });
+    }
+</script>
+
 <script>
     $(document).ready(function () {
         $(".i-checks").iCheck({checkboxClass: "icheckbox_square-green", radioClass: "iradio_square-green",})

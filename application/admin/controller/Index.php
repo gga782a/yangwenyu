@@ -172,13 +172,28 @@ class Index extends Common
             }
         }else{
            if($flag == 'add'){
-                return view('addslyderAdventures');
+                $prize = $this->listprize();
+                if($prize === false){
+                    return $this->error('请先去添加礼品','index/setprize');
+                }else{
+                    $prize = json_decode($prize,true);
+                }
+                return view('addslyderAdventures',[
+                    'prize' => $prize,
+                ]);
            }else if($flag == 'update'){
                $data = db(self::$table_slyderAdventures)
                    ->where($where)
                    ->find();
+               $prize = $this->listprize();
+               if($prize === false){
+                   return $this->error('请先去添加礼品','index/setprize');
+               }else{
+                   $prize = json_decode($prize,true);
+               }
                return view('modifyslyderAdventures',[
-                   'data'   => $data
+                   'data'   => $data,
+                   'prize' => $prize,
                ]);
            }else{
                $data = db(self::$table_slyderAdventures)
@@ -204,6 +219,18 @@ class Index extends Common
                   'data'    => $data,
                ]);
            }
+        }
+    }
+
+    private function listprize()
+    {
+        $where['app_id']  = $this->id;
+        $where['status']  = 1;
+        $list = db(self::$table_prize)->where($where)->select();
+        if($list){
+            return json_encode(['data'=>$list]);
+        }else{
+            return false;
         }
     }
 
@@ -906,7 +933,7 @@ class Index extends Common
         }
     }
 
-    //删除商品
+    //删除礼品
 
     public function delprize()
     {
