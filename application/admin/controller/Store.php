@@ -40,17 +40,19 @@ class Store extends Common
 
     public function upload($img = '',$validate = ['size'=>15678,'ext'=>'jpg,png,gif'])
     {
+        //dd($img);
         if ($img == '') {
             return false;
         } else {
             $pic_arr = '';
             // 获取表单上传文件 例如上传了001.jpg
             $files = request()->file($img);
+            //dd($files);
             //判断是不是多图上传
             $dir = ROOT_PATH . 'public' . DS . 'uploads' . DS;
             $date = date('Ymd', time()) . '/';
             $path = $dir . $date;
-            if (file_exists($path)) {
+            if (!file_exists($path)) {
                 mkdir($path, 0775, true);
             }
             if (empty($files)) {
@@ -69,7 +71,7 @@ class Store extends Common
                             $pic_arr .= $info->getFilename() . ',';
                         } else {
                             // 上传失败获取错误信息
-                            return false;
+                            continue;
                         }
                     }
                 } else {
@@ -89,6 +91,12 @@ class Store extends Common
     public function setshop()
     {
         //标识符区分添加修改
+        //var_dump($_FILES);
+        $return = $this->upload('fileList');
+        if($return == false){
+            //$this->error('上传图片失败');
+        }
+        dd($return);
         $flag = input('flag');
         $where = [
             'app_id'    => $this->app_id,
@@ -97,10 +105,7 @@ class Store extends Common
             'shop_id'   => $this->parme('shop_id'),
         ];
         if(Request::instance()->isPost()){
-            $return = $this->upload('image');
-            if($return == false){
-                $this->error('上传图片失败');
-            }
+
             $insert = [
                 'sort'          => $this->parme('sort'), //排序
                 'shop_name'     => $this->parme('shop_name'), // 名称
@@ -343,5 +348,10 @@ class Store extends Common
     public function ditu()
     {
         return view('store/ditu');
+    }
+
+    public function img()
+    {
+        return view('store/img');
     }
 }

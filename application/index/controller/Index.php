@@ -8,6 +8,7 @@
 
 namespace app\index\controller;
 
+use think\Cache;
 use think\Cookie;
 use think\Request;
 use think\Session;
@@ -15,10 +16,14 @@ use think\Session;
 class Index extends Common
 {
     public $member_id;
+    private $appId;
+    private $appSecret;
     public function __construct(Request $request = null)
     {
         parent::__construct($request);
         $this->member_id = $this->check();
+        $this->appId = _config('AppId');
+        $this->appSecret = _config('AppSecret');
     }
 
     public function index()
@@ -32,9 +37,14 @@ class Index extends Common
     public function more()
     {
         if(!$this->member_id){
+            //获取签名信息
+
             return redirecturl('more');
         }
-        return view('more');
+        $getSignPackage = json_decode($this->getSignPackage(),true);
+        return view('more',[
+            'signPackage' => $getSignPackage,
+        ]);
     }
     public function address()
     {
@@ -179,6 +189,81 @@ class Index extends Common
         }
         return view('zipCode');
     }
+
+    //获取公众平台的access_token
+    public function get_access_token()
+    {
+        //判断缓存是否过期
+        if(!Cache::get('access_token')) {
+            $url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={$this->appId}&secret={$this->appSecret}";
+            $data = json_decode(curl_request($url),true);  //强制转换为数组
+            if (!array_key_exists('errcode',$data)) {
+                Cache::set('access_token', $data['access_token'], 7000); //存入缓存
+                return $data['access_token'];
+            } else {
+                return $this->error($data['errmsg']);
+            }
+        }else{
+            return Cache::get('access_token');
+        }
+    }
+
+    //获取jsapi_ticket
+    public function get_ticket()
+    {
+        //判断缓存是否过期
+        if(!Cache::get('ticket')) {
+            $access_token = $this->get_access_token();
+            $url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token={$access_token}&type=jsapi";
+            $data = json_decode(curl_request($url),true);  //强制转换为数组
+            if ($data['errcode'] == 0) {
+                Cache::set('ticket', $data['ticket'], 7000); //存入缓存
+                return $data['ticket'];
+            } else {
+                return $this->error($data['errmsg']);
+            }
+        }else{
+            return Cache::get('ticket');
+        }
+    }
+
+    //生成随机数
+    private function createNoncestr($length = 32) {
+        $chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+        $str = "";
+        for ($i = 0; $i < $length; $i++) {
+            $str .= substr($chars, mt_rand(0, strlen($chars) - 1), 1);
+        }
+        return $str;
+    }
+
+
+    //作用：生成签名
+    public function getSignPackage() {
+        $jsapiTicket = $this->get_ticket();
+
+        // 注意 URL 一定要动态获取，不能 hardcode.
+        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+        $url = "$protocol$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+
+        $timestamp = time();
+        $nonceStr = $this->createNonceStr();
+
+        // 这里参数的顺序要按照 key 值 ASCII 码升序排序
+        $string = "jsapi_ticket=$jsapiTicket&noncestr=$nonceStr&timestamp=$timestamp&url=$url";
+
+        $signature = sha1($string);
+
+        $signPackage = array(
+            "appId"     => $this->appId,
+            "nonceStr"  => $nonceStr,
+            "timestamp" => $timestamp,
+            "signature" => $signature,
+        );
+        return json_encode($signPackage);
+    }
+
+
 }
 
 

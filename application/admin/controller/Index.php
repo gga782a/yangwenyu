@@ -36,6 +36,8 @@ class Index extends Common
 
     public static $primarykey = 'user_id';
 
+    public static $table_prize = 'prize';
+
     public $time;
 
     public static $msg = [];
@@ -820,7 +822,7 @@ class Index extends Common
                 'app_id'        => $this->id,
                 'register_from' => $this->parme('register_from'),
                 'paymoney'      => floatval($this->parme('paymoney')),
-                'create_at'     => $this->time,
+                'created_at'     => $this->time,
             ];
             $res = db(self::$table_member)->insertGetId($insert);
             if($res){
@@ -840,6 +842,61 @@ class Index extends Common
                     ->page(input('page',1),input('pageshow',15))
                     ->select();
                 return view('listmember',[
+                    'data'    => $data,
+                ]);
+            }
+        }
+    }
+
+    //设置礼品
+
+    public function setprize()
+    {
+        //标识符区分添加修改
+        $flag = input('flag');
+        $where = [
+            'app_id'     => $this->id,
+            'prize_id'  => $this->parme('prize_id')
+        ];
+        if(Request::instance()->isPost()){
+            //dd(floatval($this->parme('probability')));
+            if(floatval($this->parme('probability'))>100){
+                return $this->error('中奖概率不能高于100');
+            }
+            //$insert['type']        = $this->parme('type'); //活动类型
+            $insert['name']        = $this->parme('name');  //奖品名称
+            $insert['sum']         = $this->parme('sum');  //奖品数量
+            $insert['probability'] = floatval($this->parme('probability'));  //中奖概率
+            //$insert['type_id']     = $this->parme('type_id');  //活动ID
+            $insert['updated_at']  = time();  //创建时间
+            $insert['status']      = '1';   //启用
+            if($flag == 'add'){
+                $insert['app_id']  = $this->id;
+                $insert['created_at']= time();
+                $res = db(self::$table_prize)->insertGetId($insert);
+            }else{
+                $res = db(self::$table_prize)->where($where)->update($insert);
+            }
+            if($res){
+                return $this->redirect('index/setprize');
+            }else{
+                $this->error('操作失败');
+            }
+        }else{
+            if($flag == 'add'){
+                return view('addprize');
+            }else if($flag == 'update'){
+
+            }else{
+                $wherelist = [
+                    'app_id' => $this->id,
+                    'status' => 1,
+                ];
+                $data = db(self::$table_prize)
+                    ->where($wherelist)
+                    ->page(input('page',1),input('pageshow',15))
+                    ->select();
+                return view('listprize',[
                     'data'    => $data,
                 ]);
             }
