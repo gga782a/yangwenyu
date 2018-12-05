@@ -94,6 +94,7 @@ class Store extends Common
         $dir = ROOT_PATH . 'public' . DS . 'uploads' . DS;
         $date = date('Ymd', time()) . '/';
         $path = $dir . $date;
+        dd($path);
         if (!file_exists($path)) {
             mkdir($path, 0775, true);
         }
@@ -152,22 +153,38 @@ class Store extends Common
                 //dd($insert);
                 $res = db(self::$table_shop)->insertGetId($insert);
             }else{
+                //删除原图片
+                $pic_arr = trim($this->parme('pic_arr'),',');
+                if(!empty($pic_arr)){
+                    $pic_arr = explode(',',$pic_arr);
+                    //删除接口
+                    $this->delpics($pic_arr);
+                }
                 $res = db(self::$table_shop)->where($where)->update($insert);
             }
             if($res){
-                return $this->redirect('index/setshop');
+                return $this->redirect('store/setshop');
             }else{
                 $this->error('操作失败');
             }
         }else{
             if($flag == 'add'){
-                return view('store/addshop');
+                return view('addshop');
             }else if($flag == 'update'){
                 $data = db(self::$table_shop)
                     ->where($where)
                     ->find();
-                return view('updatestore',[
-                    'data'   => $data
+                if($data) {
+                    $pics = trim($data['pic_arr'], ',');
+                    if (!empty($pics)) {
+                        $pics = explode(',', $pics);
+                    } else {
+                        $pics  = '';
+                    }
+                }
+                return view('updateshop',[
+                    'data'   => $data,
+                    'pics'   => $pics,
                 ]);
             }else{
                 $wherelist = [
@@ -208,6 +225,18 @@ class Store extends Common
                 ]);
             }
         }
+    }
+    //删除图片从本地
+    function delpics($arr){
+        $path = trim(ROOT_PATH,'/');
+        foreach($arr as $k=>$v){
+            //dd($path.$v);
+            if(file_exists($path.$v)){
+                dd(11);
+                unlink($path.$v);
+            }
+        }
+        dd(33);
     }
 
     //设置优惠活动
