@@ -7,7 +7,7 @@ var ZYFILE = {
 		fileInput : null,             // 选择文件按钮dom对象
 		uploadInput : null,           // 上传文件按钮dom对象
 		dragDrop: null,				  //拖拽敏感区域
-		url : "",  					  // 上传action路径
+		url : "http://yilingjiu.cn/admin/store/uploadone",  					  // 上传action路径
 		uploadFile : [],  			  // 需要上传的文件数组
 		lastUploadFile : [],          // 上一次选择的文件数组，方便继续上传使用
 		perUploadFile : [],           // 存放永久的文件数组，方便删除使用
@@ -172,7 +172,7 @@ var ZYFILE = {
 		    }, false);  
 			
 			xhr.open("POST",self.url, true);
-			xhr.setRequestHeader("X_FILENAME", file.name);
+			//xhr.setRequestHeader("X_FILENAME", file.name);
 			xhr.send(formdata);
 		},
 		// 返回需要上传的文件

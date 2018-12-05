@@ -14,93 +14,148 @@
     <link rel="shortcut icon" href="favicon.ico">
     <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.staticfile.org/font-awesome/4.4.0/css/font-awesome.css?v=4.4.0" rel="stylesheet">
-    <link href="__ADMIN__/css/plugins/iCheck/custom.css" rel="stylesheet">
-    <link href="__ADMIN__/css/plugins/chosen/chosen.css" rel="stylesheet">
-    <link href="__ADMIN__/css/plugins/colorpicker/css/bootstrap-colorpicker.min.css" rel="stylesheet">
-    <link href="__ADMIN__/css/plugins/cropper/cropper.min.css" rel="stylesheet">
-    <link href="__ADMIN__/css/plugins/switchery/switchery.css" rel="stylesheet">
-    <link href="__ADMIN__/css/plugins/jasny/jasny-bootstrap.min.css" rel="stylesheet">
-    <link href="__ADMIN__/css/plugins/nouslider/jquery.nouislider.css" rel="stylesheet">
-    <link href="__ADMIN__/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
-    <link href="__ADMIN__/css/plugins/ionRangeSlider/ion.rangeSlider.css" rel="stylesheet">
-    <link href="__ADMIN__/css/plugins/ionRangeSlider/ion.rangeSlider.skinFlat.css" rel="stylesheet">
-    <link href="__ADMIN__/css/plugins/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet">
-    <link href="__ADMIN__/css/plugins/clockpicker/clockpicker.css" rel="stylesheet">
-    <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
     <link href="__ADMIN__/css/style.min-v=4.1.0.css" rel="stylesheet">
+    <link href="__ADMIN__/css/plugins/iCheck/custom.css" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="__ADMIN__/src/css/layui.css">
+
+    <!-- 引用控制层插件样式 -->
+    <link rel="stylesheet" href="__ADMIN__/file_img/control/css/zyUpload.css" type="text/css">
+    <style type="text/css">
+        body,
+        html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            margin: 0;
+            font-family: "微软雅黑";
+        }
+
+        #allmap {
+            width: 100%;
+            height: 100%;
+        }
+        .map_input{
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 100;
+            width: 100%;
+            height: 40px;
+        }
+    </style>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=wTncBH1sbMnqGVr3fmcgt7I4GTM83GcW"></script>
 
 </head>
 
 <body class="gray-bg">
 <div class="wrapper wrapper-content animated fadeInRight">
-
     <div class="row">
-
-        <div class="col-sm-5">
+        <div class="col-sm-12">
             <div class="ibox float-e-margins">
-                <!--<div class="ibox-title">-->
-
-                    <!--<h5>文件上传-->
-                        <!--<small>https://github.com/episage/bootstrap-3-pretty-file-upload</small>-->
-                    <!--</h5>-->
-
-
-                    <!--<div class="ibox-tools">-->
-                        <!--<a class="collapse-link">-->
-                            <!--<i class="fa fa-chevron-up"></i>-->
-                        <!--</a>-->
-                        <!--<a class="dropdown-toggle" data-toggle="dropdown" href="form_advanced.html#">-->
-                            <!--<i class="fa fa-wrench"></i>-->
-                        <!--</a>-->
-                        <!--<ul class="dropdown-menu dropdown-user">-->
-                            <!--<li>-->
-                                <!--<a href="form_advanced.html#">选项1</a>-->
-                            <!--</li>-->
-                            <!--<li>-->
-                                <!--<a href="form_advanced.html#">选项2</a>-->
-                            <!--</li>-->
-                        <!--</ul>-->
-                        <!--<a class="close-link">-->
-                            <!--<i class="fa fa-times"></i>-->
-                        <!--</a>-->
-                    <!--</div>-->
-                <!--</div>-->
-                <div class="ibox-content">
-                    <div id="file-pretty">
-
-
-
-
-
-                        <div class="form-group">
-                            <label class="font-noraml">文件选择（单选）</label>
-                            <input type="file" class="form-control">
-                        </div>
-
-
-
-
-
-                        <div class="form-group">
-                            <label class="font-noraml">文件选择（多选）</label>
-                            <input type="file" multiple="multiple" class="form-control">
-                        </div>
+                <div class="ibox-title">
+                    <h5>门店
+                        <small>新增</small>
+                    </h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
                     </div>
+                </div>
+                <div class="ibox-content">
+                    <form method="post" class="form-horizontal" action="{:url('store/setshop',array('flag'=>'add'))}">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">门店名</label>
+
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="shop_name" required>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">客服电话 </label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="kefu_phone" required>
+
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">门店地址</label>
+                            <div class="col-sm-10">
+                                <div id="allmap"></div>
+                                <div class="map_input">
+                                    <div id="r-result">请输入:<input type="text" id="suggestId" size="20" value="百度" style="width:150px;" /></div>
+                                    <div id="searchResultPanel" style="border:1px solid #C0C0C0;width:150px;height:auto; display:none;"></div>
+
+                                </div>
+                            </div>
+                            <input type="hidden" name="longitude" value="" />
+                            <input type="hidden" name="latitude" value="" />
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div id="file-pretty" style="min-height:200px;">
+                            <div class="form-group">
+                                <label class="font-noraml col-sm-2 control-label">上传图片</label>
+                            </div>
+                            <div id="demo" class="demo" style="height:200px;"></div>
+                            <!--<div class="form-group">-->
+                            <!--<label class="font-noraml">文件选择（多选）</label>-->
+                            <!--<input type="file" multiple="multiple" class="form-control">-->
+                            <!--</div>-->
+                            <input type="hidden" id='hiddepic' name="pics" value="">
+                        </div>
+                        <div>
+
+
+
+                        </div>
+
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">门店状态</label>
+
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="pwd" required>
+                                <span class="help-block m-b-none"> 字母、数字,长度4-18位</span>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">门店排序</label>
+
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="pwd" required>
+                                <span class="help-block m-b-none"> 字母、数字,长度4-18位</span>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-2">
+                                <button class="btn btn-primary" type="submit">保存内容</button>
+                                <button class="btn btn-white" type="button" onclick="jump()">取消</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
-
     </div>
-
 </div>
 
-
-
 <script src="https://cdn.staticfile.org/jquery/2.1.4/jquery.min.js"></script>
-<!--<script src="https://cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>-->
+<script src="https://cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 <script src="__ADMIN__/js/content.min-v=1.0.0.js"></script>
+<script type="text/javascript" src="__ADMIN__/file_img/jquery-1.7.2.js"></script>
+<!-- 引用核心层插件 -->
+<script type="text/javascript" src="__ADMIN__/file_img/core/zyFile.js"></script>
+<!-- 引用控制层插件 -->
+<script type="text/javascript" src="__ADMIN__/file_img/control/js/zyUpload.js"></script>
+<!-- 引用初始化JS -->
+<script type="text/javascript" src="__ADMIN__/file_img/demo.js"></script>
 <!--<script src="__ADMIN__/js/plugins/chosen/chosen.jquery.js"></script>-->
-<script src="__ADMIN__/js/plugins/jsKnob/jquery.knob.js"></script>
+<!--<script src="__ADMIN__/js/plugins/jsKnob/jquery.knob.js"></script>-->
 <!--<script src="__ADMIN__/js/plugins/jasny/jasny-bootstrap.min.js"></script>-->
 <!--<script src="__ADMIN__/js/plugins/datapicker/bootstrap-datepicker.js"></script>-->
 <!--<script src="__ADMIN__/js/plugins/prettyfile/bootstrap-prettyfile.js"></script>-->
@@ -112,7 +167,137 @@
 <!--<script src="__ADMIN__/js/plugins/colorpicker/bootstrap-colorpicker.min.js"></script>-->
 <!--<script src="__ADMIN__/js/plugins/clockpicker/clockpicker.js"></script>-->
 <!--<script src="__ADMIN__/js/plugins/cropper/cropper.min.js"></script>-->
-<script src="__ADMIN__/js/demo/form.js"></script>
+<!--<script src="__ADMIN__/js/demo/form-advanced-demo.min.js"></script>-->
+<script>
+    function jump() {
+        window.location.href="{:url('store/setshop')}";
+    }
+</script>
+<script type="text/javascript">
+    function G(id) {
+        return document.getElementById(id);
+    }
+    var map = new BMap.Map("allmap");
+    map.centerAndZoom("哈尔滨", 12);
+
+    var geoc = new BMap.Geocoder();
+    //获取地址
+    map.addEventListener("click", function(e) {
+        var pt = e.point;
+        geoc.getLocation(pt, function(rs) {
+            var addComp = rs.addressComponents;
+            alert(addComp.province + ", " + addComp.city + ", " + addComp.district + ", " + addComp.street + ", " + addComp.streetNumber);
+
+        });
+    });
+    //获取经纬度
+    map.addEventListener("click",function(e){
+        // alert(e.point.lng + "," + e.point.lat);
+    });
+
+    map.enableScrollWheelZoom();
+    map.enableContinuousZoom();
+
+    var ac = new BMap.Autocomplete(    //建立一个自动完成的对象
+        {"input" : "suggestId"
+            ,"location" : map
+        });
+
+    ac.addEventListener("onhighlight", function(e) {  //鼠标放在下拉列表上的事件
+        var str = "";
+        var _value = e.fromitem.value;
+        var value = "";
+        if (e.fromitem.index > -1) {
+            value = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
+        }
+        str = "FromItem<br />index = " + e.fromitem.index + "<br />value = " + value;
+
+        value = "";
+        if (e.toitem.index > -1) {
+            _value = e.toitem.value;
+            value = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
+        }
+        str += "<br />ToItem<br />index = " + e.toitem.index + "<br />value = " + value;
+        G("searchResultPanel").innerHTML = str;
+    });
+
+    var myValue;
+    ac.addEventListener("onconfirm", function(e) {    //鼠标点击下拉列表后的事件
+        var _value = e.item.value;
+        myValue = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
+        G("searchResultPanel").innerHTML ="onconfirm<br />index = " + e.item.index + "<br />myValue = " + myValue;
+
+        setPlace();
+    });
+
+    function setPlace(){
+        map.clearOverlays();    //清除地图上所有覆盖物
+        function myFun(){
+            var pp = local.getResults().getPoi(0).point;    //获取第一个智能搜索的结果
+            map.centerAndZoom(pp, 18);
+            map.addOverlay(new BMap.Marker(pp));    //添加标注
+        }
+        var local = new BMap.LocalSearch(map, { //智能搜索
+            onSearchComplete: myFun
+        });
+        local.search(myValue);
+    }
+</script>
 </body>
 
 </html>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+        body, html{width: 100%;height: 100%;margin:0;font-family:"微软雅黑";}
+        #allmap{height:500px;width:100%;}
+        #r-result{width:100%;}
+    </style>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=您的密钥"></script>
+    <title>添加/删除覆盖物</title>
+</head>
+<body>
+<div id="allmap"></div>
+<div id="r-result">
+    <input type="button" onclick="add_overlay();" value="添加覆盖物" />
+    <input type="button" onclick="remove_overlay();" value="删除覆盖物" />
+</div>
+</body>
+</html>
+<script type="text/javascript">
+    // 百度地图API功能
+    var map = new BMap.Map("allmap");
+    var point = new BMap.Point(116.404, 39.915);
+    map.centerAndZoom(point, 15);
+
+    var marker = new BMap.Marker(new BMap.Point(116.404, 39.915)); // 创建点
+    var polyline = new BMap.Polyline([
+        new BMap.Point(116.399, 39.910),
+        new BMap.Point(116.405, 39.920),
+        new BMap.Point(116.425, 39.900)
+    ], {strokeColor:"blue", strokeWeight:2, strokeOpacity:0.5});   //创建折线
+
+    var circle = new BMap.Circle(point,500,{strokeColor:"blue", strokeWeight:2, strokeOpacity:0.5}); //创建圆
+
+    var polygon = new BMap.Polygon([
+        new BMap.Point(116.387112,39.920977),
+        new BMap.Point(116.385243,39.913063),
+        new BMap.Point(116.394226,39.917988),
+        new BMap.Point(116.401772,39.921364),
+        new BMap.Point(116.41248,39.927893)
+    ], {strokeColor:"blue", strokeWeight:2, strokeOpacity:0.5});  //创建多边形
+
+    var pStart = new BMap.Point(116.392214,39.918985);
+    var pEnd = new BMap.Point(116.41478,39.911901);
+    var rectangle = new BMap.Polygon([
+        new BMap.Point(pStart.lng,pStart.lat),
+        new BMap.Point(pEnd.lng,pStart.lat),
+        new BMap.Point(pEnd.lng,pEnd.lat),
+        new BMap.Point(pStart.lng,pEnd.lat)
+    ], {strokeColor:"blue", strokeWeight:2, strokeOpacity:0.5});  //创建矩形
+
+    //添加覆盖物
+    function add_overlay(){

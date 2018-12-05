@@ -3,19 +3,19 @@ $(function(){
 	// 初始化插件
 	$("#demo").zyUpload({
 		width            :   "650px",                 // 宽度
-		height           :   "400px",                 // 宽度
+		height           :   "auto",
 		itemWidth        :   "120px",                 // 文件项的宽度
 		itemHeight       :   "100px",                 // 文件项的高度
-		url              :   "http://yilingjiu.cn/admin/store/setshop",  // 上传文件的路径
+		url              :   "http://yilingjiu.cn/admin/store/uploadone",  // 上传文件的路径
 		multiple         :   true,                    // 是否可以多个文件上传
 		dragDrop         :   true,                    // 是否可以拖动上传文件
 		del              :   true,                    // 是否可以删除文件
-		finishDel        :   false,  				  // 是否在上传文件完成后删除预览
+		finishDel        :   true,  				  // 是否在上传文件完成后删除预览
 		/* 外部获得的回调接口 */
 		onSelect: function(files, allFiles){                    // 选择文件的回调方法
-			console.info("当前选择了以下文件：");
+			console.info("当前选择了以下文件1111：");
 			console.info(files);
-			console.info("之前没上传的文件：");
+			console.info("之前没上传的文件1111：");
 			console.info(allFiles);
 		},
 		onDelete: function(file, surplusFiles){                     // 删除一个文件的回调方法

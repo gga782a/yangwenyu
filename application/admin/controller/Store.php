@@ -26,7 +26,7 @@ class Store extends Common
         parent::__construct($request);
         $this->app_id = Session::get('app_id');
         $this->deputy_id = Session::get('deputy_id');
-        $this->store_id = Session::get('store_id');
+        $this->store_id = Session::get('user_id');
         self::$msg = array_merge(DataAnalysis::$msg,self::$msg);
         $this->time = time();
     }
@@ -38,9 +38,8 @@ class Store extends Common
 
     //图片上传
 
-    public function upload($img = '',$validate = ['size'=>15678,'ext'=>'jpg,png,gif'])
+    public function upload($img = '',$validate = ['size'=>10240000,'ext'=>'jpg,png,gif'])
     {
-        //dd($img);
         if ($img == '') {
             return false;
         } else {
@@ -88,15 +87,41 @@ class Store extends Common
         }
     }
 
+    public function uploadone($validate = ['size'=>10240000,'ext'=>'jpg,png,gif']){
+        $files = request()->file('fileList');
+        //dd($files);
+        //判断是不是多图上传
+        $dir = ROOT_PATH . 'public' . DS . 'uploads' . DS;
+        $date = date('Ymd', time()) . '/';
+        $path = $dir . $date;
+        if (!file_exists($path)) {
+            mkdir($path, 0775, true);
+        }
+        if (empty($files)) {
+            return false;
+        } else {
+            // 移动到框架应用根目录/public/uploads/ 目录下
+            $info = $files->validate($validate)->rule('uniqid')->move($path);
+            if ($info) {
+                $pic_arr = '/public/uploads/'.$date.$info->getFilename();
+                return trim($pic_arr);
+            } else {
+                // 上传失败获取错误信息
+                return false;
+            }
+        }
+
+    }
+
     public function setshop()
     {
         //标识符区分添加修改
         //var_dump($_FILES);
-        $return = $this->upload('fileList');
-        if($return == false){
-            //$this->error('上传图片失败');
-        }
-        dd($return);
+//        $return = $this->upload('fileList');
+//        if($return == false){
+//            //$this->error('上传图片失败');
+//        }
+        //dd($return);
         $flag = input('flag');
         $where = [
             'app_id'    => $this->app_id,
@@ -105,16 +130,16 @@ class Store extends Common
             'shop_id'   => $this->parme('shop_id'),
         ];
         if(Request::instance()->isPost()){
-
             $insert = [
                 'sort'          => $this->parme('sort'), //排序
                 'shop_name'     => $this->parme('shop_name'), // 名称
-                'pic_arr'       => $return,//商品图片
+                'pic_arr'       => trim($this->parme('pics')),//商品图片
                 'position'      => $this->parme('position'),//店铺地址
+                'address'       => $this->parme('address'),//详细地址
                 'longitude'     => $this->parme('longitude'),//经度
                 'latitude'      => $this->parme('latitude'),//纬度
                 'kefu_phone'    => $this->parme('kefu_phone'),//客服电话
-                'erweima'       => $this->upload('erweima'),//二维码
+                //'erweima'       => $this->upload('erweima'),//二维码
                 'status'        => 1,//状态 //0关店 1营业
                 //'shelves'       => 'true',//上下架
                 'updated_at'    => $this->time,
@@ -122,14 +147,15 @@ class Store extends Common
             if($flag == 'add'){
                 $insert['deputy_id'] = $this->deputy_id; //代理ID
                 $insert['app_id']    = $this->app_id; //哪个平台
-                $insert['shop_id']    = $this->shop_id; //哪个商户
+                $insert['store_id']    = $this->store_id; //哪个商户
                 $insert['created_at']= $this->time;
+                //dd($insert);
                 $res = db(self::$table_shop)->insertGetId($insert);
             }else{
-                $res = db(self::$table_store)->where($where)->update($insert);
+                $res = db(self::$table_shop)->where($where)->update($insert);
             }
             if($res){
-                return $this->redirect('index/storemanage');
+                return $this->redirect('index/setshop');
             }else{
                 $this->error('操作失败');
             }
@@ -137,7 +163,7 @@ class Store extends Common
             if($flag == 'add'){
                 return view('store/addshop');
             }else if($flag == 'update'){
-                $data = db(self::$table_store)
+                $data = db(self::$table_shop)
                     ->where($where)
                     ->find();
                 return view('updatestore',[
@@ -156,6 +182,21 @@ class Store extends Common
                     ->where($wherelist)
                     ->page(input('page',1),input('pageshow',15))
                     ->select();
+                if($data){
+                    foreach ($data as $k=>$v){
+                        $pics = trim($v['pic_arr'],',');
+                        if($pics){
+                            $pics = explode(',',$pics);
+                            $logo = $pics[0];
+                        }else{
+                            $logo = '暂无图片';
+                        }
+                        $data[$k]['logo'] = $logo;
+                        if(!$v['erweima']){
+                            $v['erweima'] = '暂无二维码';
+                        }
+                    }
+                }
                 return view('listshop',[
                     'data'    => $data,
                     'status'  => (int)$this->parme('status','1'),

@@ -57,7 +57,6 @@ class Login extends Controller
                     $where = array(
                         'username' => $this->parme('username'),
                         'type' => $type,
-
                     );
                     $user = Db::table('shui_user')
                         ->where($where)
@@ -187,6 +186,7 @@ class Login extends Controller
         Session::set('user_id',null);
         Session::set('deputy_id',null);
         Session::set('app_id',null);
+        //Session::set('store_id',null);
         return $this->redirect('checklogin',array('type'=>$this->parme('type')));
     }
 

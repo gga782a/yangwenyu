@@ -66,13 +66,14 @@
                             <td>
                                 {$vo.kefu_phone}
                             </td>
-                            <td>{$vo.shop_id}</td>
+                            <td>{if condition=" $vo['logo'] == '暂无图片' "}{$vo.logo}{else /}<img src="{$vo.logo}"/>{/if}</td>
                             <td>{$vo.position}</td>
                             <td>
-                                {$vo.erweima}
+                                {if condition=" $vo['erweima'] == '暂无二维码' "}{$vo.erweima}{else /}<img src="{$vo.erweima}"/>{/if}
                             </td>
                             <td>{$vo.status == 1?'营业':'闭店'}</td>
                             <td>{$vo.created_at|date="Y-m-d H:i:s",###}</td>
+                            <th>{$vo.sort}</th>
                             <td>
                                 <span><a href="{:url('store/setshop',array('flag'=>'update','shop_id'=>$vo['shop_id']))}">编辑</a></span>
                                 |<span>
@@ -126,8 +127,8 @@
         if(confirm('确定要删除吗')){
             $.ajax({
                 type:'post',
-                url:'delstore',
-                data:{'store_id':$id},
+                url:'delshop',
+                data:{'shop_id':$id},
                 dataType:'json',
                 success:function(data){
                     if(data.code==200) {

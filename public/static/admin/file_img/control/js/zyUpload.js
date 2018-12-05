@@ -20,17 +20,27 @@
 					height           : "400px",  					// 宽度
 					itemWidth        : "140px",                     // 文件项的宽度
 					itemHeight       : "120px",                     // 文件项的高度
-					url              : "/upload/UploadAction",  	// 上传文件的路径
+					url              : "http://yilingjiu.cn/admin/store/uploadone",  	// 上传文件的路径
 					multiple         : true,  						// 是否可以多个文件上传
 					dragDrop         : true,  						// 是否可以拖动上传文件
 					del              : true,  						// 是否可以删除文件
-					finishDel        : false,  						// 是否在上传文件完成后删除预览
+					finishDel        : true,  						// 是否在上传文件完成后删除预览
 					/* 提供给外部的接口方法 */
-					onSelect         : function(selectFiles, files){},// 选择文件的回调方法  selectFile:当前选中的文件  allFiles:还没上传的全部文件
-					onDelete		 : function(file, files){},     // 删除一个文件的回调方法 file:当前删除的文件  files:删除之后的文件
-					onSuccess		 : function(file){},            // 文件上传成功的回调方法
-					onFailure		 : function(file){},            // 文件上传失败的回调方法
-					onComplete		 : function(responseInfo){},    // 上传完成的回调方法
+					onSelect         : function(selectFiles, files){
+
+					},// 选择文件的回调方法  selectFile:当前选中的文件  allFiles:还没上传的全部文件
+					onDelete		 : function(file, files){
+
+					},     // 删除一个文件的回调方法 file:当前删除的文件  files:删除之后的文件
+					onSuccess		 : function(file){
+						consloe.log(file)
+					},            // 文件上传成功的回调方法
+					onFailure		 : function(file){
+                        consloe.log(file)
+					},            // 文件上传失败的回调方法
+					onComplete		 : function(responseInfo){
+                        consloe.log(responseInfo)
+					},    // 上传完成的回调方法
 			};
 			
 			para = $.extend(defaults,options);
@@ -140,6 +150,17 @@
 				
 				// 设置内容
 				$("#status_info").html("选中"+num+"张文件，共"+size+"。");
+				if(num>8) {
+                    // 绑定上传点击事件
+                    $(".upload_btn").unbind("click", function (e) {
+                        // // 判断当前是否有文件需要上传
+                        // if (ZYFILE.funReturnNeedFiles().length > 0) {
+                        //     $("#fileSubmit").click();
+                        // } else {
+                        //     alert("请先选中文件再点击上传");
+                        // }
+                    });
+                }
 			};
 			
 			/**
@@ -253,7 +274,7 @@
 						var funDealtPreviewHtml = function() {
 							file = selectFiles[i];
 							if (file) {
-								var reader = new FileReader()
+								var reader = new FileReader();
 								reader.onload = function(e) {
 									// 处理下配置参数和格式的html
 									html += self.funDisposePreviewHtml(file, e);
@@ -261,7 +282,7 @@
 									i++;
 									// 再接着调用此方法递归组成可以预览的html
 									funDealtPreviewHtml();
-								}
+								};
 								reader.readAsDataURL(file);
 							} else {
 								// 走到这里说明文件html已经组织完毕，要把html添加到预览区
@@ -331,6 +352,9 @@
 						eleProgress.css("width",percent);
 					},
 					onSuccess: function(file, response) {
+						var pics = $("#hiddepic").val();
+						pics += response+',';
+                        $("#hiddepic").val(pics);
 						$("#uploadProgress_" + file.index).hide();
 						$("#uploadSuccess_" + file.index).show();
 						$("#uploadInf").append("<p>上传成功，文件地址是：" + response + "</p>");
@@ -345,10 +369,11 @@
 					onFailure: function(file) {
 						$("#uploadProgress_" + file.index).hide();
 						$("#uploadSuccess_" + file.index).show();
-						$("#uploadInf").append("<p>文件" + file.name + "上传失败！</p>");	
+						$("#uploadInf").append("<p>文件222" + file.name + "上传失败！</p>");
 						//$("#uploadImage_" + file.index).css("opacity", 0.2);
 					},
 					onComplete: function(response){
+						console.log(34455);
 						console.info(response);
 					},
 					onDragOver: function() {
