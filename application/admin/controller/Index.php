@@ -120,6 +120,7 @@ class Index extends Common
             'active_id' => $this->parme('active_id')
         ];
         if(Request::instance()->isPost()){
+            //dd(input());
             $time = $this->parme('time');
             $time1 = $this->parme('time1');
             $time2 = $this->parme('time2');
@@ -147,12 +148,24 @@ class Index extends Common
                     ->where($where)
                     ->value('activeperiod');
             }
+            //判断中奖率超过100反错
+            $prize_ids = $this->parme('prize');
+            $sumcount = 0;
+            foreach ($prize_ids as $ke=>$prize_id){
+                $sumcount += db(self::$table_prize)
+                    ->where(['app_id'=>$this->id,'prize_id'=>$prize_id])
+                    ->value('probability');
+
+            }
+            if($sumcount>100){
+                return $this->error('中奖率累加不能超过100');
+            }
             //dd($activeperiod);
             $insert = [
                 'activetitle'   => $this->parme('activetitle'), //活动标题
                 'activeperiod'  => $activeperiod, // 活动时间段
                 'limit_collar'  => $this->parme('limit_collar'),//每人可抽奖次数 每次/每个时间段
-                'prize'         => $this->parme('prize'),//奖项礼品
+                'prize'         => json_encode($this->parme('prize')),//奖项礼品
                 'probability'   => $this->parme('probability'),//奖项概率
                 'updated_at'    => $this->time,
             ];
@@ -168,11 +181,12 @@ class Index extends Common
             if($res){
                 return $this->redirect('index/slyderAdventures');
             }else{
-                $this->error('操作失败');
+                return $this->error('操作失败');
             }
         }else{
            if($flag == 'add'){
                 $prize = $this->listprize();
+                //dd($prize);
                 if($prize === false){
                     return $this->error('请先去添加礼品','index/setprize');
                 }else{
@@ -212,6 +226,14 @@ class Index extends Common
                             $activeperiod[$key] = $val;
                        }
                        $data[$k]['activeperiod'] = $activeperiod;
+                       $prize_ids = json_decode($v['prize'],true);
+                       foreach ($prize_ids as $ke=>$prize_id){
+                           $prizes[$ke] = db(self::$table_prize)
+                               ->where(['app_id'=>$this->id,'prize_id'=>$prize_id])
+                               ->field('name,probability')
+                               ->find();
+                       }
+                       $data[$k]['prizes'] = $prizes;
                    }
                    //dd($data);
                }
@@ -228,7 +250,7 @@ class Index extends Common
         $where['status']  = 1;
         $list = db(self::$table_prize)->where($where)->select();
         if($list){
-            return json_encode(['data'=>$list]);
+            return json_encode($list);
         }else{
             return false;
         }
@@ -253,29 +275,16 @@ class Index extends Common
 
     public function delslyderAdventures()
     {
-        $rule = [
-            'active_id'   => 'require',
-            //'app_id'      => 'require',
-        ];
-        $field = [
-            'active_id'   => '大转盘ID',
-            'app_id'      => '平台ID',
-        ];
-
-        $validate = new Validate($rule,self::$msg,$field);
-
-        if(!$validate->check($this->parme)){
-            $this->error($validate->getError());
-        }else{
+        if(Request::instance()->isAjax()) {
             $where = [
                 'app_id'    => $this->id,
                 'active_id' => $this->parme('active_id')
             ];
             $res = db(self::$table_slyderAdventures)->where($where)->delete();
-            if($res){
-                return $this->redirect('index/slyderAdventures');
-            }else{
-                $this->error('操作失败');
+            if ($res) {
+                return json(['code'=>200,'msg'=>'操作成功']);
+            } else {
+                return json(['code'=>400,'msg'=>'操作失败']);
             }
         }
     }
@@ -938,6 +947,32 @@ class Index extends Common
     public function delprize()
     {
         if(Request::instance()->isAjax()) {
+            //dd(11);
+            //检查礼品是否有被使用
+            $list = db(self::$table_slyderAdventures)
+                ->where(['app_id'=>$this->id])
+                ->field('prize')
+                ->select();
+            //dd($list);
+            $isfalse = false;
+            if(!empty($list)){
+                foreach ($list as $k=>$v){
+                    //dd($v['prize']);
+                    if($v['prize']){
+                        //var_dump($this->parme('prize_id'));
+                        //var_dump(json_decode($v['prize'],true));
+                        if(in_array($this->parme('prize_id'),json_decode($v['prize'],true))){
+//dd(222);
+                            $isfalse = true;
+                        }
+                    }
+                }
+            }
+            //dd($isfalse);
+            if($isfalse){
+                return json(['code'=>400,'msg'=>'礼品已被使用']);
+            }
+            dd(22);
             $where = [
                 'app_id' => $this->id,
                 'prize_id' => $this->parme('prize_id')

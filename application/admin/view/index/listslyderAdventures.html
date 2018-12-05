@@ -47,8 +47,7 @@
                             <th>活动标题</th>
                             <th>活动时间段</th>
                             <th>每人可抽奖次数 每次/每个时间段</th>
-                            <th>奖项礼品</th>
-                            <th>奖项概率</th>
+                            <th>奖项礼品--奖项概率</th>
                             <th>创建时间</th>
                             <th>操作</th>
                         </tr>
@@ -66,13 +65,16 @@
                                 {/volist}
                             </td>
                             <td>{$vo.limit_collar}</td>
-                            <td>{$vo.prize}</td>
-                            <td>{$vo.probability}%</td>
+                            <td>
+                                {volist name="vo['prizes']" id="vol"}
+                                  {$vol.name}中奖率{$vol.probability}% |
+                                {/volist}
+                            </td>
                             <td>{$vo.created_at|date="Y-m-d H:i:s",###}</td>
                             <td>
                                 <span><a href="{:url('index/slyderAdventures',array('flag'=>'update','active_id'=>$vo['active_id']))}">编辑</a></span>
                                 |<span>
-                                <a href="{:url('index/delslyderAdventures',array('active_id'=>$vo['active_id']))}">删除</a>
+                                <a onclick="return del({$vo['active_id']});">删除</a>
                             </span>
                             </td>
                             <!--<td>Internet Explorer 4.0-->
@@ -113,7 +115,32 @@
 
     function fnClickAddRow() {
         $("#editable").dataTable().fnAddData(["Custom row", "New row", "New row", "New row", "New row", "New row", "New row"])
-    };
+    }
+    function del($id)
+    {
+        if(confirm('确定要删除吗')){
+            $.ajax({
+                type:'post',
+                url:'delslyderAdventures',
+                data:{'active_id':$id},
+                dataType:'json',
+                success:function(data){
+                    if(data.code==200) {
+                        layer.msg(data.msg);
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 1000);
+                    }else{
+                        layer.msg(data.msg);
+
+                    }
+                },
+                error:function(data){
+                    console.log(data);
+                }
+            })
+        }
+    }
 </script>
 
 

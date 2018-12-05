@@ -18,6 +18,32 @@
     <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
     <link href="__ADMIN__/css/style.min-v=4.1.0.css" rel="stylesheet">
     <link rel="stylesheet" href="__ADMIN__/src/css/layui.css">
+
+
+
+
+
+    <link href="__ADMIN__/css/plugins/chosen/chosen.css" rel="stylesheet">
+    <link href="__ADMIN__/css/plugins/colorpicker/css/bootstrap-colorpicker.min.css" rel="stylesheet">
+    <link href="__ADMIN__/css/plugins/cropper/cropper.min.css" rel="stylesheet">
+    <link href="__ADMIN__/css/plugins/switchery/switchery.css" rel="stylesheet">
+    <link href="__ADMIN__/css/plugins/jasny/jasny-bootstrap.min.css" rel="stylesheet">
+    <link href="__ADMIN__/css/plugins/nouslider/jquery.nouislider.css" rel="stylesheet">
+    <link href="__ADMIN__/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
+    <link href="__ADMIN__/css/plugins/ionRangeSlider/ion.rangeSlider.css" rel="stylesheet">
+    <link href="__ADMIN__/css/plugins/ionRangeSlider/ion.rangeSlider.skinFlat.css" rel="stylesheet">
+    <link href="__ADMIN__/css/plugins/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet">
+    <link href="__ADMIN__/css/plugins/clockpicker/clockpicker.css" rel="stylesheet">
+
+
+
+
+
+
+    <!-- Data Tables -->
+    <link href="__ADMIN__/css/plugins/dataTables/dataTables.bootstrap.css" rel="stylesheet">
+
+    <link href="__ADMIN__/src/css/modules/layer/default/layer.css" rel="stylesheet">
 </head>
 
 <body class="gray-bg">
@@ -36,45 +62,55 @@
                     </div>
                 </div>
                 <div class="ibox-content">
-                    <form method="post" class="form-horizontal" action="{:url('index/slyderAdventures',array('flag'=>'update'))}">
-                        <input type="hidden" value="{$data.active_id}" name="active_id">
+                    <form method="post" class="form-horizontal" action="{:url('index/slyderAdventures',array('flag'=>'update','active_id'=>$data['active_id']))}">
                         <div class="form-group">
                             <label class="col-sm-2 control-label">活动标题</label>
 
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" value="{$data.activetitle}" name="activetitle" required>
+                                <input type="text" class="form-control" name="activetitle" value="{$data.activetitle}" required>
                             </div>
                         </div>
                         <div class="hr-line-dashed"></div>
                         <div class="form-group">
                             <label class="col-sm-2 control-label">每人可抽奖次数 </label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="limit_collar" value="{$data.limit_collar}" required>
+                                <input type="text" class="form-control" name="limit_collar" value="{$data.limit_collar}"  required>
                                 <span class="help-block m-b-none">每次/每个时间段</span>
                             </div>
                         </div>
                         <div class="hr-line-dashed"></div>
+                        <!--<div class="form-group">-->
+                        <!---->
+
+                        <!--<button style="margin-left: 1.5%;" class="btn btn-white" type="button" onclick="choicelipin()">去选择礼品</button>-->
+
+
                         <div class="form-group">
                             <label class="col-sm-2 control-label">奖项礼品</label>
-
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" value="{$data.prize}"  name="prize" required>
+                                <select data-placeholder="选择礼品 输入礼品开头名称可快速查找 " required name="prize[]" class="chosen-select" multiple style="width:100%;" tabindex="4">
+                                    {volist name='prize' id="vo"}
+                                    <option value="{$vo.prize_id}" hassubinfo="true">{$vo.name}中奖率{$vo.probability}%</option>
+                                    {/volist}
+                                </select>
+                                <span class="help-block m-b-none">中奖率加起来不能超过100%</span>
                             </div>
                         </div>
-                        <div class="hr-line-dashed"></div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">奖项概率</label>
+                        <!--</div>-->
+                        <!--<div class="hr-line-dashed"></div>-->
+                        <!--<div class="form-group">-->
+                        <!--<label class="col-sm-2 control-label">奖项概率</label>-->
 
-                            <div class="col-sm-10">
-                                <input type="text"  value="{$data.probability}" placeholder="奖项概率0-100之间的数字，俩位小数" class="form-control" name="probability" required>
-                            </div>
-                        </div>
+                        <!--<div class="col-sm-10">-->
+                        <!--<input type="text" placeholder="奖项概率0-100之间的数字，俩位小数" class="form-control" name="probability" required>-->
+                        <!--</div>-->
+                        <!--</div>-->
                         <div class="hr-line-dashed"></div>
                         <div class="form-group" >
                             <label class="col-sm-2 control-label">活动时间段</label>
                             <div class="col-sm-10">
                                 <input class="form-control layui-input"  id="test1" name="time"
-                                       style="width: 50%;float: left;margin: 0px 10px;" type="text"  />
+                                       style="width: 50%;float: left;margin: 0px 10px 0px 0px;" type="text" required />
                                 <div class="input-group-btn">
                                     <button  class="btn btn-white" type="button" onclick="show1()">添加时间段</button>
                                 </div>
@@ -85,7 +121,7 @@
                             <label class="col-sm-2 control-label">活动时间段</label>
                             <div class="col-sm-10">
                                 <input class="form-control layui-input"  id="test2" name="time1"
-                                       style="width: 50%;float: left;margin: 0px 10px;" type="text"  />
+                                       style="width: 50%;float: left;margin: 0px 10px 0px 0px;" type="text"  />
                                 <div class="input-group-btn">
                                     <button  class="btn btn-white" type="button" onclick="show2()">添加时间段</button>
                                 </div>
@@ -97,7 +133,7 @@
                             <label class="col-sm-2 control-label">活动时间段</label>
                             <div class="col-sm-10">
                                 <input class="form-control layui-input"  id="test3" name="time2"
-                                       style="width: 50%;float: left;margin: 0px 10px;" type="text"  />
+                                       style="width: 50%;float: left;margin: 0px 10px 0px 0px;" type="text"  />
                             </div>
                         </div>
                         <div class="hr-line-dashed"></div>
@@ -120,6 +156,73 @@
 <script src="__ADMIN__/js/content.min-v=1.0.0.js"></script>
 <script src="__ADMIN__/js/plugins/iCheck/icheck.min.js"></script>
 <script src="__ADMIN__/src/layui.js" charset="utf-8"></script>
+<script src="__ADMIN__/js/plugins/jeditable/jquery.jeditable.js"></script>
+<script src="__ADMIN__/js/plugins/dataTables/jquery.dataTables.js"></script>
+<script src="__ADMIN__/js/plugins/dataTables/dataTables.bootstrap.js"></script>
+<script src="__ADMIN__/src/lay/modules/layer.js" charset="utf-8"></script>
+
+
+
+<script src="__ADMIN__/js/plugins/chosen/chosen.jquery.js"></script>
+<script src="__ADMIN__/js/plugins/jsKnob/jquery.knob.js"></script>
+<script src="__ADMIN__/js/plugins/jasny/jasny-bootstrap.min.js"></script>
+<script src="__ADMIN__/js/plugins/datapicker/bootstrap-datepicker.js"></script>
+<script src="__ADMIN__/js/plugins/prettyfile/bootstrap-prettyfile.js"></script>
+<script src="__ADMIN__/js/plugins/nouslider/jquery.nouislider.min.js"></script>
+<script src="__ADMIN__/js/plugins/switchery/switchery.js"></script>
+<script src="__ADMIN__/js/plugins/ionRangeSlider/ion.rangeSlider.min.js"></script>
+<script src="__ADMIN__/js/plugins/iCheck/icheck.min.js"></script>
+<script src="__ADMIN__/js/plugins/metisMenu/jquery.metisMenu.js"></script>
+<script src="__ADMIN__/js/plugins/colorpicker/bootstrap-colorpicker.min.js"></script>
+<script src="__ADMIN__/js/plugins/clockpicker/clockpicker.js"></script>
+<script src="__ADMIN__/js/plugins/cropper/cropper.min.js"></script>
+<script src="__ADMIN__/js/demo/form-advanced-demo.min.js"></script>
+
+<!--<script>-->
+<!--function choicelipin() {-->
+<!--layui.use(['form','layer'],function(){-->
+<!--str = '<div>';-->
+<!--str += "<label for='level'>选择礼品：</label>";-->
+<!--str += "<input type='checkbox' name='prize'>";-->
+<!--str += '</div>';-->
+<!--var index = layer.open({-->
+<!--title:"选择礼品",-->
+<!--area:['80%','80%'],-->
+<!--content:str,-->
+<!--btn:['确定','取消'],-->
+<!--yes:function(){-->
+<!--$.ajax({-->
+<!--type:'post',-->
+<!--url:'listprize',-->
+<!--data:'',-->
+<!--dataType:'json',-->
+<!--success:function(data){-->
+<!--if(data.code==200) {-->
+<!--layer.msg(data.msg);-->
+<!--setTimeout(function () {-->
+<!--window.location.reload();-->
+<!--}, 1000);-->
+<!--}else{-->
+<!--layer.msg(data.msg);-->
+
+<!--}-->
+<!--},-->
+<!--error:function(data){-->
+<!--console.log(data);-->
+<!--}-->
+<!--})-->
+<!--},-->
+<!--btn2:function(){-->
+<!--layer.closeAll(index); //关闭当前窗口-->
+<!--}-->
+<!--});-->
+
+<!--// 渲染表单-->
+<!--form.render();-->
+<!--});-->
+<!--}-->
+<!--</script>-->
+
 <script>
     $(document).ready(function () {
         $(".i-checks").iCheck({checkboxClass: "icheckbox_square-green", radioClass: "iradio_square-green",})
