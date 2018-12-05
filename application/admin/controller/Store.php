@@ -185,18 +185,23 @@ class Store extends Common
                 if($data){
                     foreach ($data as $k=>$v){
                         $pics = trim($v['pic_arr'],',');
-                        if($pics){
+                        if(!empty($pics)){
                             $pics = explode(',',$pics);
                             $logo = $pics[0];
                         }else{
                             $logo = '暂无图片';
                         }
                         $data[$k]['logo'] = $logo;
-                        if(!$v['erweima']){
-                            $v['erweima'] = '暂无二维码';
+                        if(empty($v['erweima'])){
+                            //var_dump(11);
+                            $erweima = '暂无二维码';
+                        }else{
+                            $erweima = $v['erweima'];
                         }
+                        $data[$k]['erweima'] = $erweima;
                     }
                 }
+                //dd($data);
                 return view('listshop',[
                     'data'    => $data,
                     'status'  => (int)$this->parme('status','1'),
