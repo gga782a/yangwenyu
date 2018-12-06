@@ -94,7 +94,7 @@ class Store extends Common
         $dir = ROOT_PATH . 'public' . DS . 'uploads' . DS;
         $date = date('Ymd', time()) . '/';
         $path = $dir . $date;
-        dd($path);
+        //dd($path);
         if (!file_exists($path)) {
             mkdir($path, 0775, true);
         }
@@ -232,11 +232,31 @@ class Store extends Common
         foreach($arr as $k=>$v){
             //dd($path.$v);
             if(file_exists($path.$v)){
-                dd(11);
+                //dd(11);
                 unlink($path.$v);
             }
         }
-        dd(33);
+    }
+
+    //删除商户
+
+    public function delshop()
+    {
+        //dd(222);
+        if(Request::instance()->isAjax()) {
+            $where = [
+                'app_id'    => $this->app_id,
+                'deputy_id' => $this->id,
+                'store_id'  => $this->store_id,
+                'shop_id'   => $this->parme('shop_id'),
+            ];
+            $res = db(self::$table_shop)->where($where)->delete();
+            if ($res) {
+                return json(['code'=>200,'msg'=>'操作成功']);
+            } else {
+                return json(['code'=>400,'msg'=>'操作失败']);
+            }
+        }
     }
 
     //设置优惠活动

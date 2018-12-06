@@ -2,7 +2,7 @@
 
 <body style="background-color: #F4F4F4;">
     <div class="shopTop clearfixed">
-        <div class="li blackImg"><img src="img/black.png" alt=""></div>
+        <div class="li blackImg"><img src="__IMG__/black.png" alt=""></div>
         <div class="topTitle li">分享收益</div>
     </div>
     <div class="me">
@@ -24,7 +24,7 @@
             <a href="#">
             <div class="dl">
                 <div class="dd">
-                    <img src="img/bill1.png" alt="">
+                    <img src="__IMG__/bill1.png" alt="">
                 </div>
                 <div class="dt gray">抽奖</div>
             </div>
@@ -34,7 +34,7 @@
             <a href="#">
             <div class="dl">
                 <div class="dd">
-                    <img src="img/bill2.png" alt="">
+                    <img src="__IMG__/bill2.png" alt="">
                 </div>
                 <div class="dt gray">积分商城</div>
             </div>
@@ -44,7 +44,7 @@
             <a href="#">
             <div class="dl">
                 <div class="dd">
-                    <img src="img/bill3.png" alt="">
+                    <img src="__IMG__/bill3.png" alt="">
                 </div>
                 <div class="dt gray">共享商家</div>
             </div>
@@ -54,7 +54,7 @@
             <a href="#">
             <div class="dl">
                 <div class="dd">
-                    <img src="img/bill4.png" alt="">
+                    <img src="__IMG__/bill4.png" alt="">
                 </div>
                 <div class="dt gray">我要加盟</div>
             </div>
@@ -63,54 +63,26 @@
     </div>
    <div class="shopBox top">
         <div class="clearfixed shopbor">
+           {notempty name="$data"}
+            {volist name="data" id="vo"}
             <div class="li">
                 <div class="padding15">
-                    <div class="shopConTitle ellipsis bottom3">商品名字</div>
-                    <div class="shopConidt gray ellipsis bottom3">商品简介</div>
+                    <div class="shopConTitle ellipsis bottom3">{$vo.goods_name}</div>
+                    <div class="shopConidt gray ellipsis bottom3">{$vo.goods_desc}</div>
                     <div class="clearfixed bottom3">
-                        <div class="li yellow font14 pr2">2000</div>
+                        <div class="li yellow font14 pr2">{$vo.price}</div>
                         <div class="li small gray itg pr2">积分</div>
                         <div class="li smallBtn yellow eca">兑换</div>
                     </div>
-                    <a href="shopDetail.html">
+                    <a href="{:url('index/shopDetail',array('goods_id'=>$vo['goods_id']))}">
                         <div class="shopImg">
-                            <img src="img/rule_popups.png" alt="">
+                            <img src="__IMG__/rule_popups.png" alt="">
                         </div>
                     </a>
                 </div>
             </div>
-            <div class="li">
-                <div class="padding15">
-                    <div class="shopConTitle ellipsis bottom3">商品名字</div>
-                    <div class="shopConidt gray ellipsis bottom3">商品简介</div>
-                    <div class="clearfixed bottom3">
-                        <div class="li yellow font14 pr2">2000</div>
-                        <div class="li small gray itg pr2">积分</div>
-                        <div class="li smallBtn yellow eca">兑换</div>
-                    </div>
-                    <a href="shopDetail.html">
-                        <div class="shopImg">
-                            <img src="img/rule_popups.png" alt="">
-                        </div>
-                    </a>
-                </div>
-            </div>
-            <div class="li">
-                <div class="padding15">
-                    <div class="shopConTitle ellipsis bottom3">商品名字</div>
-                    <div class="shopConidt gray ellipsis bottom3">商品简介</div>
-                    <div class="clearfixed bottom3">
-                        <div class="li yellow font14 pr2">2000</div>
-                        <div class="li small gray itg pr2">积分</div>
-                        <div class="li smallBtn yellow eca">兑换</div>
-                    </div>
-                    <a href="shopDetail.html">
-                        <div class="shopImg">
-                            <img src="img/rule_popups.png" alt="">
-                        </div>
-                    </a>
-                </div>
-            </div>
+            {/volist}
+           {/notempty}
         </div>
     </div>
     {include file='common/footer' /}

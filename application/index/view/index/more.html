@@ -1,52 +1,7 @@
 {include file='common/header' /}
 
 <body style="background-color: #F4F4F4;">
-<div class="moreAdd">
-    <div class="clearfixed ulAddress">
-        <div class="li">
-            <div class="ol clearfixed">
-                <div class="li title_name ellipsis">小六子烧烤 </div>
-                <div class="li"><span class="gray">|</span> 距离 <span>3.6</span>km</div>
-            </div>
-            <div class="ol gray clearfixed">
-                <div class="li">地址: </div>
-                <span class="li addressText ellipsis">松北区学院路888号</span>
-            </div>
-        </div>
-        <div class="li fr">
-            <div class="ol yell">电话: <span>8888888888</span></div>
-        </div>
-    </div>
-    <div class="clearfixed ulAddress">
-        <div class="li">
-            <div class="ol clearfixed">
-                <div class="li title_name ellipsis">小六子烧烤 </div>
-                <div class="li"><span class="gray">|</span> 距离 <span>3.6</span>km</div>
-            </div>
-            <div class="ol gray clearfixed">
-                <div class="li">地址: </div>
-                <span class="li addressText ellipsis">松北区学院路888号</span>
-            </div>
-        </div>
-        <div class="li fr">
-            <div class="ol yell">电话: <span>8888888888</span></div>
-        </div>
-    </div>
-    <div class="clearfixed ulAddress">
-        <div class="li">
-            <div class="ol clearfixed">
-                <div class="li title_name ellipsis">小六子烧烤小六子烧烤小六子烧烤小六子烧烤小六子烧烤小六子烧烤 </div>
-                <div class="li"><span class="gray">|</span> 距离 <span>3.6</span>km</div>
-            </div>
-            <div class="ol gray clearfixed">
-                <div class="li">地址: </div>
-                <span class="li addressText ellipsis">松北区学院路888号</span>
-            </div>
-        </div>
-        <div class="li fr">
-            <div class="ol yell">电话: <span>8888888888</span></div>
-        </div>
-    </div>
+<div class="moreAdd" id="js_moreAdd">
 </div>
 <script src="http://res.wx.qq.com/open/js/jweixin-1.4.0.js"></script>
 <script>
@@ -69,7 +24,7 @@
             success: function(res) {
                 if (res.checkResult.getLocation == false) {
                     alert('你的微信版本太低，不支持微信JS接口，请升级到最新的微信版本！');
-                    return;
+
                 }
             }
         });
@@ -80,6 +35,47 @@
                 var longitude = res.longitude; // 经度，浮点数，范围为180 ~ -180。
                 var speed = res.speed; // 速度，以米/每秒计
                 var accuracy = res.accuracy; // 位置精度
+                console.log(longitude);
+                console.log(latitude);
+                console.log(111111);
+                $.ajax({
+                    type:'post',
+                    url:"{:url('index/index/getshop')}",
+                    data: {'lng':longitude,'lat':latitude},
+                    dataType:'json',
+                    success:function(data){
+                        data = JSON.parse(data);
+                        console.log(data.data);
+                        if(data.code==200){
+                            var len = data.data.length;
+                            console.log(len);
+                            var str = '';
+                            for (var i=0 ; i<len; i++){
+                                str += '<div class="clearfixed ulAddress">';
+                                str += '<div class="li">';
+                                str += '<div class="ol clearfixed">';
+                                str += '<div class="li title_name ellipsis">'+data.data[i].shop_name+'</div>';
+                                str += '<div class="li"><span class="gray">|</span> 距离 <span>'+data.data[i].distance+'</span></div>';
+                                str += '</div>';
+                                str += '<div class="ol gray clearfixed">';
+                                str += '<div class="li">地址: </div>';
+                                str += '<span class="li addressText ellipsis">'+data.data[i].position+data.data[i].address+'</span>';
+                                str += '</div>';
+                                str += '</div>';
+                                str += '<div class="li fr">';
+                                str += '<div class="ol yell">电话: <span>'+data.data[i].kefu_phone+'</span></div>';
+                                str += '</div>';
+                                str += '</div>';
+                            }
+                             $("#js_moreAdd").append(str);
+                        }else{
+                            layer.msg(data.data);
+                        }
+                    },
+                    error:function(){
+                        layer.msg('网络错误');
+                    }
+                });
             },
             cancel: function (res) {
                 alert('用户拒绝授权获取地理位置');

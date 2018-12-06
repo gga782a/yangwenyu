@@ -18,6 +18,8 @@ class Index extends Common
     public $member_id;
     private $appId;
     private $appSecret;
+    public static $table_shop = 'shop';
+    public static $table_goods = 'goods';
     public function __construct(Request $request = null)
     {
         parent::__construct($request);
@@ -41,6 +43,7 @@ class Index extends Common
 
             return redirecturl('more');
         }
+        //dd(222);
         $getSignPackage = json_decode($this->getSignPackage(),true);
         return view('more',[
             'signPackage' => $getSignPackage,
@@ -96,15 +99,18 @@ class Index extends Common
         if(!$this->member_id){
             return redirecturl('exchangeShop');
         }
-        return view('exchangeShop');
+        $data = db(self::$table_goods)->where(['status'=>0])->select();
+        return view('exchangeShop',[
+            'data' => $data,
+        ]);
     }
 
-    public function joinln()
+    public function joinIn()
     {
         if(!$this->member_id){
-            return redirecturl('joinln');
+            return redirecturl('joinIn');
         }
-        return view('joinln');
+        return view('joinIn');
     }
     public function my()
     {
@@ -152,6 +158,15 @@ class Index extends Common
         return view('sharelt');
     }
 
+    public function shopDetail()
+    {
+        if(!$this->member_id){
+            return redirecturl('sharelt');
+        }
+        //$data = db(self::$table_goods)->where(['goods_id'=>input('goods_id')])->find();
+        return view('shopDetail');
+    }
+
     public function shopDetailList()
     {
         if(!$this->member_id){
@@ -193,8 +208,10 @@ class Index extends Common
     //获取公众平台的access_token
     public function get_access_token()
     {
+        //dd(222);
         //判断缓存是否过期
-        if(!Cache::get('access_token')) {
+        //if(!Cache::get('access_token')) {
+            //dd(Cache::get('access_token'));
             $url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={$this->appId}&secret={$this->appSecret}";
             $data = json_decode(curl_request($url),true);  //强制转换为数组
             if (!array_key_exists('errcode',$data)) {
@@ -203,9 +220,9 @@ class Index extends Common
             } else {
                 return $this->error($data['errmsg']);
             }
-        }else{
+        //}else{
             return Cache::get('access_token');
-        }
+        //}
     }
 
     //获取jsapi_ticket
@@ -213,6 +230,7 @@ class Index extends Common
     {
         //判断缓存是否过期
         if(!Cache::get('ticket')) {
+            //dd(111);
             $access_token = $this->get_access_token();
             $url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token={$access_token}&type=jsapi";
             $data = json_decode(curl_request($url),true);  //强制转换为数组
@@ -223,6 +241,7 @@ class Index extends Common
                 return $this->error($data['errmsg']);
             }
         }else{
+            //dd(22222);
             return Cache::get('ticket');
         }
     }
@@ -261,6 +280,31 @@ class Index extends Common
             "signature" => $signature,
         );
         return json_encode($signPackage);
+    }
+
+    //ajax获取门店距离排序
+
+    public function getshop()
+    {
+        if(Request::instance()->isPost()){
+            $lng = input('lng');
+            $lat = input('lat');
+            //dd($lng);
+
+            $shop = db(self::$table_shop)->where(['status'=>1])->select();
+            if(!empty($shop)){
+                foreach($shop as $k=>$v){
+                    //获取距离
+                    $shop[$k]['distance'] = getdistance($lng,$lat,$v['longitude'],$v['latitude']);
+                }
+                //根据距离排序
+                $shop = arr_sort($shop,'distance',$order="asc");
+                return json_encode(['code'=>200,'data'=>$shop]);
+            }else{
+                return json_encode(['code'=>400,'data'=>'暂无数据']);
+            }
+
+        }
     }
 
 

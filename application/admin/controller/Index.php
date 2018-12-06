@@ -38,6 +38,8 @@ class Index extends Common
 
     public static $table_prize = 'prize';
 
+    public static $table_goods_type = 'goods_type'; //商品分类
+
     public $time;
 
     public static $msg = [];
@@ -655,9 +657,102 @@ class Index extends Common
             }
         }
     }
+    //删除图片从本地
+    function delpics($arr){
+        $path = trim(ROOT_PATH,'/');
+        foreach($arr as $k=>$v){
+            //dd($path.$v);
+            if(file_exists($path.$v)){
+                //dd(11);
+                unlink($path.$v);
+            }
+        }
+    }
 
     //积分商城
+    public function uploadone($validate = ['size'=>10240000,'ext'=>'jpg,png,gif']){
+        $files = request()->file('fileList');
+        //dd($files);
+        //判断是不是多图上传
+        $dir = ROOT_PATH . 'public' . DS . 'uploads' . DS;
+        $date = date('Ymd', time()) . '/';
+        $path = $dir . $date;
+        dd($path);
+        if (!file_exists($path)) {
+            mkdir($path, 0775, true);
+        }
+        if (empty($files)) {
+            return false;
+        } else {
+            // 移动到框架应用根目录/public/uploads/ 目录下
+            $info = $files->validate($validate)->rule('uniqid')->move($path);
+            if ($info) {
+                $pic_arr = '/public/uploads/'.$date.$info->getFilename();
+                return trim($pic_arr);
+            } else {
+                // 上传失败获取错误信息
+                return false;
+            }
+        }
 
+    }
+    //商品分类设置
+    public function setgoodstype()
+    {
+        $flag = input('flag');
+        $where = [
+            'app_id'    => $this->id,
+            'type_id'  => $this->parme('type_id')
+        ];
+        if(Request::instance()->isPost()){
+            $insert = [
+                'sort'          => $this->parme('sort'), //排序
+                'type_name'     => $this->parme('goods_name'), // 名称
+                'parentid'      => (int)$this->parme('parentid','0'),//父级ID
+                'status'        => $this->parme('status',1),//zhuangtai
+                'updated_at'    => $this->time,
+            ];
+            if($flag == 'add'){
+                //$insert['deputy_id'] = $this->parme('deputy_id'); //代理ID
+                $insert['app_id']    = $this->id; //哪个平台
+                $insert['created_at']= $this->time;
+                $res = db(self::$table_goods_type)->insertGetId($insert);
+            }else{
+                $res = db(self::$table_goods_type)->where($where)->update($insert);
+            }
+            if($res){
+                return $this->redirect('index/setgoodstype');
+            }else{
+                $this->error('操作失败');
+            }
+        }else {
+            $wherelist = [
+                'app_id' => $this->id,
+            ];
+            if ($this->parme('status')) {
+                $where['status'] = $this->parme('status');  //下架或售罄商品
+            }
+            $data = db(self::$table_goods_type)
+                ->where($wherelist)
+                ->page(input('page', 1), input('pageshow', 15))
+                ->select();
+            return view('listgoodstype', [
+                'data' => $data,
+                'status' => (int)$this->parme('status', '1'),
+            ]);
+        }
+    }
+
+    //商品分类表
+    private function typelist()
+    {
+        $list = db(self::$table_goods_type)->where(['app_id'=>$this->id,'status'=>1])->field('type_id,type_name')->select();
+        if(!empty($list)){
+            return $list;
+        }else{
+            return false;
+        }
+    }
     //商品设置
     public function setgoods()
     {
@@ -668,19 +763,15 @@ class Index extends Common
             'goods_id'  => $this->parme('goods_id')
         ];
         if(Request::instance()->isPost()){
-            $return = $this->upload('image');
-            if($return == false){
-                $this->error('上传图片失败');
-            }
             $insert = [
                 'sort'          => $this->parme('sort'), //排序
                 'goods_name'    => $this->parme('goods_name'), // 名称
-                'pic_arr'       => $return,//商品图片
+                'pic_arr'       => $this->parme('pics'),//商品图片
                 'price'         => $this->parme('price'),//价格
                 'stock'         => $this->parme('stock'),//库存
                 'goods_desc'    => $this->parme('goods_desc'),//详情
                 'sales'         => $this->parme('sales'),//销量
-                'status'        => $this->parme('status'),//状态 //0上架 1售罄 2下架
+                'type_id'       => $this->parme('type_id'),//商品分类
                 //'shelves'       => 'true',//上下架
                 'updated_at'    => $this->time,
             ];
@@ -688,8 +779,16 @@ class Index extends Common
                 //$insert['deputy_id'] = $this->parme('deputy_id'); //代理ID
                 $insert['app_id']    = $this->id; //哪个平台
                 $insert['created_at']= $this->time;
+                $insert['status']    = (int)$this->parme('status','0');//状态 //0上架 1售罄 2下架
                 $res = db(self::$table_goods)->insertGetId($insert);
             }else{
+                //删除原图片
+                $pic_arr = trim($this->parme('pic_arr'),',');
+                if(!empty($pic_arr)){
+                    $pic_arr = explode(',',$pic_arr);
+                    //删除接口
+                    $this->delpics($pic_arr);
+                }
                 $res = db(self::$table_goods)->where($where)->update($insert);
             }
             if($res){
@@ -699,13 +798,26 @@ class Index extends Common
             }
         }else{
             if($flag == 'add'){
-                return view('addgoods');
+                //检测是否有商品分类
+                $return = $this->typelist();
+                if($return === false){
+                    return $this->redirect('index/setgoodstype');
+                }
+                return view('addgoods',[
+                    'list'   => $return,
+                ]);
             }else if($flag == 'update'){
+                //检测是否有商品分类
+                $return = $this->typelist();
+                if($return === false){
+                    return $this->redirect('index/setgoodstype');
+                }
                 $data = db(self::$table_goods)
                     ->where($where)
                     ->find();
                 return view('updategoods',[
-                    'data'   => $data
+                    'data'   => $data,
+                    'list'   => $return,
                 ]);
             }else{
                 $wherelist = [
@@ -718,6 +830,19 @@ class Index extends Common
                     ->where($wherelist)
                     ->page(input('page',1),input('pageshow',15))
                     ->select();
+                if($data){
+                    foreach ($data as $k=>$v){
+                        $pics = trim($v['pic_arr'],',');
+                        if(!empty($pics)){
+                            $pics = explode(',',$pics);
+                            $logo = $pics[0];
+                        }else{
+                            $logo = '暂无图片';
+                        }
+                        $data[$k]['logo'] = $logo;
+                        $data[$k]['typename'] = db(self::$table_goods_type)->where('type_id',$v['type_id'])->value('type_name');
+                    }
+                }
                 return view('listgoods',[
                     'data'    => $data,
                     'status'  => (int)$this->parme('status','0'),
@@ -730,29 +855,51 @@ class Index extends Common
 
     public function delgoods()
     {
-        $rule = [
-            'goods_id'   => 'require',
-            //'app_id'      => 'require',
-        ];
-        $field = [
-            'goods_id'   => '商品ID',
-            'app_id'     => '平台ID',
-        ];
-
-        $validate = new Validate($rule,self::$msg,$field);
-
-        if(!$validate->check($this->parme)){
-            $this->error($validate->getError());
-        }else{
+        //dd(222);
+        if(Request::instance()->isAjax()) {
             $where = [
                 'app_id'    => $this->id,
-                'goods_id'  => $this->parme('goods_id')
+                'goods_id'  => $this->parme('goods_id'),
             ];
             $res = db(self::$table_goods)->where($where)->delete();
-            if($res){
-                return $this->redirect('index/setgoods');
-            }else{
-                $this->error('操作失败');
+            if ($res) {
+                return json(['code'=>200,'msg'=>'操作成功']);
+            } else {
+                return json(['code'=>400,'msg'=>'操作失败']);
+            }
+        }
+    }
+    //上架
+    public function up()
+    {
+        //dd(222);
+        if(Request::instance()->isAjax()) {
+            $where = [
+                'app_id'    => $this->id,
+                'goods_id'  => $this->parme('goods_id'),
+            ];
+            $res = db(self::$table_goods)->where($where)->update(['status'=>0,'updated_at'=>$this->time]);
+            if ($res) {
+                return json(['code'=>200,'msg'=>'操作成功']);
+            } else {
+                return json(['code'=>400,'msg'=>'操作失败']);
+            }
+        }
+    }
+
+    public function down()
+    {
+        //dd(222);
+        if(Request::instance()->isAjax()) {
+            $where = [
+                'app_id'    => $this->id,
+                'goods_id'  => $this->parme('goods_id'),
+            ];
+            $res = db(self::$table_goods)->where($where)->update(['status'=>2,'updated_at'=>$this->time]);
+            if ($res) {
+                return json(['code'=>200,'msg'=>'操作成功']);
+            } else {
+                return json(['code'=>400,'msg'=>'操作失败']);
             }
         }
     }
