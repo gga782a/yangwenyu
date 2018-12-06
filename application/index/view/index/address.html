@@ -2,14 +2,16 @@
 
 <body style="background-color: #F4F4F4;">
     <div class="address">
+        {notempty name="$data"}
+        {volist name="data" id="vo"}
         <div class="dl clearfixed">
             <div class="dt li">
                 <div class="pTRBL">
                     <div class="clearfixed">
-                        <div class="li">名字</div>
-                        <div class="li left15">13649877522</div>
+                        <div class="li">{$vo.name}</div>
+                        <div class="li left15">{$vo.phone}</div>
                     </div>
-                    <div class="gray ellipsis top">地址地址地址地址</div>
+                    <div class="gray ellipsis top">{$vo.position}{$vo.address}</div>
                 </div>
             </div>
             <div class="dd clearfixed li">
@@ -17,36 +19,8 @@
                 <div class="li shpopdelet">删除</div>
             </div>
         </div>
-        <div class="dl clearfixed">
-            <div class="dt li">
-                <div class="pTRBL">
-                    <div class="clearfixed">
-                        <div class="li">名字</div>
-                        <div class="li left15">13649877522</div>
-                    </div>
-                    <div class="gray ellipsis top">地址地址地址地址</div>
-                </div>
-            </div>
-            <div class="dd clearfixed li">
-                <div class="li shpopedits">修改</div>
-                <div class="li shpopdelet">删除</div>
-            </div>
-        </div>
-        <div class="dl clearfixed">
-            <div class="dt li">
-                <div class="pTRBL">
-                    <div class="clearfixed">
-                        <div class="li">名字</div>
-                        <div class="li left15">13649877522</div>
-                    </div>
-                    <div class="gray ellipsis top">地址地址地址地址</div>
-                </div>
-            </div>
-            <div class="dd clearfixed li">
-                <div class="li shpopedits">修改</div>
-                <div class="li shpopdelet">删除</div>
-            </div>
-        </div>
+        {/volist}
+        {/notempty}
         <div class="shopBtn">+添加地址</div>
     </div>
     {include file="common/footer" /}

@@ -7,54 +7,26 @@
 	</div>
     <div class="shopBox">
     	<div class="clearfixed shopbor">
+			{notempty name="$data"}
+			{volist name="data" id="vo"}
     		<div class="li">
     			<div class="padding15">
-	    			<div class="shopConTitle ellipsis bottom3">商品名字</div>
-	    			<div class="shopConidt gray ellipsis bottom3">商品简介</div>
+	    			<div class="shopConTitle ellipsis bottom3">{$vo.goods_name}</div>
+	    			<div class="shopConidt gray ellipsis bottom3">{$vo.goods_desc}</div>
 	    			<div class="clearfixed bottom3">
-	    				<div class="li yellow font14 pr2">2000</div>
+	    				<div class="li yellow font14 pr2">{$vo.price}</div>
 	    				<div class="li small gray itg pr2">积分</div>
 	    				<div class="li smallBtn yellow eca">兑换</div>
 	    			</div>
 	    			<a href="shopDetail.html">
 		    			<div class="shopImg">
-		    				<img src="img/rule_popups.png" alt="">
+		    				<img src="__IMG__/rule_popups.png" alt="">
 		    			</div>
 	    			</a>
 	    		</div>
     		</div>
-    		<div class="li">
-    			<div class="padding15">
-	    			<div class="shopConTitle ellipsis bottom3">商品名字</div>
-	    			<div class="shopConidt gray ellipsis bottom3">商品简介</div>
-	    			<div class="clearfixed bottom3">
-	    				<div class="li yellow font14 pr2">2000</div>
-	    				<div class="li small gray itg pr2">积分</div>
-	    				<div class="li smallBtn yellow eca">兑换</div>
-	    			</div>
-	    			<a href="shopDetail.html">
-		    			<div class="shopImg">
-		    				<img src="img/rule_popups.png" alt="">
-		    			</div>
-	    			</a>
-	    		</div>
-    		</div>
-    		<div class="li">
-    			<div class="padding15">
-	    			<div class="shopConTitle ellipsis bottom3">商品名字</div>
-	    			<div class="shopConidt gray ellipsis bottom3">商品简介</div>
-	    			<div class="clearfixed bottom3">
-	    				<div class="li yellow font14 pr2">2000</div>
-	    				<div class="li small gray itg pr2">积分</div>
-	    				<div class="li smallBtn yellow eca">兑换</div>
-	    			</div>
-	    			<a href="shopDetail.html">
-		    			<div class="shopImg">
-		    				<img src="img/rule_popups.png" alt="">
-		    			</div>
-	    			</a>
-	    		</div>
-    		</div>
+			{/volist}
+			{/notempty}
     	</div>
     </div>
 	{include file="common/footer" /}

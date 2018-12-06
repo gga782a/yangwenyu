@@ -20,6 +20,8 @@ class Index extends Common
     private $appSecret;
     public static $table_shop = 'shop';
     public static $table_goods = 'goods';
+    public static $table_member = 'member';
+    public static $table_address = 'address';
     public function __construct(Request $request = null)
     {
         parent::__construct($request);
@@ -54,7 +56,25 @@ class Index extends Common
         if(!$this->member_id){
             return redirecturl('address');
         }
-        return view('address');
+        $app_id = db(self::$table_member)->where('member_id',$this->member_id)->value('app_id');
+        $flag = input('flag');
+        if(Request::instance()->isPost()){
+
+        }else{
+            if($flag == 'add'){
+                return view('addaddress');
+            }else if($flag == 'update'){
+
+            }else{
+                $address = db(self::$table_address)
+                    ->where('member_id',$this->member_id)
+                    ->order('created_at desc')
+                    ->select();
+                return view('address',[
+                    'data' => $address,
+                ]);
+            }
+        }
     }
 
     public function business()
@@ -179,7 +199,10 @@ class Index extends Common
         if(!$this->member_id){
             return redirecturl('shopIndex');
         }
-        return view('shopIndex');
+        $data = db(self::$table_goods)->where(['status'=>0])->select();
+        return view('shopIndex',[
+            'data' => $data,
+        ]);
     }
 
     public function shopList()
