@@ -699,31 +699,36 @@ class Index extends Common
     //商品分类设置
     public function setgoodstype()
     {
-        $flag = input('flag');
+        //dd(22);
         $where = [
             'app_id'    => $this->id,
             'type_id'  => $this->parme('type_id')
         ];
-        if(Request::instance()->isPost()){
+       //dd($where);
+        if(Request::instance()->isAjax()){
+            $flag = input('flag');
+            //dd($flag);
             $insert = [
                 'sort'          => $this->parme('sort'), //排序
-                'type_name'     => $this->parme('goods_name'), // 名称
+                'type_name'     => $this->parme('type_name'), // 名称
                 'parentid'      => (int)$this->parme('parentid','0'),//父级ID
                 'status'        => $this->parme('status',1),//zhuangtai
                 'updated_at'    => $this->time,
             ];
             if($flag == 'add'){
+                //dd(211);
                 //$insert['deputy_id'] = $this->parme('deputy_id'); //代理ID
                 $insert['app_id']    = $this->id; //哪个平台
                 $insert['created_at']= $this->time;
                 $res = db(self::$table_goods_type)->insertGetId($insert);
+                //dd($res);
             }else{
                 $res = db(self::$table_goods_type)->where($where)->update($insert);
             }
             if($res){
-                return $this->redirect('index/setgoodstype');
+                return json(['code'=>200,'msg'=>'操作成功']);
             }else{
-                $this->error('操作失败');
+                return json(['code'=>400,'msg'=>'操作失败']);
             }
         }else {
             $wherelist = [
@@ -862,6 +867,23 @@ class Index extends Common
                 'goods_id'  => $this->parme('goods_id'),
             ];
             $res = db(self::$table_goods)->where($where)->delete();
+            if ($res) {
+                return json(['code'=>200,'msg'=>'操作成功']);
+            } else {
+                return json(['code'=>400,'msg'=>'操作失败']);
+            }
+        }
+    }
+
+    public function delgoodstype()
+    {
+        //dd(222);
+        if(Request::instance()->isAjax()) {
+            $where = [
+                'app_id'    => $this->id,
+                'type_id'  => $this->parme('type_id'),
+            ];
+            $res = db(self::$table_goods_type)->where($where)->delete();
             if ($res) {
                 return json(['code'=>200,'msg'=>'操作成功']);
             } else {
