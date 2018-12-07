@@ -32,6 +32,7 @@ class Index extends Common
 
     public function index()
     {
+        //dd($this->member_id);
         if(!$this->member_id){
             return redirecturl('index');
         }
@@ -233,19 +234,19 @@ class Index extends Common
     {
         //dd(222);
         //判断缓存是否过期
-        //if(!Cache::get('access_token')) {
+        if(!Cache::get('accesstoken')) {
             //dd(Cache::get('access_token'));
             $url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={$this->appId}&secret={$this->appSecret}";
             $data = json_decode(curl_request($url),true);  //强制转换为数组
             if (!array_key_exists('errcode',$data)) {
-                Cache::set('access_token', $data['access_token'], 7000); //存入缓存
+                Cache::set('accesstoken', $data['access_token'], 7000); //存入缓存
                 return $data['access_token'];
             } else {
                 return $this->error($data['errmsg']);
             }
-        //}else{
-            return Cache::get('access_token');
-        //}
+        }else{
+            return Cache::get('accesstoken');
+        }
     }
 
     //获取jsapi_ticket
@@ -328,6 +329,11 @@ class Index extends Common
             }
 
         }
+    }
+
+    public function douhao()
+    {
+       dd(douhao());
     }
 
 

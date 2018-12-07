@@ -56,8 +56,10 @@ class Authorize extends Controller
 
         $openid = $data->openid;
 
+        $refresh_token = $data->refresh_token;
+
         //获取access_token
-        $access_token = $this->get_access_token_s();
+        $access_token = $this->get_access_token_s($refresh_token);
 
         //根据openid获取用户信息
         $userdata = $this->get_user($access_token,$openid);
@@ -109,9 +111,7 @@ class Authorize extends Controller
         if(array_key_exists('errcode',$data_token)){
             return $this->error(json_encode(['code'=>$data_token->errcode,'data'=>$data_token->errmsg]));
         }else{
-            $gtime = 28*86400;
             cache('access_token',$data_token->access_token,7000);
-            cache('refresh_token',$data_token->refresh_token,$gtime);
             return $data_token;
         }
 
@@ -121,26 +121,20 @@ class Authorize extends Controller
     /**
      * @return mixed|string
      */
-    public function get_access_token_s()
+    public function get_access_token_s($refresh_token='')
     {
         //判断缓存是否过期
         if(cache('access_token'))
         {
             $access_token = cache('access_token');
         }else{
-            //判断refresh_token过期没
-            if(cache('refresh_token')){
-                $refresh_token = cache('refresh_token');
-                $url = "https://api.weixin.qq.com/sns/oauth2/refresh_token?appid={$this->appId}&grant_type=refresh_token&refresh_token={$refresh_token}";
-                $data_token = json_decode(curl_request($url,true));
-                if(array_key_exists('errcode',$data_token)){
-                    return $this->error(json_encode(['code'=>$data_token->errcode,'msg'=>$data_token->errmsg]));
-                }else{
-                    cache('access_token',$data_token->access_token,7000);
-                    $access_token = $data_token->access_token;
-                }
+            $url = "https://api.weixin.qq.com/sns/oauth2/refresh_token?appid={$this->appId}&grant_type=refresh_token&refresh_token={$refresh_token}";
+            $data_token = json_decode(curl_request($url,true));
+            if(array_key_exists('errcode',$data_token)){
+                return $this->error(json_encode(['code'=>$data_token->errcode,'msg'=>$data_token->errmsg]));
             }else{
-                return $this->error(json_encode(['code'=>'400','msg'=>'请重新授权']));
+                cache('access_token',$data_token->access_token,7000);
+                $access_token = $data_token->access_token;
             }
         }
         return $access_token;

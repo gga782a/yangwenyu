@@ -96,4 +96,18 @@ function arr_sort($array,$key,$order="asc"){//asc是升序 desc是降序
     return $arr;
 }
 
+function douhao($num=1500900065,$res=''){
+    $a = $num/1000;
+    if( $a>1){
+        $res = ','.substr($num,strlen($num)-3).$res;
+
+        $b = substr($num,0,strlen($num)-3);
+        return douhao($b,$res);
+    }else{
+        //var_dump($res);
+        $res = $num.$res;
+        return $res;
+    }
+}
+
 

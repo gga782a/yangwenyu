@@ -21,6 +21,11 @@
         </div>
         {/volist}
         {/notempty}
-        <div class="shopBtn">+添加地址</div>
+        <div class="shopBtn" onclick="jumpurl();">+添加地址</div>
     </div>
+    <script>
+function jumpurl(){
+    window.location.href = "{:url('index/address',array('flag'=>'add'))}";
+}
+        </script>
     {include file="common/footer" /}
