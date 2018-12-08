@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>H+ 后台主题UI框架 - 基本表单</title>
+    <meta name="keywords" content="H+后台主题,后台bootstrap框架,会员中心主题,后台HTML,响应式后台">
+    <meta name="description" content="H+是一个完全响应式，基于Bootstrap3最新版本开发的扁平化主题，她采用了主流的左右两栏式布局，使用了Html5+CSS3等现代技术">
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.staticfile.org/font-awesome/4.4.0/css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="__ADMIN__/css/plugins/iCheck/custom.css" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="__ADMIN__/css/style.min-v=4.1.0.css" rel="stylesheet">
+    <link rel="stylesheet" href="__ADMIN__/src/css/layui.css">
+    <link href="__ADMIN__/src/css/modules/layer/default/layer.css" rel="stylesheet">
+</head>
+
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>代理
+                        <small>新增</small>
+                    </h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <form method="post" class="form-horizontal" action="{:url('index/express',array('flag'=>'add'))}">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">模板名</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="name" required>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">快递公司名 </label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="express_name" required>
+
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">计算方式 </label>
+                            <div class="col-sm-10">
+                                <input type="radio" class="form-control" checked="checked" value="1"  name="type" style="width: 3%;float: left;">
+                                <span style="float:left;line-height: 38px;color:#409eff;margin-top: 2px;">以件计算</span>
+
+                            </div>
+                        </div>
+
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">是否包邮 </label>
+                            <div class="col-sm-10 js_radio">
+                                <input type="radio" value="1" class="form-control" checked  name="ismail" style="width: 3%;float: left;">
+                                <span style="float:left;line-height: 38px;margin:2px 10px 0 0">
+                                    卖家承担运费包邮
+                                </span>
+                                <input type="radio" value="2" class="form-control" checked  name="ismail" style="width: 3%;float: left;">
+                                <span style="float:left;line-height: 38px;margin:2px 10px 0 0">
+                                    买家承担运费
+                                </span>
+                                <input type="radio" value="3" class="form-control" checked  name="ismail" style="width: 3%;float: left;">
+                                <span style="float:left;line-height: 38px;margin:2px 10px 0 0">
+                                    满足件数包邮
+                                </span>
+                                <input type="radio" value="4"  class="form-control" checked  name="ismail" style="width: 3%;float: left;">
+                                <span style="float:left;line-height: 38px;margin:2px 10px 0 0">
+                                    满足金额包邮
+                                </span>
+                            </div>
+                        </div>
+
+                        <div id="ss_input"></div>
+
+
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">代理账号</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="username" required>
+                                <span class="help-block m-b-none">汉字、字母、数字,长度4-18位</span>
+
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">代理密码</label>
+
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="pwd" required>
+                                <span class="help-block m-b-none"> 字母、数字,长度4-18位</span>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group" >
+                            <label class="col-sm-2 control-label">代理省市区</label>
+                            <div class="col-sm-10">
+                                <ul style="display:flex;margin-top: 5px;">
+                                    <li style="float: left;margin-right: 30px;">
+                                        <select id="province" name="province" required>
+                                            <option value="">省份</option>
+                                        </select>
+                                    </li>
+                                    <li style="float: left;margin-right: 30px;">
+                                        <select id="city" name="city">
+                                            <option value="">城市</option>
+                                        </select>
+                                    </li>
+                                    <li style="float: left;margin-right: 30px;">
+                                        <select id="county" name="county">
+                                            <option value="">区县</option>
+                                        </select>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-2">
+                                <button class="btn btn-primary" type="submit">保存内容</button>
+                                <button class="btn btn-white" type="button" onclick="jump()">取消</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.staticfile.org/jquery/2.1.4/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script src="__ADMIN__/js/content.min-v=1.0.0.js"></script>
+<script src="__ADMIN__/js/plugins/iCheck/icheck.min.js"></script>
+<script src="__ADMIN__/src/layui.js" charset="utf-8"></script>
+<script src="__ADMIN__/js/sitedata_bas.js">
+
+</script>
+<script>
+    function jump() {
+        window.location.href="{:url('index/express')}";
+    }
+
+    $(".js_radio>input").on('click',function(){
+        console.log(this.value);
+        var text = this.value;
+        $('#ss_input').text(text)
+    });
+
+</script></script>
+
+</body>
+
+</html>;

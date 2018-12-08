@@ -40,6 +40,8 @@ class Index extends Common
 
     public static $table_goods_type = 'goods_type'; //商品分类
 
+    public static $table_express_templete = 'express_templete'; //快递模板=
+
     public $time;
 
     public static $msg = [];
@@ -1147,6 +1149,85 @@ class Index extends Common
                 'prize_id' => $this->parme('prize_id')
             ];
             $res = db(self::$table_prize)->where($where)->delete();
+            if ($res) {
+                return json(['code'=>200,'msg'=>'操作成功']);
+            } else {
+                return json(['code'=>400,'msg'=>'操作失败']);
+            }
+        }
+    }
+
+    //设置快递模板
+
+    public function express()
+    {
+        //标识符区分添加修改
+        $flag = input('flag');
+        $where = [
+            'app_id'     => $this->id,
+            'express_id'  => $this->parme('express_id')
+        ];
+        if(Request::instance()->isPost()){
+            //dd(floatval($this->parme('probability')));
+            $insert['name']        = $this->parme('name');  //模板名称
+            $insert['express_name']= $this->parme('express_name');  //快递公司名
+            $insert['type']        = $this->parme('type',1);  //计算方式 1.计件2重量 3体积
+            $insert['ismail']      = $this->parme('ismail',1);  //1卖家承担运费包邮2买家承担运费 3满足件数包邮4满足金额包邮
+            $insert['basefee']     = floatval($this->parme('basefee')); //一件的基础运费
+            $insert['increfee']    = floatval($this->parme('increfee')); //增加一件增加的运费
+            $insert['usecondition']= floatval($this->parme('usecondition')); //满足的条件
+            $insert['updated_at']  = time();  //创建时间
+            if($flag == 'add'){
+                $insert['status']      = '1';   //启用
+                $insert['app_id']  = $this->id;
+                $insert['created_at']= time();
+                $id = db(self::$table_express_templete)->insertGetId($insert);
+                if($id){
+                    return $this->redirect('index/express');
+                }else{
+                    return $this->error('操作失败');
+                }
+            }else{
+                $res = db(self::$table_express_templete)->where($where)->update($insert);
+            }
+            if($res!==false){
+                return $this->redirect('index/express');
+            }else{
+                return $this->error('操作失败');
+            }
+        }else{
+            if($flag == 'add'){
+                return view('addexpress');
+            }else if($flag == 'update'){
+                $data = db(self::$table_express_templete)->where($where)->find();
+                return view('editexpress',[
+                    'data'    => $data,
+                ]);
+            }else{
+                $wherelist = [
+                    'app_id' => $this->id,
+                    'status' => 1,
+                ];
+                $data = db(self::$table_express_templete)
+                    ->where($wherelist)
+                    ->page(input('page',1),input('pageshow',15))
+                    ->select();
+                return view('listexpress',[
+                    'data'    => $data,
+                ]);
+            }
+        }
+    }
+    //删除快递模板
+    public function delexpress()
+    {
+        //dd(222);
+        if(Request::instance()->isAjax()) {
+            $where = [
+                'app_id'    => $this->id,
+                'express_id'=> $this->parme('express_id'),
+            ];
+            $res = db(self::$table_express_templete)->where($where)->delete();
             if ($res) {
                 return json(['code'=>200,'msg'=>'操作成功']);
             } else {
