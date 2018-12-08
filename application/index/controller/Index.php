@@ -57,18 +57,54 @@ class Index extends Common
         if(!$this->member_id){
             return redirecturl('address');
         }
-        $app_id = db(self::$table_member)->where('member_id',$this->member_id)->value('app_id');
+        //$app_id = db(self::$table_member)->where('member_id',$this->member_id)->value('app_id');
+        $where = [
+            //'app_id'    => $app_id,
+            'member_id' => $this->member_id,
+            'address_id'=> input('address_id'),
+        ];
         $flag = input('flag');
         if(Request::instance()->isPost()){
-
+            $insert = [
+                'name'      => input('name'),
+                'phone'     => input('phone'),
+                'position'  => input('position'),
+                'address'   => input('address'),
+                'updated_at'=> time(),
+            ];
+            if($flag == 'add'){
+                //$insert['app_id']    = $app_id;
+                $insert['member_id'] = $this->member_id;
+                $insert['isdefault'] = 0;
+                $insert['status']    = 1;
+                $insert['created_at']= time();
+                $id = db(self::$table_address)->insertGetId($insert);
+                if($id){
+                    return $this->redirect('index/address');
+                }else{
+                   return $this->error('操作失败');
+                }
+            }else{
+                $res = db(self::$table_address)->where($where)->update($insert);
+                if($res !== false){
+                    return $this->redirect('index/address');
+                }else{
+                    return $this->error('操作失败');
+                }
+            }
         }else{
             if($flag == 'add'){
                 return view('addaddress');
             }else if($flag == 'update'){
-
+                $data = db(self::$table_address)
+                    ->where($where)
+                    ->find();
+                return view('updateaddress',[
+                    'data' => $data,
+                ]);
             }else{
                 $address = db(self::$table_address)
-                    ->where('member_id',$this->member_id)
+                    ->where(['member_id'=>$this->member_id])
                     ->order('created_at desc')
                     ->select();
                 return view('address',[
