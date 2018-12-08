@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<!-- saved from url=(0067)http://www.17sucai.com/preview/1266961/2018-09-25/picker/index.html -->
+<html lang="en-us">
+<head>
+    <meta name="viewport" content="width=device-width; initial-scale=1.0" />
+    <link rel="stylesheet" href="__CSS__/style.css" />
+    <meta charset="utf-8" />
+    <title>壹零玖</title>
+    <link rel="stylesheet" href="__CSS__/reset.css" type="text/css" />
+    <link rel="stylesheet" href="__CSS__/style.css" type="text/css" />
+    <link rel="stylesheet" href="__CSS__/three.css" type="text/css" />
+    <link rel="stylesheet" href="__STATIC__/dist/css/swiper.min.css">
+    <link rel="stylesheet" href="__STATIC__/layui/css/layui.css" type="text/css" />
+    <link href="__ADMIN__/src/css/modules/layer/default/layer.css" rel="stylesheet">
+    <link href="__STATIC__/index/css/demo.css" rel="stylesheet" media="all">
+    <style>
+        .cancel{
+            background: #fff !important;
+        }
+        .btnconfirm {
+            display: inline-block;
+            width: 80%;
+            margin: 0.3rem 10%;
+            padding: 0.3rem;
+            text-align: center;
+            color: #fff;
+            font-size: 0.5rem;
+            border-radius: 0.1rem;
+            background: #FBC028;
+        }
+    </style>
+    <!--[if IE]>
+
+
+
+    <![endif]-->
+
+    <script src="__STATIC__/index/js/hm.js">
+    </script><script type="text/javascript" src="__STATIC__/index/js/jquery.min.js"></script>
+    <!--<script type="text/javascript" src="./sanji_files/jquery.qrcode.min.js"></script>-->
+    <script type="text/javascript">
+        $(document).ready(function () {
+            function fixHeight() {
+                var headerHeight = $("#switcher").height();
+                $("#iframe").attr("height", $(window).height()-54+ "px");
+            }
+            $(window).resize(function () {
+                fixHeight();
+            }).resize();
+
+            $('.icon-monitor').addClass('active');
+
+            $(".icon-mobile-3").click(function () {
+                $("#by").css("overflow-y", "auto");
+                $('#iframe-wrap').removeClass().addClass('mobile-width-3');
+                $('.icon-tablet,.icon-mobile-1,.icon-monitor,.icon-mobile-2,.icon-mobile-3').removeClass('active');
+                $(this).addClass('active');
+                return false;
+            });
+
+            $(".icon-mobile-2").click(function () {
+                $("#by").css("overflow-y", "auto");
+                $('#iframe-wrap').removeClass().addClass('mobile-width-2');
+                $('.icon-tablet,.icon-mobile-1,.icon-monitor,.icon-mobile-2,.icon-mobile-3').removeClass('active');
+                $(this).addClass('active');
+                return false;
+            });
+
+            $(".icon-mobile-1").click(function () {
+                $("#by").css("overflow-y", "auto");
+                $('#iframe-wrap').removeClass().addClass('mobile-width');
+                $('.icon-tablet,.icon-mobile,.icon-monitor,.icon-mobile-2,.icon-mobile-3').removeClass('active');
+                $(this).addClass('active');
+                return false;
+            });
+
+            $(".icon-tablet").click(function () {
+                $("#by").css("overflow-y", "auto");
+                $('#iframe-wrap').removeClass().addClass('tablet-width');
+                $('.icon-tablet,.icon-mobile-1,.icon-monitor,.icon-mobile-2,.icon-mobile-3').removeClass('active');
+                $(this).addClass('active');
+                return false;
+            });
+
+            $(".icon-monitor").click(function () {
+                $("#by").css("overflow-y", "hidden");
+                $('#iframe-wrap').removeClass().addClass('full-width');
+                $('.icon-tablet,.icon-mobile-1,.icon-monitor,.icon-mobile-2,.icon-mobile-3').removeClass('active');
+                $(this).addClass('active');
+                return false;
+            });
+        });
+    </script>
+
+    <script type="text/javascript">
+        function Responsive($a) {
+            if ($a == true) $("#Device").css("opacity", "100");
+            if ($a == false) $("#Device").css("opacity", "0");
+            $('#iframe-wrap').removeClass().addClass('full-width');
+            $('.icon-tablet,.icon-mobile-1,.icon-monitor,.icon-mobile-2,.icon-mobile-3').removeClass('active');
+            $(this).addClass('active');
+            return false;
+        }
+    </script>
+
+    <style type="text/css">
+        .picker{display:none;position:fixed;top:0;z-index:100;width:100%;height:100%;overflow:hidden;text-align:center;font-family:PingFang SC,STHeitiSC-Light,Helvetica-Light,arial,sans-serif;font-size:14px;-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;user-select:none}.picker .picker-mask{position:absolute;z-index:500;width:100%;height:100%;transition:all .5s;-webkit-transition:all .5s;background:transparent;opacity:0}.picker .picker-mask.show{background:rgba(0,0,0,.6);opacity:1}.picker .picker-panel{position:absolute;z-index:600;bottom:0;width:100%;height:243px;background:#fff;transform:translateY(243px);-webkit-transform:translateY(243px);transition:all .5s;-webkit-transition:all .5s}.picker .picker-panel.show{transform:translateY(0);-webkit-transform:translateY(0)}.picker .picker-panel .picker-choose{position:relative;height:50px;color:#878787;font-size:14px}.picker .picker-panel .picker-choose .picker-title{line-height:50px;font-size:19px;text-align:center;color:#333}.picker .picker-panel .picker-choose .cancel,.picker .picker-panel .picker-choose .confirm{position:absolute;padding:10px;top:6px}.picker .picker-panel .picker-choose .confirm{right:10px;color:#fa8919}.picker .picker-panel .picker-choose .cancel{left:0}.picker .picker-panel .picker-content{position:relative}.picker .picker-panel .picker-content .mask-bottom,.picker .picker-panel .picker-content .mask-top{position:absolute;z-index:10;width:100%;height:68px;pointer-events:none;transform:translateZ(0);-webkit-transform:translateZ(0)}.picker .picker-panel .picker-content .mask-top{top:0;background:-webkit-gradient(linear,left bottom,left top,from(hsla(0,0%,100%,.4)),to(hsla(0,0%,100%,.8)));background:-o-linear-gradient(bottom,hsla(0,0%,100%,.4),hsla(0,0%,100%,.8))}.picker .picker-panel .picker-content .mask-top:after,.picker .picker-panel .picker-content .mask-top:before{display:block;position:absolute;border-top:1px solid #ccc;left:0;width:100%;content:" "}.picker .picker-panel .picker-content .mask-top:before{display:none;top:0}.picker .picker-panel .picker-content .mask-top:after{display:block;bottom:0}.picker .picker-panel .picker-content .mask-bottom{bottom:0;background:-webkit-gradient(linear,left top,left bottom,from(hsla(0,0%,100%,.4)),to(hsla(0,0%,100%,.8)));background:-o-linear-gradient(top,hsla(0,0%,100%,.4),hsla(0,0%,100%,.8))}.picker .picker-panel .picker-content .mask-bottom:after,.picker .picker-panel .picker-content .mask-bottom:before{display:block;position:absolute;border-top:1px solid #ccc;left:0;width:100%;content:" "}.picker .picker-panel .picker-content .mask-bottom:before{display:block;top:0}.picker .picker-panel .picker-content .mask-bottom:after{display:none;bottom:0}.picker .picker-panel .wheel-wrapper{display:-ms-flexbox;display:-webkit-box;display:flex;padding:0 10px}.picker .picker-panel .wheel-wrapper .wheel{-ms-flex:1 1 1e-9px;-webkit-box-flex:1;flex:1;flex-basis:1e-9px;width:1%;height:173px;overflow:hidden;font-size:21px}.picker .picker-panel .wheel-wrapper .wheel .wheel-scroll{margin-top:68px;line-height:36px}.picker .picker-panel .wheel-wrapper .wheel .wheel-scroll .wheel-item{height:36px;overflow:hidden;white-space:nowrap;color:#333}.picker .picker-footer{height:20px}@media (-webkit-min-device-pixel-ratio:1.5),(min-device-pixel-ratio:1.5){.border-1px:after,.border-1px:before{-webkit-transform:scaleY(.7);-webkit-transform-origin:0 0;transform:scaleY(.7)}.border-1px:after{-webkit-transform-origin:left bottom}}@media (-webkit-min-device-pixel-ratio:2),(min-device-pixel-ratio:2){.border-1px:after,.border-1px:before{-webkit-transform:scaleY(.5);transform:scaleY(.5)}}</style></head>
+<body style="background-color: #F4F4F4;">
+<div class="address">
+    <form method="post" action="{:url('index/address',array('flag'=>'update','address_id'=>$data['address_id']))}">
+        <div class="dl clearfixed" style="background: #f5f5f5;font-size: 16px;line-height: 24px;">
+            <div class="dt li">
+                <div class="pTRBL">
+
+                    <div style="width: 100%;margin: 0 auto;padding: 5px 0px;">
+                        <label style="display: inline-block;width:25%;text-align: right;">收货人：</label>
+                        <input type="text" required name="name" value="{$data.name}" style="padding-left:2%;width: 66%;" placeholder="请填写收货人">
+                    </div>
+                    <div style="width: 100%;margin: 0 auto;padding: 5px 0px;">
+                        <label style="display: inline-block;width:25%;text-align: right;">手机号：</label>
+                        <input type="text" value="{$data.phone}" required name="phone" style="padding-left:2%;width: 66%;" placeholder="请填写收货人手机号">
+                    </div>
+                    <div style="width: 100%;margin: 0 auto;padding: 5px 0px;">
+                        <label style="display: inline-block;width:25%;text-align: right;">地址：</label>
+                        <input type="text"  required name="position" placeholder="每次点击数据联动" id="picker" style="padding-left:2%;width: 66%;" value="{$data.position}">
+                    </div>
+                    <div style="width: 100%;margin: 0 auto;padding: 5px 0px;">
+                        <label style="display: inline-block;width:25%;text-align: right;">详细地址：</label>
+                        <input type="text" name="address" value="{$data.address}" style="padding-left:2%;width: 66%;" placeholder="请填写收货人详细地址">
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+        <button class="btnconfirm" type="submit" style="color:#fff;">确认提交</button>
+
+    </form>
+</div>
+<script src="__STATIC__/index/js/picker.min.js"></script>
+<script type="text/javascript" src="__STATIC__/index/js/city.js"></script>
+<script type="text/javascript" src="__STATIC__/index/js/index.js"></script><div class="picker">
+
+
+    <div class="picker-mask mask-hook"></div>
+    <div class="picker-panel panel-hook">
+        <div class="picker-choose choose-hook">
+            <span class="cancel cancel-hook">取消</span>
+            <span class="confirm confirm-hook">确定</span>
+            <h1 class="picker-title">地址选择</h1>
+        </div>
+        <div class="picker-content">
+            <div class="mask-top border-1px"></div>
+            <div class="mask-bottom border-1px"></div>
+            <div class="wheel-wrapper wheel-wrapper-hook">
+
+                <div class="wheel wheel-hook">
+                    <ul class="wheel-scroll wheel-scroll-hook">
+
+                        <li class="wheel-item" data-val="0">北京</li>
+
+                        <li class="wheel-item" data-val="1">广东</li>
+
+                        <li class="wheel-item" data-val="2">上海</li>
+
+                        <li class="wheel-item" data-val="3">天津</li>
+
+                        <li class="wheel-item" data-val="4">重庆</li>
+
+                        <li class="wheel-item" data-val="5">辽宁</li>
+
+                        <li class="wheel-item" data-val="6">江苏</li>
+
+                        <li class="wheel-item" data-val="7">湖北</li>
+
+                        <li class="wheel-item" data-val="8">四川</li>
+
+                        <li class="wheel-item" data-val="9">陕西</li>
+
+                        <li class="wheel-item" data-val="10">河北</li>
+
+                        <li class="wheel-item" data-val="11">山西</li>
+
+                        <li class="wheel-item" data-val="12">河南</li>
+
+                        <li class="wheel-item" data-val="13">吉林</li>
+
+                        <li class="wheel-item" data-val="14">黑龙江</li>
+
+                        <li class="wheel-item" data-val="15">内蒙古</li>
+
+                        <li class="wheel-item" data-val="16">山东</li>
+
+                        <li class="wheel-item" data-val="17">安徽</li>
+
+                        <li class="wheel-item" data-val="18">浙江</li>
+
+                        <li class="wheel-item" data-val="19">福建</li>
+
+                        <li class="wheel-item" data-val="20">湖南</li>
+
+                        <li class="wheel-item" data-val="21">广西</li>
+
+                        <li class="wheel-item" data-val="22">江西</li>
+
+                        <li class="wheel-item" data-val="23">贵州</li>
+
+                        <li class="wheel-item" data-val="24">云南</li>
+
+                        <li class="wheel-item" data-val="25">西藏</li>
+
+                        <li class="wheel-item" data-val="26">海南</li>
+
+                        <li class="wheel-item" data-val="27">甘肃</li>
+
+                        <li class="wheel-item" data-val="28">宁夏</li>
+
+                        <li class="wheel-item" data-val="29">青海</li>
+
+                        <li class="wheel-item" data-val="30">新疆</li>
+
+                        <li class="wheel-item" data-val="31">香港</li>
+
+                        <li class="wheel-item" data-val="32">澳门</li>
+
+                        <li class="wheel-item" data-val="33">台湾</li>
+
+                        <li class="wheel-item" data-val="34">海外</li>
+
+                        <li class="wheel-item" data-val="35">其他</li>
+
+                    </ul>
+                </div>
+
+                <div class="wheel wheel-hook">
+                    <ul class="wheel-scroll wheel-scroll-hook">
+
+                        <li class="wheel-item" data-val="0">东城区</li>
+
+                        <li class="wheel-item" data-val="1">西城区</li>
+
+                        <li class="wheel-item" data-val="2">崇文区</li>
+
+                        <li class="wheel-item" data-val="3">宣武区</li>
+
+                        <li class="wheel-item" data-val="4">朝阳区</li>
+
+                        <li class="wheel-item" data-val="5">海淀区</li>
+
+                        <li class="wheel-item" data-val="6">丰台区</li>
+
+                        <li class="wheel-item" data-val="7">石景山区</li>
+
+                        <li class="wheel-item" data-val="8">房山区</li>
+
+                        <li class="wheel-item" data-val="9">通州区</li>
+
+                        <li class="wheel-item" data-val="10">顺义区</li>
+
+                        <li class="wheel-item" data-val="11">昌平区</li>
+
+                        <li class="wheel-item" data-val="12">大兴区</li>
+
+                        <li class="wheel-item" data-val="13">怀柔区</li>
+
+                        <li class="wheel-item" data-val="14">平谷区</li>
+
+                        <li class="wheel-item" data-val="15">门头沟区</li>
+
+                        <li class="wheel-item" data-val="16">密云县</li>
+
+                        <li class="wheel-item" data-val="17">延庆县</li>
+
+                        <li class="wheel-item" data-val="18">其他</li>
+
+                    </ul>
+                </div>
+
+                <div class="wheel wheel-hook">
+                    <ul class="wheel-scroll wheel-scroll-hook">
+
+                        <li class="wheel-item" data-val="0"></li>
+
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+        <div class="picker-footer footer-hook"></div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript" src="__JS__/jquery.js"></script>
+<script type="text/javascript" src="__JS__/award.js"></script>
+<script type="text/javascript" src="__JS__/awardRotate.js"></script>
+<script type="text/javascript" src="__JS__/rem.js"></script>
+<script type="text/javascript" src="__STATIC__/layui/layui.js"></script>
+<script src="__STATIC__/dist/js/swiper.min.js"></script>
+<script src="__ADMIN__/src/lay/modules/layer.js" charset="utf-8"></script>
+<script>
+    // 返回
+    function go() {
+        window.history.go(-1);
+    }
+    $(function() {
+        var height = $('.footerBtn').outerHeight();
+        $('.empty').height(height);
+        var he = $('._popups').height();
+        $('._popups').css({
+            'margin-top': -he / 2
+        });
+        //地址
+        var shopL = $('.address .dl .dt').height();
+        $('.address .dl .dd .li').css({
+            "height":shopL,
+            "line-height":shopL+'px'
+        });
+        // 底部
+        var footerEm = $('.footer').height();
+        $('.footerEm').height(footerEm)
+    });
+    //图片加载
+    var counter;
+    var imgLen = $('.canvasImg img');
+    for (var i = 0; i < imgLen.length; i++) {
+        var id = 'indexRain' + i;
+        var img = document.getElementById(id);
+        var src = img.getAttribute('src');
+        img.setAttribute('src', '');
+        img.onload = function() {
+            counter = counter + 1;
+            if (counter == imgLen.length) {
+                drawRouletteWheel();
+            }
+        };
+        img.setAttribute('src', src);
+    }
+    // 弹窗
+    function popups(e){
+        var cl = $(e).attr('data-class');
+        $('#'+cl).show();
+        $('.mask').show()
+    }
+    function close_popups(e){
+        var cl = $(e).attr('data-class');
+        $('.'+cl).hide();
+        $('.mask').hide()
+    }
+    //滑动
+    sweiperPage('dt');
+    var touchNum = 0;
+    function sweiperPage(name) {
+        var startX = 0;
+        var startY = 0;
+        var end = 0;
+        $('.' + name).off('touchstart').on('touchstart', function(e) {
+            var touch = e.originalEvent.targetTouches[0];
+            startY = touch.pageY;
+            startX = touch.pageX
+        });
+        $('.' + name).off('touchmove').on('touchmove', function(e) {
+            var that = $(this);
+            var touch = e.originalEvent.targetTouches[0];
+            endY = touch.pageY;
+            endX = touch.pageX;
+            distanceX = endX - startX;
+            distanceY = endY - startY;
+            if (Math.abs(distanceY) < Math.abs(distanceX) && distanceY < 0) {
+                console.log(endX - startX);
+                if (endX - startX < -50) {
+                    touchNum ++;
+                    if (touchNum == 1) {
+                        sideslip(that)
+                    }
+
+                }else if (endX - startX > 50) {
+                    touchNum ++;
+                    if (touchNum == 1) {
+                        sideslipRight(that)
+                    }
+                }
+            }
+
+        });
+    }
+    function sideslip(that){
+        var left = that.siblings('.dd').width();
+        that.parent().animate({
+            "margin-left":-left
+        },200,function(){
+            touchNum = 0;
+        });
+
+    }
+    function sideslipRight(that){
+        that.parent().animate({
+            "margin-left":"0"
+        },200,function(){
+            touchNum = 0;
+        });
+
+    }
+    // tab
+    function tabs(e){
+        var idx = $(e).attr('data-idx');
+        $('.tabbodys').find('.shopListBox').eq(idx).addClass('show');
+        $('.tabbodys').find('.shopListBox').eq(idx).removeClass('hide');
+        $('.tabbodys').find('.shopListBox').eq(idx).siblings().removeClass('show');
+        $('.tabbodys').find('.shopListBox').eq(idx).siblings().addClass('hide')
+    }
+    // 跳页
+    function jump(e){
+        var href = $(e).attr('data-href');
+        window.location.href = href
+    }
+</script>
+</body>
+
+</html>

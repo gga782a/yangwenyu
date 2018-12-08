@@ -372,6 +372,25 @@ class Index extends Common
        dd(douhao());
     }
 
+    //删除地轴
+
+    public function deladdress()
+    {
+        //dd(222);
+        if(Request::instance()->isAjax()) {
+            $where = [
+                //'app_id'    => $this->id,
+                'address_id'  => input('address_id'),
+            ];
+            $res = db(self::$table_address)->where($where)->delete();
+            if ($res) {
+                return json(['code'=>200,'msg'=>'操作成功']);
+            } else {
+                return json(['code'=>400,'msg'=>'操作失败']);
+            }
+        }
+    }
+
 
 }
 

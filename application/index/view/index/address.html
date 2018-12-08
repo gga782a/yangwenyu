@@ -1,10 +1,10 @@
 ﻿{include file="common/header" /}
 
 <body style="background-color: #F4F4F4;">
-    <div class="address">
+    <div class="address" style="width: 100%;">
         {notempty name="$data"}
         {volist name="data" id="vo"}
-        <div class="dl clearfixed">
+        <div class="dl clearfixed" style="border-bottom: 1px solid #eee;">
             <div class="dt li">
                 <div class="pTRBL">
                     <div class="clearfixed">
@@ -14,9 +14,14 @@
                     <div class="gray ellipsis top">{$vo.position}{$vo.address}</div>
                 </div>
             </div>
-            <div class="dd clearfixed li">
-                <div class="li shpopedits">修改</div>
-                <div class="li shpopdelet">删除</div>
+            <div style="clear: both"></div>
+            <div class="dd li" style="width:50%;background: #fff;">
+                <div  style="float: right;line-height: 36px;width: 30px;margin-right: 30px;"><a
+                        onclick="return del({$vo['address_id']});"
+                >删除</a></div>
+                <div  style="float: right;line-height: 36px;width: 30px;margin-right: 10px;">
+                    <a href="{:url('index/address',array('address_id'=>$vo['address_id'],'flag'=>'update'))}">修改</a>
+                </div>
             </div>
         </div>
         {/volist}
@@ -26,6 +31,31 @@
     <script>
 function jumpurl(){
     window.location.href = "{:url('index/address',array('flag'=>'add'))}";
+}
+function del(id)
+{
+    if(confirm('确定要删除吗')){
+        $.ajax({
+            type:'post',
+            url:'deladdress',
+            data:{'address_id':id},
+            dataType:'json',
+            success:function(data){
+                if(data.code==200) {
+                    layer.msg(data.msg);
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 1000);
+                }else{
+                    layer.msg(data.msg);
+
+                }
+            },
+            error:function(data){
+                console.log(data);
+            }
+        })
+    }
 }
         </script>
     {include file="common/footer" /}
