@@ -1177,6 +1177,7 @@ class Index extends Common
             $insert['increfee']    = floatval($this->parme('increfee')); //增加一件增加的运费
             $insert['usecondition']= floatval($this->parme('usecondition')); //满足的条件
             $insert['updated_at']  = time();  //创建时间
+            //dd($insert);
             if($flag == 'add'){
                 $insert['status']      = '1';   //启用
                 $insert['app_id']  = $this->id;

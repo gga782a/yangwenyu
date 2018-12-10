@@ -66,7 +66,7 @@
             line-height: 40px;
             border: 1px solid #e3e3e3;
         }
-    </style>
+        </style>
 </head>
 
 <body class="gray-bg">
@@ -76,7 +76,7 @@
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
                     <h5>快递模板
-                        <small>新增</small>
+                        <small>修改</small>
                     </h5>
                     <div class="ibox-tools">
                         <a class="collapse-link">
@@ -85,18 +85,18 @@
                     </div>
                 </div>
                 <div class="ibox-content">
-                    <form method="post" class="form-horizontal" action="{:url('index/express',array('flag'=>'add'))}">
+                    <form method="post" class="form-horizontal" action="{:url('index/express',array('flag'=>'update','express_id'=>$data['express_id']))}">
                         <div class="form-group">
                             <label class="col-sm-2 control-label">模板名</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="name" required>
+                                <input type="text" class="form-control" name="name" required value="{$data.name}">
                             </div>
                         </div>
                         <div class="hr-line-dashed"></div>
                         <div class="form-group">
                             <label class="col-sm-2 control-label">快递公司名 </label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="express_name" required>
+                                <input type="text" class="form-control" name="express_name" value="{$data.express_name}" required>
 
                             </div>
                         </div>
@@ -104,7 +104,7 @@
                         <div class="form-group">
                             <label class="col-sm-2 control-label">计算方式 </label>
                             <div class="col-sm-10">
-                                <input type="radio" class="form-control" checked="checked" value="1"  name="type" style="width: 3%;float: left;">
+                                <input type="radio" class="form-control" checked="checked" value="{$data.type}"  name="type" style="width: 3%;float: left;">
                                 <span style="float:left;line-height: 38px;color:#409eff;margin-top: 2px;">以件计算</span>
 
                             </div>
@@ -114,46 +114,54 @@
                         <div class="form-group">
                             <label class="col-sm-2 control-label">是否包邮 </label>
                             <div class="col-sm-10 js_radio">
-                                <input type="radio" value="1" class="form-control" checked  name="ismail" style="width: 3%;float: left;">
+                                <input type="radio" value="1" class="form-control"
+                                       {if condition=" $data['ismail'] == 1 "}checked{else /}{/if}
+                                       name="ismail" style="width: 3%;float: left;">
                                 <span style="float:left;line-height: 38px;margin:2px 10px 0 0">
                                     卖家承担运费包邮
                                 </span>
-                                <input type="radio" value="2" class="form-control"  name="ismail" style="width: 3%;float: left;">
+                                <input type="radio" value="2" class="form-control"
+                                       {if condition=" $data['ismail'] == 2 "}checked{else /}{/if}
+                                       name="ismail" style="width: 3%;float: left;">
                                 <span style="float:left;line-height: 38px;margin:2px 10px 0 0">
                                     买家承担运费
                                 </span>
-                                <input type="radio" value="3" class="form-control"  name="ismail" style="width: 3%;float: left;">
+                                <input type="radio" value="3" class="form-control"
+                                       {if condition=" $data['ismail'] == 3 "}checked{else /}{/if}
+                                       name="ismail" style="width: 3%;float: left;">
                                 <span style="float:left;line-height: 38px;margin:2px 10px 0 0">
                                     满足件数包邮
                                 </span>
-                                <input type="radio" value="4"  class="form-control"   name="ismail" style="width: 3%;float: left;">
+                                <input type="radio" value="4"  class="form-control"
+                                       {if condition=" $data['ismail'] == 4 "}checked{else /}{/if}
+                                       name="ismail" style="width: 3%;float: left;">
                                 <span style="float:left;line-height: 38px;margin:2px 10px 0 0">
                                     满足金额包邮
                                 </span>
                             </div>
                             <!--<div id="normal" class="ss_input">-->
-                            <!--<div style="border-bottom: 1px solid #e3e3e3;height: 80px;">-->
-                            <!--<span style="float: left;margin: 20px 0px 20px 5%;width:45%;line-height: 40px;">每件商品运费单价</span>-->
-                            <!--<span style="float: right;margin: 20px 0px 20px 5%;width:45%;line-height: 40px;">每加1件增加运费</span>-->
-                            <!--</div>-->
-                            <!--<div>-->
-                            <!--<input  name="basefee"  style="padding-left:10px;margin: 40px 5% 40px 5%;width:39%;border-radius:5px;line-height: 40px;border: 1px solid #e3e3e3;" placeholder="请输入运费单价" />-->
-                            <!--<input  name="increfee" style="padding-left:10px;margin: 40px 0px 40px 5%;width:39%;border-radius:5px;line-height: 40px;border: 1px solid #e3e3e3;" placeholder="请输入所增加运费" />-->
-                            <!--</div>-->
+                                    <!--<div style="border-bottom: 1px solid #e3e3e3;height: 80px;">-->
+                                        <!--<span style="float: left;margin: 20px 0px 20px 5%;width:45%;line-height: 40px;">每件商品运费单价</span>-->
+                                        <!--<span style="float: right;margin: 20px 0px 20px 5%;width:45%;line-height: 40px;">每加1件增加运费</span>-->
+                                    <!--</div>-->
+                                    <!--<div>-->
+                                        <!--<input  name="basefee"  style="padding-left:10px;margin: 40px 5% 40px 5%;width:39%;border-radius:5px;line-height: 40px;border: 1px solid #e3e3e3;" placeholder="请输入运费单价" />-->
+                                        <!--<input  name="increfee" style="padding-left:10px;margin: 40px 0px 40px 5%;width:39%;border-radius:5px;line-height: 40px;border: 1px solid #e3e3e3;" placeholder="请输入所增加运费" />-->
+                                    <!--</div>-->
                             <!--</div>style="float: left;margin: 20px 0px 20px 3%;width:30%;line-height: 40px;"
                             style=""-->
-                            <div id="normal" class="ss_input">
+                           <div id="normal" class="ss_input">
                                 <div style="border-bottom: 1px solid #e3e3e3;height: 80px;">
                                     <span class="normal" >每件商品运费单价</span>
                                     <span class="normal" >每加1件增加运费</span>
                                     <span class="normal" style="display: none;" id="text">满足件数包邮</span>
                                 </div>
                                 <div>
-                                    <input  class="normal1" name="basefee"   placeholder="请输入运费单价" />
-                                    <input class="normal1"  name="increfee"  placeholder="请输入所增加运费" />
-                                    <input class="normal1" style="display:none;" id="special" name="usecondition"   placeholder="请输入满足的条件" />
+                                    <input  class="normal1" name="basefee" value="{$data.basefee}"   placeholder="请输入运费单价" />
+                                    <input class="normal1"  name="increfee" value="{$data.increfee}"  placeholder="请输入所增加运费" />
+                                    <input class="normal1" style="display:none;" value="{$data.usecondition}" id="special" name="usecondition"   placeholder="请输入满足的条件" />
                                 </div>
-                            </div>
+                           </div>
                         </div>
                         <div class="hr-line-dashed"></div>
                         <div class="form-group">
@@ -182,7 +190,31 @@
     function jump() {
         window.location.href="{:url('index/express')}";
     }
-
+    $('document').ready(function () {
+        var val = $("input[name=ismail]:checked").val();
+        if(val == 3){
+            $("#special").show();
+            $("#text").text('满足件数包邮');
+            $("#text").show();
+            //$("#normal").removeClass('normal');
+            $(".normal").attr('class','special');
+            $(".normal1").attr('class','special1');
+            $("#normal").css('width','75%');
+        }else if(val == 4){
+            $("#special").show();
+            $("#text").text('满足金额包邮');
+            $("#text").show();
+            $(".normal").attr('class','special');
+            $(".normal1").attr('class','special1');
+            $("#normal").css('width','75%');
+        }else{
+            $("#special").hide();
+            $("#text").hide();
+            $(".special").attr('class','normal');
+            $(".special1").attr('class','normal1');
+            $("#normal").css('width','50%');
+        }
+    });
     $(".js_radio>input").on('click',function(){
         var val = this.value;
         if(val == 3){
