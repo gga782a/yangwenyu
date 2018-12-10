@@ -19,6 +19,9 @@ class Deputy extends Common
     public $id;
     public $app_id;
     public static $table_store = 'store';
+    public static $table_deputy = 'deputy';
+    public static $table_shui = 'shui';
+    public static $table_goushui = 'goushui';
     public static $msg = [];
     public function __construct(Request $request = null)
     {
@@ -198,4 +201,92 @@ class Deputy extends Common
             ]);
         }
     }
+
+    //服务订购
+
+    public function serviceorder()
+    {
+        $where = [
+            'app_id'    => $this->app_id,
+            'deputy_id' => $this->id,
+        ];
+//        //查询当前代理等级
+//        $level = db(self::$table_store)->where($where)->value('level');
+        return view('listservice',[
+
+        ]);
+    }
+    //购水
+    public function goushui()
+    {
+        $where = [
+            'app_id'    => $this->app_id,
+            'deputy_id' => $this->id,
+        ];
+        if(Request::instance()->isPost()){
+
+        }else{
+            //查询当前代理等级
+            $deputy = db(self::$table_deputy)->where($where)->field('level,parentid')->find();
+            if($deputy) {
+                $level = $deputy['level'];
+                $parentid = $deputy['parentid'];
+                $istrue = false;
+                $goushui = [];
+                if ($level == 0) {
+                    $field = 'shui_id,name,stock,deputyprice';
+                    //在分公司买水 如果不存在分公司或者分公司没有水（水余量为0） 则可以在总平台购买
+                    if($parentid != 0){
+                        $goushui = db(self::$table_goushui)
+                           ->where(['app_id'=> $this->app_id,'type'=>1,'type_id'=>$parentid])
+                           ->select();
+                        if(count($goushui)>0){
+                            foreach($goushui as $k=>$v){
+                                if($v['stock']>0){
+                                    break;
+                                }else{
+                                    $istrue = true;
+                                }
+                            }
+                        }else{
+                            $istrue = true;
+                        }
+                    }else{
+                        $istrue = true;
+                    }
+                } else {
+                    $field = 'shui_id,name,stock,companyprice';
+                    $istrue = true;
+                }
+                if($istrue){
+                    //水列表
+                    $list = db(self::$table_shui)
+                        ->where(['app_id' => $this->app_id])
+                        ->field($field)
+                        ->page(input('page', 1), input('pageshow', 15))
+                        ->select();
+                    if(!empty($list)){
+                        foreach ($list as $key=>$val){
+                            if($level == 0){
+                                $list[$key]['price'] = $val['deputyprice'];
+                            }else{
+                                $list[$key]['price'] = $val['companyprice'];
+                            }
+                        }
+                    }
+                    //dd($list);
+                }else{
+                   $list = $goushui;
+                }
+                //dd($list);
+                return view('goushuilist', [
+                    'data' => $list,
+                ]);
+            }
+        }
+    }
+
+
+
+
 }

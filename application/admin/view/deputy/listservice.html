@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>H+ 后台主题UI框架 - 数据表格</title>
+    <meta name="keywords" content="H+后台主题,后台bootstrap框架,会员中心主题,后台HTML,响应式后台">
+    <meta name="description" content="H+是一个完全响应式，基于Bootstrap3最新版本开发的扁平化主题，她采用了主流的左右两栏式布局，使用了Html5+CSS3等现代技术">
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.staticfile.org/font-awesome/4.4.0/css/font-awesome.css?v=4.4.0" rel="stylesheet">
+
+    <!-- Data Tables -->
+    <link href="__ADMIN__/css/plugins/dataTables/dataTables.bootstrap.css" rel="stylesheet">
+
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="__ADMIN__/css/style.min-v=4.1.0.css" rel="stylesheet">
+    <link href="__ADMIN__/src/css/modules/layer/default/layer.css" rel="stylesheet">
+
+</head>
+
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>服务订购列表</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <div class="">
+                        <a class="btn btn-primary " href="{:url('deputy/goushui')}">购水</a>
+                    </div>
+                    <table class="table table-striped table-bordered table-hover " id="editable">
+                        <thead>
+                        <tr>
+                            <th>水序号</th>
+                            <th>水名称</th>
+                            <th>水余量</th>
+                            <th>当前时间</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {empty name="$data"}
+                        {else /}
+                        {volist name='data' id="vo"}
+                        <tr class="">
+                            <td>{$vo.shui_id}</td>
+                            <td>{$vo.name}</td>
+                            <th>{$vo.stock}</th>
+                            <td>{date="Y-m-d H:i:s",time()}</td>
+                            <td>
+                                <span><a href="{:url('index/serviceorder',array('flag'=>'update','shui_id'=>$vo['shui_id']))}">编辑</a></span>
+                                |<span><a onclick="addstock({$vo['shui_id']})">补水量</a></span>
+                                |<span><a onclick="orderdetail({$vo['shui_id']})">订购详情</a></span>
+                            </td>
+                            <!--<td>Internet Explorer 4.0-->
+                            <!--</td>-->
+                            <!--<td>Win 95+</td>-->
+                            <!--<td class="center">4</td>-->
+                            <!--<td class="center">X</td>-->
+                        </tr>
+                        {/volist}
+                        {/empty}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.staticfile.org/jquery/2.1.4/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script src="__ADMIN__/js/plugins/jeditable/jquery.jeditable.js"></script>
+<script src="__ADMIN__/js/plugins/dataTables/jquery.dataTables.js"></script>
+<script src="__ADMIN__/js/plugins/dataTables/dataTables.bootstrap.js"></script>
+<script src="__ADMIN__/js/content.min-v=1.0.0.js"></script>
+<script src="__ADMIN__/src/layui.js" charset="utf-8"></script>
+<script src="__ADMIN__/src/lay/modules/layer.js" charset="utf-8"></script>
+
+<script>
+    function addstock(id) {
+        layui.use(['form','layer'],function(){
+            var form = layui.form;
+            var layer = layui.layer;
+            str = '<div>';
+            str += "<label for='level'>水量：</label>";
+            str += "<input type='text' name='stock' id='stock'>";
+            str += '</div>';
+            var index = layer.open({
+                title:"补水量",
+                area:['325px'],
+                content:str,
+                btn:['确定','取消'],
+                yes:function(){
+                    var stock = $("#stock").val();
+                    $.ajax({
+                        type:'post',
+                        url:'setincstock',
+                        data:{'stock':stock,'shui_id':id},
+                        dataType:'json',
+                        success:function(data){
+                            if(data.code==200) {
+                                layer.msg(data.msg);
+                                setTimeout(function () {
+                                    window.location.reload();
+                                }, 1000);
+                            }else{
+                                layer.msg(data.msg);
+                            }
+                        },
+                        error:function(data){
+                            console.log(data);
+                        }
+                    })
+                },
+                btn2:function(){
+                    layer.closeAll(index); //关闭当前窗口
+                }
+            });
+
+            // 渲染表单
+            form.render();
+        });
+    }
+</script>
+
+
+</body>
+
+</html>

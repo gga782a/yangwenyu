@@ -28,7 +28,7 @@ class Index extends Common
 
     public static $table_member = 'member'; //会员
 
-    public static $table_store = 'store'; // 门店
+    public static $table_store = 'store'; // 商户
 
     public static $table_activity = 'activity';//活动
 
@@ -41,6 +41,10 @@ class Index extends Common
     public static $table_goods_type = 'goods_type'; //商品分类
 
     public static $table_express_templete = 'express_templete'; //快递模板=
+
+    public static $table_shop = 'shop'; //门店
+
+    public static $table_shui = 'shui'; //水
 
     public $time;
 
@@ -1237,6 +1241,158 @@ class Index extends Common
         }
     }
 
+    //门店列表
+
+    public function listshop()
+    {
+        $where = [
+            'app_id' => $this->id,
+        ];
+        $shops = db(self::$table_shop)
+            ->where($where)
+            ->page(input('page',1),input('pageshow',15))
+            ->select();
+        //dd($shops);
+        if(!empty($shops)){
+            foreach ($shops as $k=>$shop){
+                //代理
+                $shops[$k]['deputyname'] = db(self::$table_deputy)
+                    ->where(['app_id'=>$this->id,'deputy_id'=>$shop['deputy_id']])
+                    ->value('deputy_name');
+                //分公司
+                $shops[$k]['company'] = db(self::$table_deputy)
+                    ->where(['app_id'=>$this->id,'parentid'=>$shop['deputy_id']])
+                    ->value('deputy_name');
+                //商户
+                $shops[$k]['storename'] = db(self::$table_store)
+                    ->where(['app_id'=>$this->id,'store_id'=>$shop['store_id']])
+                    ->value('storename');
+//                $shops[$k]['created_at'] = date("Y-m-d H:i:s",$shop['created_at']);
+            }
+        }
+        return view('listshop',[
+            'data' => $shops
+        ]);
+    }
+
+    //服务订购
+
+    public function serviceorder()
+    {
+        //标识符区分添加修改
+        $flag = input('flag');
+        $where = [
+            'app_id'     => $this->id,
+            'shui_id'  => $this->parme('shui_id')
+        ];
+        if(Request::instance()->isPost()){
+            //dd(floatval($this->parme('probability')));
+            //$storeprice = $betweenprice ='';
+            $storeprice = $this->parme('storelow').','.$this->parme('storeup');
+            $betweenprice = $this->parme('betweenlow').','.$this->parme('betweenup');
+            $insert['name']        = $this->parme('name');  //水名称
+            $insert['stock']       = (int)$this->parme('stock');  //水余量
+            $insert['deputyprice'] = floatval($this->parme('deputyprice'));  //普通代理购水价格
+            $insert['companyprice']= floatval($this->parme('companyprice'));  //分公司购水价格
+            $insert['storeprice']  = trim($storeprice,','); //商户购水代理售价价格区间
+            $insert['betweenprice']= trim($betweenprice,','); //普通代理在分公司购水价格区间
+            $insert['updated_at']  = time();  //创建时间
+            //dd($insert);
+            if($flag == 'add'){
+                //$insert['status']      = '1';   //启用
+                $insert['app_id']  = $this->id;
+                $insert['created_at']= time();
+                $id = db(self::$table_shui)->insertGetId($insert);
+                if($id){
+                    return $this->redirect('index/serviceorder');
+                }else{
+                    return $this->error('操作失败');
+                }
+            }else{
+                $res = db(self::$table_shui)->where($where)->update($insert);
+            }
+            if($res!==false){
+                return $this->redirect('index/serviceorder');
+            }else{
+                return $this->error('操作失败');
+            }
+        }else{
+            if($flag == 'add'){
+                return view('addservice');
+            }else if($flag == 'update'){
+                $data = db(self::$table_shui)->where($where)->find();
+                if(!empty($data)){
+                    $data['storelow'] = $data['storeup'] = $data['betweenlow'] = $data['betweenup'] = '';
+                    if($data['storeprice']){
+                        $count = count(explode(',',$data['storeprice']));
+                    }
+                    if($count>0){
+                        $data['storelow'] = explode(',',$data['storeprice'])[0];
+                    }
+                    if($count>1){
+                        $data['storeup']  = explode(',',$data['storeprice'])[1];
+                    }
+                    if($data['betweenprice']){
+                        $count = count(explode(',',$data['betweenprice']));
+                    }
+                    if($count>0){
+                        $data['betweenlow'] = explode(',',$data['storeprice'])[0];
+                    }
+                    if($count>0){
+                        $data['betweenup']  = explode(',',$data['storeprice'])[1];
+                    }
+                }
+                return view('editservice',[
+                    'data'    => $data,
+                ]);
+            }else{
+                $wherelist = [
+                    'app_id' => $this->id,
+                ];
+                $data = db(self::$table_shui)
+                    ->where($wherelist)
+                    ->page(input('page',1),input('pageshow',15))
+                    ->select();
+                if(!empty($data)){
+                    foreach ($data as $k=>$v){
+                        if($v['storeprice']){
+                            $count = count(explode(',',$v['storeprice']));
+                        }
+                        if($count>1){
+                            $data[$k]['storeprice'] = explode(',',$v['storeprice'])[0].'到'.explode(',',$v['storeprice'])[1];
+                        }
+                        if($v['betweenprice']){
+                            $count = count(explode(',',$v['betweenprice']));
+                        }
+                        if($count>1){
+                            $data[$k]['betweenprice'] = explode(',',$v['betweenprice'])[0].'到'.explode(',',$v['betweenprice'])[1];
+                        }
+
+                    }
+                }
+                return view('listservice',[
+                    'data'    => $data,
+                ]);
+            }
+        }
+    }
+    //补水量
+    public function setincstock()
+    {
+        //dd(222);
+        if(Request::instance()->isAjax()) {
+            $where = [
+                'app_id'    => $this->id,
+                'shui_id'=> $this->parme('shui_id'),
+            ];
+            $res = db(self::$table_shui)->where($where)->setInc('stock',(int)$this->parme('stock'));
+            if ($res) {
+                return json(['code'=>200,'msg'=>'操作成功']);
+            } else {
+                return json(['code'=>400,'msg'=>'操作失败']);
+            }
+        }
+    }
     /***********************************商家后台开始**********************************************************/
     //门店管理
 
