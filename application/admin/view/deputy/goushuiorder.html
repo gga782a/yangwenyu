@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>H+ 后台主题UI框架 - 基本表单</title>
+    <meta name="keywords" content="H+后台主题,后台bootstrap框架,会员中心主题,后台HTML,响应式后台">
+    <meta name="description" content="H+是一个完全响应式，基于Bootstrap3最新版本开发的扁平化主题，她采用了主流的左右两栏式布局，使用了Html5+CSS3等现代技术">
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.staticfile.org/font-awesome/4.4.0/css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="__ADMIN__/css/plugins/iCheck/custom.css" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="__ADMIN__/css/style.min-v=4.1.0.css" rel="stylesheet">
+    <link rel="stylesheet" href="__ADMIN__/src/css/layui.css">
+    <link href="__ADMIN__/src/css/modules/layer/default/layer.css" rel="stylesheet">
+</head>
+
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>购水
+                        <small>订单</small>
+                    </h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <form method="post" class="form-horizontal" id="form1" onsubmit="return false;">
+                        <input type="hidden" name="shui_id" value="{$params.shui_id}" />
+                        <input type="hidden" name="deputy_id" value="{$params.deputy_id}" />
+                        <input type="hidden" name="app_id" value="{$params.app_id}" />
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">水名称</label>
+
+                            <div class="col-sm-10">
+                                <input type="text" value="{$params.name}" readonly class="form-control" name="name" required>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">水价格 </label>
+                            <div class="col-sm-10">
+                                <input type="text" id="price" value="{$params.price}" readonly class="form-control" name="price" required>
+
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">购水量</label>
+                            <div class="col-sm-10">
+                                <input type="number" id="stock" class="form-control" placeholder="正数字即可"  name="stock" required>
+                                <span class="help-block m-b-none">最大购水量{$params.stock}</span>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">收货人</label>
+
+                            <div class="col-sm-10">
+                                <input type="text" placeholder="请输入收货人姓名" class="form-control" name="receiver" required>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">收货人电话</label>
+
+                            <div class="col-sm-10">
+                                <input type="text" placeholder="请输入收货人电话" class="form-control" name="receiverphone" required>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">收货人地址</label>
+
+                            <div class="col-sm-10">
+                                <input type="text" placeholder="请输入收货人地址信息" class="form-control" name="receiveraddress" required>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">合计金额</label>
+
+                            <div class="col-sm-10">
+                                <input type="text" id="needpay" readonly class="form-control" name="needpay" required>
+                            </div>
+                        </div>
+                        <!--<div class="hr-line-dashed"></div>-->
+                        <!--<div class="form-group" >-->
+                        <!--<label class="col-sm-2 control-label">代理省市区</label>-->
+                        <!--<div class="col-sm-10">-->
+                        <!--<ul style="display:flex;margin-top: 5px;">-->
+                        <!--<li style="float: left;margin-right: 30px;">-->
+                        <!--<select id="province" name="province" required>-->
+                        <!--<option value="">省份</option>-->
+                        <!--</select>-->
+                        <!--</li>-->
+                        <!--<li style="float: left;margin-right: 30px;">-->
+                        <!--<select id="city" name="city">-->
+                        <!--<option value="">城市</option>-->
+                        <!--</select>-->
+                        <!--</li>-->
+                        <!--<li style="float: left;margin-right: 30px;">-->
+                        <!--<select id="county" name="county">-->
+                        <!--<option value="">区县</option>-->
+                        <!--</select>-->
+                        <!--</li>-->
+                        <!--</ul>-->
+                        <!--</div>-->
+                        <!--</div>-->
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-2">
+                                <button class="btn btn-primary" type="button" id="btn">保存内容</button>
+                                <button class="btn btn-white" type="button" onclick="jump()">取消</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div id="img" style="position: fixed;
+                left:0;top:0;z-index:999;
+                width: 100%;height: 100%;
+                border: 1px solid red;
+                display: none;
+                background: rgba(0,0,0,.5)">
+                    <div style="padding: 0px;
+                    position: absolute;left:25%;top:25%;
+                    width:50%;
+                    background: #fff;
+                    text-align:center;
+                    overflow: hidden;">
+                        <img id="imgsrc" style="height: 80%;margin:10% 0px;" src="/yangwenyu/public/qr_uploads/qrcode_22149.png" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.staticfile.org/jquery/2.1.4/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script src="__ADMIN__/js/content.min-v=1.0.0.js"></script>
+<script src="__ADMIN__/js/plugins/iCheck/icheck.min.js"></script>
+<script src="__ADMIN__/src/layui.js" charset="utf-8"></script>
+<script src="__ADMIN__/js/sitedata_bas.js">
+
+</script>
+<script src="__ADMIN__/src/lay/modules/layer.js" charset="utf-8"></script>
+<script>
+    /**加载省份列表到选择框*/
+    $("#province").empty();
+    for(var i=0,length=arrCity.length; i<length; i++)
+    {
+        $("#province").append("<option value='"+arrCity[i].name+"'>"+arrCity[i].name+"</option>");
+    }
+    var province;
+    var city;
+    var county;
+    /**省份选择后加载城市数据*/
+    $("#province").on("change",function()
+    {
+        console.log("省份:" + $("#province").val());
+        for(var i=0,length=arrCity.length; i<length; i++){
+            if($("#province").val()==arrCity[i].name){
+                city = arrCity[i].sub; break; }
+        } $("#city").empty();
+        for(var i=0,length=city.length; i<length; i++){
+            $("#city").append("<option value='"+city[i].name+"'>"+city[i].name+"</option>");
+        }
+    });
+    /**城市选择后加载区县数据*/
+    $("#city").on("change",function(){
+        console.log("城市:"+$("#city").val());
+        for(var i=0,length=city.length;i<length;i++){
+            if($("#city").val()==city[i].name){
+                county = city[i].sub; break;
+            }
+        } $("#county").empty();
+        for(var i=0,length=county.length; i<length; i++){
+            $("#county").append("<option value='"+county[i].name+"'>"+county[i].name+"</option>");
+        }
+    });
+    $(document).ready(function () {
+        $(".i-checks").iCheck({checkboxClass: "icheckbox_square-green", radioClass: "iradio_square-green",})
+    });
+    function jump() {
+        window.location.href="{:url('deputy/goushui')}";
+    }
+    function show1() {
+        document.getElementById('time1').style.display = 'block';
+    }
+    function show2() {
+        document.getElementById('time2').style.display = 'block';
+    }
+    var maxstock = {$params['stock']};
+    $("#stock").bind('input propertychange',function(){
+        var stock = $("#stock").val();
+        if(stock >maxstock){
+            $("#stock").val(maxstock);
+        }
+        if(stock >0){
+            stock = stock>maxstock?maxstock:stock;
+            var pay = parseFloat($("#price").val()*stock).toFixed(2);
+            $("#needpay").val(pay);
+        }
+    });
+    $("#btn").on('click',function(){
+       var appid = $("input[name=app_id]").val();
+       var deputyid = $("input[name=deputy_id]").val();
+       var shui_id = $("input[name=shui_id]").val();
+       var name = $("input[name=name]").val();
+       var price = $("input[name=price]").val();
+       var stock = $("input[name=stock]").val();
+       var receiver = $("input[name=receiver]").val();
+       var receiverphone = $("input[name=receiverphone]").val();
+       var receiveraddress = $("input[name=receiveraddress]").val();
+       var needpay = $("input[name=needpay]").val();
+       if(stock == ''||stock == null){
+           layer.msg('购水量必填');
+           return;
+       }
+        if(receiver == ''||receiver == null){
+            layer.msg('收货人必填');
+            return;
+        }
+        if(receiverphone == ''||receiverphone == null){
+            layer.msg('收货人电话必填');
+            return;
+        }
+        if(receiveraddress == ''||receiveraddress == null){
+            layer.msg('收货人地址必填');
+            return;
+        }
+        //alert(111);
+        //console.log(appid,deputyid,shui_id,name,price,stock,receiver,receiverphone,receiveraddress,needpay)
+        //ajax 获取二维码
+        $.ajax({
+            type:'post',
+            url:"{:url('deputy/creategoushuiorder')}",
+            data:{
+                'app_id':appid,
+                'deputy_id':deputyid,
+                'shui_id':shui_id,
+                'name':name,
+                'price':price,
+                'stock':stock,
+                'receiver':receiver,
+                'receiverphone':receiverphone,
+                'receiveraddress':receiveraddress,
+                'needpay':needpay,
+            },
+            dataType:'json',
+            success:function(data){
+                alert(data.msg);
+                if(data.code==200) {
+                    //调起支付二维码
+                    $("#img").show();
+                    $("#imgsrc").attr('src',data.msg);
+                }else{
+                    layer.msg(data.msg);
+                }
+            },
+            error:function(data){
+                console.log(data);
+            }
+        })
+    });
+    // $("#btn").onclick = function(){
+    //     alert(1);
+    //     return false;
+    // }
+    //dd(11);
+</script>
+</body>
+
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>H+ 后台主题UI框架 - 数据表格</title>
+    <meta name="keywords" content="H+后台主题,后台bootstrap框架,会员中心主题,后台HTML,响应式后台">
+    <meta name="description" content="H+是一个完全响应式，基于Bootstrap3最新版本开发的扁平化主题，她采用了主流的左右两栏式布局，使用了Html5+CSS3等现代技术">
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.staticfile.org/font-awesome/4.4.0/css/font-awesome.css?v=4.4.0" rel="stylesheet">
+
+    <!-- Data Tables -->
+    <link href="__ADMIN__/css/plugins/dataTables/dataTables.bootstrap.css" rel="stylesheet">
+
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="__ADMIN__/css/style.min-v=4.1.0.css" rel="stylesheet">
+    <link href="__ADMIN__/src/css/modules/layer/default/layer.css" rel="stylesheet">
+
+</head>
+
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>服务订购列表</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+
+                    <table class="table table-striped table-bordered table-hover " id="editable">
+                        <thead>
+                        <tr>
+                            <th>水序号</th>
+                            <th>水名称</th>
+                            <th>水余量</th>
+                            <th>水价格</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {empty name="$data"}
+                        {else /}
+                        {volist name='data' id="vo"}
+                        <tr class="">
+                            <td>{$vo.shui_id}</td>
+                            <td>{$vo.name}</td>
+                            <th>{$vo.stock}</th>
+                            <td>{$vo.price}</td>
+                            <td>
+                                <span>
+                                    <a href="{:url('deputy/goushuiorder',array(
+                                      'name'  => $vo['name'],
+                                      'price' => $vo['price'],
+                                      'stock' => $vo['stock'],
+                                      'shui_id' => $vo['shui_id'],
+                                      'deputy_id' => $deputy_id,
+                                      'app_id'  => $app_id,
+                                    ))}">
+                                        购水
+                                    </a>
+                                </span>
+                            </td>
+                            <!--<td>Internet Explorer 4.0-->
+                            <!--</td>-->
+                            <!--<td>Win 95+</td>-->
+                            <!--<td class="center">4</td>-->
+                            <!--<td class="center">X</td>-->
+                        </tr>
+                        {/volist}
+                        {/empty}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.staticfile.org/jquery/2.1.4/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script src="__ADMIN__/js/plugins/jeditable/jquery.jeditable.js"></script>
+<script src="__ADMIN__/js/plugins/dataTables/jquery.dataTables.js"></script>
+<script src="__ADMIN__/js/plugins/dataTables/dataTables.bootstrap.js"></script>
+<script src="__ADMIN__/js/content.min-v=1.0.0.js"></script>
+<script src="__ADMIN__/src/layui.js" charset="utf-8"></script>
+<script src="__ADMIN__/src/lay/modules/layer.js" charset="utf-8"></script>
+
+<script>
+//     function goumaishui(name,price,shuiid,stock,deputyid) {
+//         console.log(name);
+//         console.log(price);
+//         console.log(shuiid);
+//         console.log(stock);
+//         console.log(deputyid);
+//         layui.use(['form','layer'],function(){
+//             var form = layui.form;
+//             var layer = layui.layer;
+//             str = '<div style="margin: 10px auto;">';
+//             str += "<label for='name' style='display: inline-block;width:20%;text-align: right;'>水名称：</label>";
+//             str += "<input style='padding-left: 2%;width: 75%;' type='text' value="+name+" name='name' id='name' disabled>";
+//             str += '</div>';
+//             str += '<div style="margin: 10px auto;">';
+//             str += "<label style='display: inline-block;width:20%;text-align: right;' for='price'>水价格：</label>";
+//             str += "<input style='padding-left: 2%;width: 75%;' disabled type='text' name='price' id='price' value="+price+">";
+//             str += '</div>';
+//             str += '<div style="margin: 10px auto;">';
+//             str += "<label style='display: inline-block;width:20%;text-align: right;' for='stock'>购水量：</label>";
+//             str += "<input style='padding-left: 2%;width: 75%;' required type='number' name='stock' id='stock' value=''>";
+//             str += '</div>';
+//             str += '<div style="margin: 10px auto;">';
+//             str += "<label style='display: inline-block;width:20%;text-align: right;' for='receiver'>收货人：</label>";
+//             str += "<input style='padding-left: 2%;width: 75%;' required type='text' name='receiver' id='receiver' value=''>";
+//             str += '</div>';
+//             str += '<div style="margin: 10px auto;">';
+//             str += "<label style='display: inline-block;width:20%;text-align: right;' for='phone'>收货电话：</label>";
+//             str += "<input style='padding-left: 2%;width: 75%;' required type='text' name='phone' id='phone'>";
+//             str += '</div>';
+//             str += '<div style="margin: 10px auto;">';
+//             str += "<label style='display: inline-block;width:20%;text-align: right;' for='position'>收货地址：</label>";
+//             str += "<input style='padding-left: 2%;width: 75%;' required type='text' name='position' id='position'>";
+//             str += '</div>';
+//             str += '<div style="margin: 10px auto;">';
+//             str += "<label style='display: inline-block;width:20%;text-align: right;' for='needpay'>合计金额：</label>";
+//             str += "<input style='padding-left: 2%;width: 75%;' type='text' name='needpay' id='needpay' disabled>";
+//             str += '</div>';
+//             var index = layer.open({
+//                 title:"购水订单",
+//                 area:['500px','80%'],
+//                 content:str,
+//                 btn:['确定','取消'],
+//                 yes:function(){
+//                     $("#stock").on('change',function(){
+//                         console.log($("#stock").val());
+//                     });
+// console.log(11);
+//                     // $.ajax({
+//                     //     type:'post',
+//                     //     url:'setincstock',
+//                     //     data:{'stock':stock,'shui_id':id},
+//                     //     dataType:'json',
+//                     //     success:function(data){
+//                     //         if(data.code==200) {
+//                     //             layer.msg(data.msg);
+//                     //             setTimeout(function () {
+//                     //                 window.location.reload();
+//                     //             }, 1000);
+//                     //         }else{
+//                     //             layer.msg(data.msg);
+//                     //         }
+//                     //     },
+//                     //     error:function(data){
+//                     //         console.log(data);
+//                     //     }
+//                     // })
+//                 },
+//                 btn2:function(){
+//                     layer.closeAll(index); //关闭当前窗口
+//                 }
+//             });
+//
+//             // 渲染表单
+//             form.render();
+//         });
+//     }
+</script>
+
+
+</body>
+
+</html>

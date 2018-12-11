@@ -111,3 +111,5 @@ function douhao($num=1500900065,$res=''){
 }
 
 
+
+

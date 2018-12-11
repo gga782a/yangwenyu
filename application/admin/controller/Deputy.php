@@ -8,11 +8,11 @@
 
 namespace app\admin\controller;
 
-
 use app\DataAnalysis;
 use think\Request;
 use think\Session;
 use think\Validate;
+use app\wechat\controller\Saomapay;
 
 class Deputy extends Common
 {
@@ -22,6 +22,8 @@ class Deputy extends Common
     public static $table_deputy = 'deputy';
     public static $table_shui = 'shui';
     public static $table_goushui = 'goushui';
+    public static $table_goushui_order = 'goushui_order';
+    public static $table_pay_setting = 'pay_setting';
     public static $msg = [];
     public function __construct(Request $request = null)
     {
@@ -281,12 +283,168 @@ class Deputy extends Common
                 //dd($list);
                 return view('goushuilist', [
                     'data' => $list,
+                    'deputy_id' => $this->id,
+                    'app_id'    => $this->app_id,
                 ]);
             }
         }
     }
 
+    //生成购水订单
 
+    public function goushuiorder()
+    {
+        $params = input();
+//        if(Request::instance()->isPost()){
+//            $insert = [
+//                'app_id'        => input('app_id'),
+//                'deputy_id'     => input('deputy_id'),
+//                'shui_id'       => input('shui_id'),
+//                'store_id'      => 0,
+//                'name'          => input('name'),
+//                'stock'         => (int)input('stock'),
+//                'price'         => floatval(input('price')),
+//                'receiver'      => input('receiver'),
+//                'receiverphone' => input('receiverphone'),
+//                'receiveraddress'=> input('receiveraddress'),
+//                'status'        => 0,
+//                'needpay'       => floatval(input('needpay')),
+//                'order_num'     => time().rand(000000,999999),
+//                'created_at'    => time(),
+//            ];
+//            $id = db(self::$table_goushui_order)->insertGetId($insert);
+//            if($id){
+//                //跳转到扫码支付页
+//                return $this->redirect('deputy/saomapay',['id'=>$id]);
+//            }else{
+//                return $this->error('操作失败');
+//            }
+//        }else{
+            return view("goushuiorder",[
+                'params' => $params
+            ]);
+        //}
+    }
 
+    public function goss()
+    {
+        return view('goss');
+    }
+
+    public function ss()
+    {
+        //dd(111);
+        return json(['code'=>400,'msg'=>'操作失败']);
+    }
+    //ajax生成支付订单
+
+    public function creategoushuiorder()
+    {
+        //return json(['code'=>400,'msg'=>'操作失败']);
+        if(Request::instance()->isAjax()){
+            $insert = [
+                'app_id'        => input('app_id'),
+                'deputy_id'     => input('deputy_id'),
+                'shui_id'       => input('shui_id'),
+                'store_id'      => 0,
+                'name'          => input('name'),
+                'stock'         => (int)input('stock'),
+                'price'         => floatval(input('price')),
+                'receiver'      => input('receiver'),
+                'receiverphone' => input('receiverphone'),
+                'receiveraddress'=> input('receiveraddress'),
+                'status'        => 0,
+                'needpay'       => floatval(input('needpay')),
+                'order_num'     => time().rand(000000,999999),
+                'created_at'    => time(),
+            ];
+            $id = db(self::$table_goushui_order)->insertGetId($insert);
+            if($id){
+                //跳转到扫码支付页
+                //return json(['code'=>400,'msg'=>$id]);
+                $return = $this->saomapay($id);
+                if($return === false){
+                    return json(['code'=>400,'msg'=>'操作失败']);
+                }else{
+                    return json(['code'=>200,'msg'=>$return]);
+                }
+            }else{
+                return json(['code'=>400,'msg'=>'操作失败']);
+            }
+        }
+    }
+
+    //扫码支付
+
+    public function saomapay($id='')
+    {
+        //return json(['code'=>400,'msg'=>'操作失败']);
+        //$id = input('id');
+        //$id = 1;
+        //查询订单
+        $order = db(self::$table_goushui_order)
+            ->where(['app_id'=>$this->app_id,'order_id'=>$id])
+            ->field('order_num,needpay,name,shui_id')
+            ->find();
+        //dd($order);
+        if($order){
+            //获取商户信息
+            $paysetting  = db(self::$table_pay_setting)
+                ->where(['app_id'=>$this->app_id])
+                ->find();
+            if($paysetting){
+                //调起扫码支付 生成二维码
+                $notify_url = "http://www.yilingjiu.cn/wechat/Saomapay/notify";
+                //$order['needpay']
+                $somapay = new Saomapay($order['shui_id'],$openid='', $paysetting['mch_id'], $paysetting['mch_key'],$order['order_num'],$order['name'],0.01,$id,$notify_url);
+                $return  = $somapay->pay();
+                //dd($return);
+                if($return['return_code'] == 'SUCCESS'&&$return['return_msg'] == 'OK'){
+                    //return json(['code'=>400,'msg'=>444]);
+                    $code_url = $return['code_url'];
+
+                    //生成二维码
+                    return $this->qr_code($code_url);
+                }else{
+                    return false;
+                }
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+    //生成二维码
+    public function qr_code($url='',$level=3,$size=7)
+    {
+        //return json(['code'=>400,'msg'=>222]);
+        //dd(ROOT_PATH);
+        //引入 qrcode类
+        Vendor('phpqrcode.phpqrcode');
+        //实例化qrcode类
+        //$qrcode = new \QRcode();
+        //路径
+        $pathname = ROOT_PATH.'/public/qr_uploads/';
+        if(!is_dir($pathname)) { //若目录不存在则创建之
+            mkdir($pathname,0777,true);
+        }
+        //图片名
+        $ad = 'qrcode_' . rand(10000,99999) . '.png';
+        //图片保存路径
+        $savepath = $pathname.$ad;
+        $errorCorrectionLevel =intval($level) ;//容错级别
+        $matrixPointSize = intval($size);//生成图片大小
+        $url = $url?$url:'http://www.ztwlxx.net?a=2';
+        //return $url;
+        \QRcode::png($url, $savepath, $errorCorrectionLevel, $matrixPointSize, 2);
+        return '/yangwenyu/public/qr_uploads/'.$ad;
+        //return json(['code'=>400,'msg'=>$return]);
+        //dd($png);
+        //$res = file_put_contents($savepath,$png);
+//        if($res !== false){
+//            return $savepath;
+//        }
+    }
 
 }
