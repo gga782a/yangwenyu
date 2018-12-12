@@ -92,6 +92,7 @@ class Store extends Common
         //dd($files);
         //判断是不是多图上传
         $dir = ROOT_PATH . 'public' . DS . 'uploads' . DS;
+        //dd($dir);
         $date = date('Ymd', time()) . '/';
         $path = $dir . $date;
         //dd($path);

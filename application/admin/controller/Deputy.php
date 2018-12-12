@@ -9,6 +9,8 @@
 namespace app\admin\controller;
 
 use app\DataAnalysis;
+use think\Db;
+use think\Exception;
 use think\Request;
 use think\Session;
 use think\Validate;
@@ -37,6 +39,7 @@ class Deputy extends Common
     {
         return view('deputy/index');
     }
+    /***********************************************商户*******************************************************/
     //设置商户
     public function setstore()
     {
@@ -159,7 +162,7 @@ class Deputy extends Common
         }
     }
 
-    //重置代理密码
+    //重置商户密码
 
     public function resetpwd()
     {
@@ -203,7 +206,48 @@ class Deputy extends Common
             ]);
         }
     }
+    //重置密码
+    public function resetdeputypwd()
+    {
+        $where = [
+            'app_id'    => $this->app_id,
+            'deputy_id' => $this->id,
+        ];
+        if(Request::instance()->isPost()){
+            $rule = [
+                'pwd'       => 'require|confirm:repwd|alphaNum|min:4|max:18',
+            ];
+            $field = [
+                'username'  => '账号',
+                'pwd'       => '密码',
+            ];
 
+            $validate = new Validate($rule, self::$msg, $field);
+            if (!$validate->check($this->parme)) {
+                $this->error($validate->getError());
+            } else {
+                $pwd = md5(sha1($this->parme('pwd')));
+                $res = db(self::$table_deputy)
+                    ->where($where)
+                    ->update(['pwd'=>$pwd,'updated_at'=>time()]);
+                if($res){
+                    return $this->redirect('deputy/resetdeputypwd');
+                }else{
+                    $this->error('操作失败');
+                }
+            }
+        }else{
+            $username = db(self::$table_deputy)
+                ->where($where)
+                ->value('username');
+            //dd($username);
+            //$username = 'aa';
+            return view('resetpwd',[
+                'username' => $username
+            ]);
+        }
+    }
+    /********************************************服务订购*************************************************************/
     //服务订购
 
     public function serviceorder()
@@ -211,11 +255,24 @@ class Deputy extends Common
         $where = [
             'app_id'    => $this->app_id,
             'deputy_id' => $this->id,
+            'store_id'  => 0,
         ];
+        $statusarr = [
+            '未支付','支付成功,待发货','待收货','订单完成'
+        ];
+        $data = db(self::$table_goushui_order)
+            ->where($where)
+            ->page(input('page',1),input('pageshow',15))
+            ->select();
+        if(!empty($data)){
+            foreach($data as $k=>$v){
+                $data[$k]['statusname'] = $statusarr[$v['status']];
+            }
+        }
 //        //查询当前代理等级
 //        $level = db(self::$table_store)->where($where)->value('level');
         return view('listservice',[
-
+            'data'  => $data,
         ]);
     }
     //购水
@@ -366,7 +423,7 @@ class Deputy extends Common
                 if($return === false){
                     return json(['code'=>400,'msg'=>'操作失败']);
                 }else{
-                    return json(['code'=>200,'msg'=>$return]);
+                    return json(['code'=>200,'msg'=>$return,'id'=>$id]);
                 }
             }else{
                 return json(['code'=>400,'msg'=>'操作失败']);
@@ -378,7 +435,7 @@ class Deputy extends Common
 
     public function saomapay($id='')
     {
-        //return json(['code'=>400,'msg'=>'操作失败']);
+        //return json(['code'=>400,'msg'=>'扫码']);
         //$id = input('id');
         //$id = 1;
         //查询订单
@@ -388,11 +445,14 @@ class Deputy extends Common
             ->find();
         //dd($order);
         if($order){
+            //return json(['code'=>400,'msg'=>'操作失败']);
             //获取商户信息
             $paysetting  = db(self::$table_pay_setting)
                 ->where(['app_id'=>$this->app_id])
                 ->find();
+            //dd($paysetting);
             if($paysetting){
+                //return json(['code'=>400,'msg'=>'操作失败']);
                 //调起扫码支付 生成二维码
                 $notify_url = "http://www.yilingjiu.cn/wechat/Saomapay/notify";
                 //$order['needpay']
@@ -414,6 +474,20 @@ class Deputy extends Common
         }else{
             return false;
         }
+    }
+
+    public function getpaysetting()
+    {
+        //dd($this->app_id);
+        $paysetting  = db(self::$table_pay_setting)
+            ->where(['app_id'=>$this->app_id])
+            ->find();
+        dd($paysetting);
+    }
+
+    public function ceshi()
+    {
+        db('ceshi')->insertGetId(array('text1'=>'saoma','text2'=>1111));
     }
     //生成二维码
     public function qr_code($url='',$level=3,$size=7)
@@ -438,7 +512,8 @@ class Deputy extends Common
         $url = $url?$url:'http://www.ztwlxx.net?a=2';
         //return $url;
         \QRcode::png($url, $savepath, $errorCorrectionLevel, $matrixPointSize, 2);
-        return '/yangwenyu/public/qr_uploads/'.$ad;
+        //return '/yangwenyu/public/qr_uploads/'.$ad;
+        return '/public/qr_uploads/'.$ad;
         //return json(['code'=>400,'msg'=>$return]);
         //dd($png);
         //$res = file_put_contents($savepath,$png);
@@ -447,4 +522,251 @@ class Deputy extends Common
 //        }
     }
 
+    //检测是否支付成功
+
+    public function check()
+    {
+        if(Request::instance()->isAjax()){
+            $status = db(self::$table_goushui_order)->where(['app_id'=>$this->app_id,'order_id'=>input('order_id')])->value('status');
+            if($status == 1){
+                return json(['code'=>200]);
+            }else{
+                return json(['code'=>400]);
+            }
+        }
+    }
+
+    //三天后自动确认收货
+
+    public function autoreceive()
+    {
+        if(Request::instance()->isAjax()) {
+            $where = [
+                'app_id' => $this->app_id,
+                'deputy_id' => $this->id,
+                'status' => 2,
+            ];
+
+            $late = 24 * 60 * 60 * 3;
+
+            $order = db(self::$table_goushui_order)
+                ->where($where)
+                ->select();
+            if (!empty($order)) {
+                //选出满足自动收获条件的数据
+                foreach ($order as $k => $v) {
+                    if (time() > ($v['shouhuotime'] + $late)) {
+                        $this->shouhuo($v['order_id']);
+                    }
+                }
+            }
+        }
+    }
+
+    //shuohuo
+    private function shouhuo($id)
+    {
+        $where = [
+            'app_id'    => $this->app_id,
+            'deputy_id' => $this->id,
+            'order_id'  => $id
+        ];
+        //查找订单
+        $order = db(self::$table_goushui_order)->where($where)->find();
+        if($order) {
+            Db::startTrans();
+            try {
+                db(self::$table_goushui_order)->where($where)->update(['status' => 3, 'updated_at' => time()]);
+                //查找是否已购买过该水，如果购买过 只增加水余量
+                //$count = db()
+                $insert = [
+                    'app_id'     => $this->app_id,
+                    'shui_id'    => $order['shui_id'],
+                    'name'       => $order['name'],
+                    'stock'      => $order['stock'],
+                    'price'      => $order['price'],
+                    'created_at' => time(),
+                    //'status'     => 1,
+                ];
+                if($order['store_id'] == 0) {
+                    //根据代理ID 获取代理等级
+                    $level = db(self::$table_deputy)->where(['app_id' => $this->app_id, 'deputy_id' => $order['deputy_id']])->value('level');
+                    if ($level == 1) {
+                        //增加数据到goushui表
+                        $insert['type'] = 1; //分公司
+                    }else {
+                        $insert['type'] = 2; //普通代理
+                    }
+                    $insert['type_id'] = $order['deputy_id'];
+                } else {
+                    $insert['type'] = 3;  //商户
+                    $insert['type_id'] = $order['store_id'];
+                }
+                db(self::$table_goushui)->insertGetId($insert);
+                Db::commit();
+            } catch (Exception $exception) {
+                Db::rollback();
+            }
+        }
+
+    }
+    //删除购水订单
+    public function delgoushuiorder()
+    {
+        //dd(222);
+        if(Request::instance()->isAjax()) {
+            $where = [
+                'app_id'    => $this->app_id,
+                'deputy_id' => $this->id,
+                'order_id'  => $this->parme('order_id')
+            ];
+            $res = db(self::$table_goushui_order)->where($where)->delete();
+            if ($res) {
+                return json(['code'=>200,'msg'=>'操作成功']);
+            } else {
+                return json(['code'=>400,'msg'=>'操作失败']);
+            }
+        }
+    }
+
+    //确认收获
+    public function receive()
+    {
+        //dd(222);
+        if(Request::instance()->isAjax()) {
+            $where = [
+                'app_id'    => $this->app_id,
+                'deputy_id' => $this->id,
+                'order_id'  => $this->parme('order_id')
+            ];
+            //查找订单
+            $order = db(self::$table_goushui_order)->where($where)->find();
+            if($order) {
+                Db::startTrans();
+                try {
+                    db(self::$table_goushui_order)->where($where)->update(['status' => 3, 'updated_at' => time()]);
+                    $insert = [
+                        'app_id'     => $this->app_id,
+                        'shui_id'    => $order['shui_id'],
+                        'name'       => $order['name'],
+                        'stock'      => $order['stock'],
+                        'price'      => $order['price'],
+                        'created_at' => time(),
+                        //'status'     => 1,
+                    ];
+                    if($order['store_id'] == 0) {
+                        //根据代理ID 获取代理等级
+                        $level = db(self::$table_deputy)->where(['app_id' => $this->app_id, 'deputy_id' => $order['deputy_id']])->value('level');
+                        if ($level == 1) {
+                            //增加数据到goushui表
+                            $insert['type'] = 1; //分公司
+                        }else {
+                            $insert['type'] = 2; //普通代理
+                        }
+                        $insert['type_id'] = $order['deputy_id'];
+                    } else {
+                        $insert['type'] = 3;  //商户
+                        $insert['type_id'] = $order['store_id'];
+                    }
+                    db(self::$table_goushui)->insertGetId($insert);
+                    Db::commit();
+                    return json(['code'=>200,'msg'=>'操作成功']);
+                } catch (Exception $exception) {
+                    Db::rollback();
+                    return json(['code'=>400,'msg'=>'操作失败']);
+                }
+            }
+//            $res = db(self::$table_goushui_order)->where($where)->update(['status'=>3,'updated_at'=>time()]);
+//            if ($res) {
+//                return json(['code'=>200,'msg'=>'操作成功']);
+//            } else {
+//                return json(['code'=>400,'msg'=>'操作失败']);
+//            }
+        }
+    }
+
+    //生成签名测试用
+
+    //作用：生成签名
+    public function getSign() {
+        $json = '{"appid":"wx762bbeb8757c18b7","attach":"18","bank_type":"CFT","cash_fee":"1","device_info":"WEB","fee_type":"CNY","is_subscribe":"Y","mch_id":"1514213421","nonce_str":"ma8jmi5kw671gghz6tepi2j3gmwlox1w","openid":"os-5N1ZgTUrkGgasKpmQHpFc5R5E","out_trade_no":"154458270292671","result_code":"SUCCESS","return_code":"SUCCESS","time_end":"20181212104516","total_fee":"1","trade_type":"NATIVE","transaction_id":"4200000235201812123971197823"}';
+        $Obj = json_decode($json,true);
+        $key = 'c56d0e9a7ccec67b4ea131655038d604';
+        foreach ($Obj as $k => $v) {
+            $Parameters[$k] = $v;
+        }
+        //签名步骤一：按字典序排序参数
+        ksort($Parameters);
+        $String = $this->formatBizQueryParaMap($Parameters, false);
+        //签名步骤二：在string后加入KEY
+        $String = $String . "&key=" . $key;
+        //签名步骤三：MD5加密
+        $String = md5($String);
+        //签名步骤四：所有字符转为大写
+        $result_ = strtoupper($String);
+        return $result_;
+    }
+
+
+    ///作用：格式化参数，签名过程需要使用
+    private function formatBizQueryParaMap($paraMap, $urlencode) {
+        $buff = "";
+        ksort($paraMap);
+        foreach ($paraMap as $k => $v) {
+            if ($urlencode) {
+                $v = urlencode($v);
+            }
+            $buff .= $k . "=" . $v . "&";
+        }
+        $reqPar = '';
+        if (strlen($buff) > 0) {
+            $reqPar = substr($buff, 0, strlen($buff) - 1);
+        }
+        return $reqPar;
+    }
+
+    /******************************************已购买到货的水**********************************************************/
+    public function myshui()
+    {
+        //查找当前代理级别
+        $level = db(self::$table_deputy)
+            ->where(['app_id'=>$this->app_id,'deputy_id'=>$this->id])
+            ->value('level');
+        //根据级别获取总平台配置
+        if($level == 1){ //分公司卖给普通代理的价格区间
+            $pricespace = db(self::$table_shui)->where('app_id',$this->app_id)->value('betweenprice');
+        }else{ //普通代理卖给商户的价格区间
+            $pricespace = db(self::$table_shui)->where('app_id',$this->app_id)->value('storeprice');
+        }
+        if(!empty($pricespace)){
+            $pricespace = explode(',',$pricespace);
+        }
+        $where = [
+            'app_id'    => $this->app_id,
+            'deputy_id' => $this->id,
+            'status'    => 3,
+        ];
+
+        $data = db(self::$table_goushui)
+            ->where($where)
+            ->select();
+        return view('myshui',[
+            'data'  => $data,
+            'pricespace' => $pricespace,
+        ]);
+
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

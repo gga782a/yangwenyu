@@ -209,7 +209,7 @@
                     //alert(level);
                     $.ajax({
                         type:'post',
-                        url:'updatelevel',
+                        url:"{:url('index/updatelevel')}",
                         data:{'deputy_id':$id,'level':level},
                         dataType:'json',
                         success:function(data){

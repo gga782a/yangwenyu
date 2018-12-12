@@ -46,6 +46,8 @@ class Index extends Common
 
     public static $table_shui = 'shui'; //水
 
+    public static $table_goushui_order = 'goushui_order'; //水订单
+
     public $time;
 
     public static $msg = [];
@@ -115,6 +117,8 @@ class Index extends Common
             ]);
         }
     }
+
+    /********************************************************大转盘****************************************************************/
 
     //大转盘设置  slyderAdventures
 
@@ -297,6 +301,8 @@ class Index extends Common
         }
     }
 
+    /*************************************************代理********************************************************/
+
     //代理设置
 
     public function setdeputy()
@@ -393,7 +399,7 @@ class Index extends Common
                 ]);
             }else{
                 //var_dump($level);
-                $where['parentid'] = (int)$this->parme('parentid','0');
+                //$where['parentid'] = (int)$this->parme('parentid','0');
                 $data = db(self::$table_deputy)
                     ->where(['app_id'=>$this->id,'level'=>$level])
                     ->order('created_at desc')
@@ -674,7 +680,7 @@ class Index extends Common
             }
         }
     }
-
+    /*****************************************************积分商城*************************************************************/
     //积分商城
     public function uploadone($validate = ['size'=>10240000,'ext'=>'jpg,png,gif']){
         $files = request()->file('fileList');
@@ -1058,7 +1064,7 @@ class Index extends Common
             }
         }
     }
-
+    /****************************************************礼品**************************************************************/
     //设置礼品
 
     public function setprize()
@@ -1160,7 +1166,7 @@ class Index extends Common
             }
         }
     }
-
+    /*********************************************快递模板*****************************************************************/
     //设置快递模板
 
     public function express()
@@ -1274,7 +1280,7 @@ class Index extends Common
             'data' => $shops
         ]);
     }
-
+    /***********************************************服务订购**********************************************************/
     //服务订购
 
     public function serviceorder()
@@ -1392,6 +1398,85 @@ class Index extends Common
                 return json(['code'=>400,'msg'=>'操作失败']);
             }
         }
+    }
+
+    /**********************************订单总览********************************************************************/
+    //水订单列表
+    public function shuiorder()
+    {
+        $where = [
+            'app_id'  => $this->id,
+        ];
+
+        $statusarr = [
+            '未支付','支付成功,待发货','待收货','订单完成'
+        ];
+
+        $data = db(self::$table_goushui_order)
+            ->where($where)
+            ->page(input('page',1),input('pageshow',15))
+            ->select();
+        if(!empty($data)){
+            foreach($data as $k=>$v){
+                $data[$k]['statusname'] = $statusarr[$v['status']];
+            }
+        }
+
+        return view('shuiorder',[
+            'data'  =>  $data
+        ]);
+    }
+    //确认发货
+    public function fahuo()
+    {
+        if(Request::instance()->isAjax()) {
+            $where = [
+                'app_id'    => $this->id,
+                'order_id'  => $this->parme('order_id'),
+            ];
+            $res = db(self::$table_goushui_order)->where($where)->update(['status'=>2,'updated_at'=>time()]);
+            if ($res) {
+                return json(['code'=>200,'msg'=>'操作成功']);
+            } else {
+                return json(['code'=>400,'msg'=>'操作失败']);
+            }
+        }
+    }
+
+    //超时不支付自动删除订单
+
+    public function autodel()
+    {
+        if(Request::instance()->isAjax()) {
+            $where = [
+                'app_id' => $this->id,
+                'status' => 0,
+            ];
+
+            $late = 7200;
+
+            $order = db(self::$table_goushui_order)
+                ->where($where)
+                ->select();
+            if (!empty($order)) {
+                //选出满足自动收获条件的数据
+                foreach ($order as $k => $v) {
+                    if (time() > ($v['created_at'] + $late)) {
+                        $this->delorder($v['order_id']);
+                    }
+                }
+            }
+        }
+    }
+
+    //shuohuo
+    private function delorder($id)
+    {
+        $where = [
+            'app_id'    => $this->id,
+            'order_id'  => $id
+        ];
+        db(self::$table_goushui_order)->where($where)->delete();
     }
     /***********************************商家后台开始**********************************************************/
     //门店管理

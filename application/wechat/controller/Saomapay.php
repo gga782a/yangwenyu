@@ -8,6 +8,8 @@
 
 namespace app\wechat\controller;
 use think\Controller;
+use think\Db;
+use think\Exception;
 use think\Request;
 
 class Saomapay extends Controller
@@ -24,8 +26,13 @@ class Saomapay extends Controller
     protected $attach;
     protected $notify_url;
     protected $product_id;
+
+    public static $table_goushui_order = 'goushui_order';
+    public static $table_goushui = 'goushui';
+    public static $table_shui = 'shui';
+    public static $table_deputy = 'deputy';
     //初始化参数
-    public function __construct($product_id,$openid='', $mch_id, $key,$out_trade_no,$body,$total_fee,$attach,$notify_url='')
+    public function __construct($product_id='',$openid='', $mch_id='', $key='',$out_trade_no='',$body='',$total_fee=0.01,$attach='',$notify_url='')
     {
         //构成微信支付所需的参数
         $this->appId        = _config('AppID');
@@ -75,6 +82,105 @@ class Saomapay extends Controller
         $return = $this->xmlToArray($this->postXmlCurl($xmlData, $url, 60));
         //dd($return);
         return $return;
+    }
+
+    //支付回调
+
+    /**
+     * <xml><appid><![CDATA[wx762bbeb8757c18b7]]></appid>
+    <attach><![CDATA[14]]></attach>
+    <bank_type><![CDATA[CFT]]></bank_type>
+    <cash_fee><![CDATA[1]]></cash_fee>
+    <device_info><![CDATA[WEB]]></device_info>
+    <fee_type><![CDATA[CNY]]></fee_type>
+    <is_subscribe><![CDATA[Y]]></is_subscribe>
+    <mch_id><![CDATA[1514213421]]></mch_id>
+    <nonce_str><![CDATA[qnvfxzdgr052tn7uj1kk8mwe43soyiw7]]></nonce_str>
+    <openid><![CDATA[os-5N1ZgTUrkGgasKpmQHpFc5R5E]]></openid>
+    <out_trade_no><![CDATA[1544580925314777]]></out_trade_no>
+    <result_code><![CDATA[SUCCESS]]></result_code>
+    <return_code><![CDATA[SUCCESS]]></return_code>
+    <sign><![CDATA[80DEF682D282A82F9F13E0C300947C41]]></sign>
+    <time_end><![CDATA[20181212101542]]></time_end>
+    <total_fee>1</total_fee>
+    <trade_type><![CDATA[NATIVE]]></trade_type>
+    <transaction_id><![CDATA[4200000230201812121985432559]]></transaction_id>
+    </xml>
+     */
+
+    public function notify()
+    {
+        //db('ceshi')->insertGetId(array('text1'=>'saoma','text2'=>4444));
+        $xml = file_get_contents("php://input");
+        //转换成数组
+        $data=$this->xmlToArray($xml);
+        //根据订单id获取app_id
+        $appid = db(self::$table_goushui_order)->where(['order_id'=>$data['attach'],'status'=>0])->value('app_id');
+        $mch_key = db('pay_setting')->where('app_id',$appid)->value('mch_key');
+        $this->key = $mch_key;
+        //db('ceshi')->insertGetId(array('text1'=>'saomadata','text2'=>json_encode($data)));
+        //比较签名
+        $data_sign = $data['sign'];
+        //db('ceshi')->insertGetId(array('text1'=>'saoma1','text2'=>$data_sign));
+        unset($data['sign']);
+        $sign=$this->getSign($data);
+        //db('ceshi')->insertGetId(array('text1'=>'saoma2','text2'=>$sign));
+        // 判断签名是否正确  判断支付状态
+        if ( ($sign===$data_sign) && ($data['return_code']=='SUCCESS') && ($data['result_code']=='SUCCESS') ){
+            db('ceshi')->insertGetId(array('text1'=>'saoma','text2'=>'ok'));
+            //查找订单
+            $order = db(self::$table_goushui_order)->where(['order_id'=>$data['attach'],'status'=>0])->find();
+            if($order){
+                Db::startTrans();
+                try{
+                    //更改状态 减少库存 添加goushui表
+                    db(self::$table_goushui_order)->where(['order_id'=>$data['attach'],'status'=>0])->update(['status'=>1,'paytime'=>time()]);
+                    if($order['store_id'] == 0) {
+//                        $insert = [
+//                            'app_id'     => $appid,
+//                            //'shui_id'    => $order['shui_id'],
+//                            'name'       => $order['name'],
+//                            'stock'      => $order['stock'],
+//                            'created_at' => time(),
+//                            //'status'     => 1,
+//                        ];
+                        //根据代理ID 获取代理等级
+                        $level = db(self::$table_deputy)->where(['app_id' => $appid, 'deputy_id' => $order['deputy_id']])->value('level');
+                        if ($level == 1) {
+                            //减少总后台水量
+                            db(self::$table_shui)
+                                ->where(['app_id' => $appid, 'shui_id' => $order['shui_id']])
+                                ->setDec('stock', $order['stock']);
+                            //增加数据到goushui表
+//                            $insert['type'] = 1;
+//                            $insert['type_id'] = $order['deputy_id'];
+//                            db(self::$table_goushui)->insertGetId($insert);
+                            Db::commit();
+                            $result = true;
+                        } else {
+
+                        }
+                    }else{
+
+                    }
+                }catch (Exception $exception){
+                    Db::rollback();
+                    $result = false;
+                }
+            }else{
+                $result = false;
+            }
+        }else{
+            $result = false;
+        }
+        // 返回状态给微信服务器
+        if ($result) {
+            $str='<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>';
+        }else{
+            $str='<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[签名失败]]></return_msg></xml>';
+        }
+        return $result;
+
     }
 
     /**

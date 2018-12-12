@@ -194,7 +194,9 @@
     });
     $(document).ready(function () {
         $(".i-checks").iCheck({checkboxClass: "icheckbox_square-green", radioClass: "iradio_square-green",})
+
     });
+
     function jump() {
         window.location.href="{:url('deputy/goushui')}";
     }
@@ -268,6 +270,7 @@
                     //调起支付二维码
                     $("#img").show();
                     $("#imgsrc").attr('src',data.msg);
+                    interval = setInterval("check("+data.id+")",3000);
                 }else{
                     layer.msg(data.msg);
                 }
@@ -277,6 +280,28 @@
             }
         })
     });
+    function check(id) {
+        $.ajax({
+            type:'post',
+            url:"{:url('deputy/check')}",
+            data:{'order_id':id},
+            dataType: 'json',
+            success:function (data) {
+                if(data.code == 200){
+                    clearInterval(interval);
+                    $("#img").hide();
+                    layer.msg('支付成功');
+                    setTimeout(function () {
+                        window.location.href="{:url('deputy/serviceorder')}";
+                    }, 1000);
+                }
+            },
+            error:function () {
+                layer.msg('网络错误');
+            },
+        })
+    }
+
     // $("#btn").onclick = function(){
     //     alert(1);
     //     return false;

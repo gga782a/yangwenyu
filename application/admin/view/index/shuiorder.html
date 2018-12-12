@@ -49,6 +49,9 @@
                             <th>水单价</th>
                             <th>总支付</th>
                             <th>订单号</th>
+                            <th>购买人</th>
+                            <th>购买人电话</th>
+                            <th>购买人地址</th>
                             <th>状态</th>
                             <th>购水时间</th>
                             <th>操作</th>
@@ -65,21 +68,24 @@
                             <td>{$vo.price}</td>
                             <td>{$vo.needpay}</td>
                             <td>{$vo.order_num}</td>
+                            <td>{$vo.receiver}</td>
+                            <td>{$vo.receiverphone}</td>
+                            <td>{$vo.receiveraddress}</td>
                             <td>{$vo.statusname}</td>
                             <td>{$vo.created_at|date="Y-m-d H:i:s",###}</td>
                             <td>
-                                {if condition=" $vo['status'] == 2 "}
+                                {if condition=" $vo['status'] == 1 "}
                                 <span>
-                                    <a onclick="return receive({$vo['order_id']})">
-                                        确认收货
+                                    <a onclick="return fahuo({$vo['order_id']})">
+                                        确认发货
                                     </a>
                                 </span>
                                 {elseif condition=" $vo['status'] == 0 " /}
-                                <span>
-                                    <a onclick="return del({$vo['order_id']})">
-                                        删除订单
-                                    </a>
-                                </span>
+                                <!--<span>-->
+                                    <!--<a onclick="return del({$vo['order_id']})">-->
+                                        <!--删除订单-->
+                                    <!--</a>-->
+                                <!--</span>-->
                                 {/if}
                             </td>
                             <!--<td>Internet Explorer 4.0-->
@@ -119,16 +125,19 @@
         //         return {"row_id": this.parentNode.getAttribute("id"), "column": oTable.fnGetPosition(this)[2]}
         //     }, "width": "90%", "height": "100%"
         // })
-        setInterval("autoreceive()",5000);
+        setInterval("autodel()",5000);
     });
-    function autoreceive() {
+    function autodel() {
         $.ajax({
             type:'post',
-            url:"{:url('deputy/autoreceive')}",
+            url:"{:url('index/autodel')}",
             data:'',
             dataType: 'json',
             success:function(data){
-
+                console.log(data)
+            },
+            error:function () {
+                console.log(333);
             }
         });
     }
@@ -161,12 +170,12 @@
             })
         }
     }
-    function receive(id)
+    function fahuo(id)
     {
         if(confirm('确定要收获吗')){
             $.ajax({
                 type:'post',
-                url:"{:url('deputy/receive')}",
+                url:"{:url('index/fahuo')}",
                 data:{'order_id':id},
                 dataType:'json',
                 success:function(data){
