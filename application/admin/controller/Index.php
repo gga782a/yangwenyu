@@ -9,6 +9,7 @@
 namespace app\admin\controller;
 use app\DataAnalysis;
 use think\Db;
+use think\Exception;
 use think\Session;
 use think\Request;
 use think\Validate;
@@ -1298,6 +1299,7 @@ class Index extends Common
             $betweenprice = $this->parme('betweenlow').','.$this->parme('betweenup');
             $insert['name']        = $this->parme('name');  //水名称
             $insert['stock']       = (int)$this->parme('stock');  //水余量
+            $insert['totalstock']  = (int)$this->parme('stock');  //总水量
             $insert['deputyprice'] = floatval($this->parme('deputyprice'));  //普通代理购水价格
             $insert['companyprice']= floatval($this->parme('companyprice'));  //分公司购水价格
             $insert['storeprice']  = trim($storeprice,','); //商户购水代理售价价格区间
@@ -1391,15 +1393,59 @@ class Index extends Common
                 'app_id'    => $this->id,
                 'shui_id'=> $this->parme('shui_id'),
             ];
-            $res = db(self::$table_shui)->where($where)->setInc('stock',(int)$this->parme('stock'));
-            if ($res) {
+            Db::startTrans();
+            try{
+                db(self::$table_shui)->where($where)->setInc('stock',(int)$this->parme('stock'));
+                db(self::$table_shui)->where($where)->setInc('totalstock',(int)$this->parme('stock'));
+                Db::commit();
                 return json(['code'=>200,'msg'=>'操作成功']);
-            } else {
+            }catch (Exception $exception){
+                Db::rollback();
                 return json(['code'=>400,'msg'=>'操作失败']);
             }
+//            if ($res) {
+//                return json(['code'=>200,'msg'=>'操作成功']);
+//            } else {
+//                return json(['code'=>400,'msg'=>'操作失败']);
+//            }
         }
     }
-
+    //订购详情
+    public function orderdetail()
+    {
+        $where = [
+            'app_id'  => $this->id,
+            'shui_id' => input('shui_id'),
+            'store_id'=> 0,
+            'parentid'=> 0,
+        ];
+        $order = db(self::$table_goushui_order)
+            ->where($where)
+            ->select();
+        $statusarr = [
+            '未支付', '支付成功，待发货', '待收货', '订单完成',
+        ];
+        if(!empty($order)){
+            foreach($order as $k=>$v){
+                $deputyname = '';
+                $deputylevel = '';
+                $deputy = db(self::$table_deputy)
+                    ->where(['app_id'=>$this->id,'deputy_id'=>$v['deputy_id']])
+                    ->field('deputy_name,level')
+                    ->find();
+                if($deputy){
+                    $deputyname = $deputy['deputy_name'];
+                    $deputylevel = $deputy['level'];
+                }
+                $order[$k]['deputyname'] = $deputyname;
+                $order[$k]['deputylevel'] = $deputylevel;
+                $order[$k]['statusname'] = $statusarr[$v['status']];
+            }
+        }
+        return view('orderdetail',[
+            'data' => $order,
+        ]);
+    }
     /**********************************订单总览********************************************************************/
     //水订单列表
     public function shuiorder()

@@ -319,8 +319,14 @@ class Deputy extends Common
                 }
                 if($istrue){
                     //水列表
+                    $wheres = [
+                        'app_id' => $this->app_id
+                    ];
+                    if(input('shui_id')){
+                        $wheres['shui_id'] = input('shui_id');
+                    }
                     $list = db(self::$table_shui)
-                        ->where(['app_id' => $this->app_id])
+                        ->where($wheres)
                         ->field($field)
                         ->page(input('page', 1), input('pageshow', 15))
                         ->select();
@@ -342,6 +348,7 @@ class Deputy extends Common
                     'data' => $list,
                     'deputy_id' => $this->id,
                     'app_id'    => $this->app_id,
+                    'parentid'  => $parentid
                 ]);
             }
         }
@@ -404,6 +411,7 @@ class Deputy extends Common
                 'deputy_id'     => input('deputy_id'),
                 'shui_id'       => input('shui_id'),
                 'store_id'      => 0,
+                'parentid'      => (int)input('parentid','0'),
                 'name'          => input('name'),
                 'stock'         => (int)input('stock'),
                 'price'         => floatval(input('price')),
@@ -577,13 +585,17 @@ class Deputy extends Common
             Db::startTrans();
             try {
                 db(self::$table_goushui_order)->where($where)->update(['status' => 3, 'updated_at' => time()]);
-                //查找是否已购买过该水，如果购买过 只增加水余量
-                //$count = db()
+                $wheres = [
+                    'app_id'    => $this->app_id,
+                    'type_id'   => $this->id,
+                    'shui_id'   => $order['shui_id'],
+                ];
                 $insert = [
                     'app_id'     => $this->app_id,
                     'shui_id'    => $order['shui_id'],
                     'name'       => $order['name'],
                     'stock'      => $order['stock'],
+                    'totalstock' => $order['stock'],
                     'price'      => $order['price'],
                     'created_at' => time(),
                     //'status'     => 1,
@@ -594,15 +606,27 @@ class Deputy extends Common
                     if ($level == 1) {
                         //增加数据到goushui表
                         $insert['type'] = 1; //分公司
+                        $wheres['type'] = 1;
                     }else {
                         $insert['type'] = 2; //普通代理
+                        $wheres['type'] = 2;
                     }
                     $insert['type_id'] = $order['deputy_id'];
                 } else {
                     $insert['type'] = 3;  //商户
                     $insert['type_id'] = $order['store_id'];
+                    $wheres['type'] = 3;
                 }
-                db(self::$table_goushui)->insertGetId($insert);
+
+                //查找是否已购买过该水，如果购买过 只增加水余量
+                $count = db(self::$table_goushui)
+                    ->where($wheres)
+                    ->count();
+                if($count>0){
+                    db(self::$table_goushui)->where($wheres)->setInc('stock',$order['stock']);
+                }else{
+                    db(self::$table_goushui)->insertGetId($insert);
+                }
                 Db::commit();
             } catch (Exception $exception) {
                 Db::rollback();
@@ -645,10 +669,16 @@ class Deputy extends Common
                 Db::startTrans();
                 try {
                     db(self::$table_goushui_order)->where($where)->update(['status' => 3, 'updated_at' => time()]);
+                    $wheres = [
+                        'app_id'    => $this->app_id,
+                        'type_id'   => $this->id,
+                        'shui_id'   => $order['shui_id'],
+                    ];
                     $insert = [
                         'app_id'     => $this->app_id,
                         'shui_id'    => $order['shui_id'],
                         'name'       => $order['name'],
+                        'totalstock' => $order['stock'],
                         'stock'      => $order['stock'],
                         'price'      => $order['price'],
                         'created_at' => time(),
@@ -660,15 +690,26 @@ class Deputy extends Common
                         if ($level == 1) {
                             //增加数据到goushui表
                             $insert['type'] = 1; //分公司
+                            $wheres['type'] = 1;
                         }else {
                             $insert['type'] = 2; //普通代理
+                            $wheres['type'] = 2;
                         }
                         $insert['type_id'] = $order['deputy_id'];
                     } else {
                         $insert['type'] = 3;  //商户
                         $insert['type_id'] = $order['store_id'];
+                        $wheres['type'] = 3;
                     }
-                    db(self::$table_goushui)->insertGetId($insert);
+                    //查找是否已购买过该水，如果购买过 只增加水余量
+                    $count = db(self::$table_goushui)
+                        ->where($wheres)
+                        ->count();
+                    if($count>0){
+                        db(self::$table_goushui)->where($wheres)->setInc('stock',$order['stock']);
+                    }else{
+                        db(self::$table_goushui)->insertGetId($insert);
+                    }
                     Db::commit();
                     return json(['code'=>200,'msg'=>'操作成功']);
                 } catch (Exception $exception) {
@@ -728,33 +769,72 @@ class Deputy extends Common
     /******************************************已购买到货的水**********************************************************/
     public function myshui()
     {
+
         //查找当前代理级别
         $level = db(self::$table_deputy)
             ->where(['app_id'=>$this->app_id,'deputy_id'=>$this->id])
             ->value('level');
-        //根据级别获取总平台配置
-        if($level == 1){ //分公司卖给普通代理的价格区间
-            $pricespace = db(self::$table_shui)->where('app_id',$this->app_id)->value('betweenprice');
-        }else{ //普通代理卖给商户的价格区间
-            $pricespace = db(self::$table_shui)->where('app_id',$this->app_id)->value('storeprice');
-        }
-        if(!empty($pricespace)){
-            $pricespace = explode(',',$pricespace);
-        }
         $where = [
             'app_id'    => $this->app_id,
-            'deputy_id' => $this->id,
-            'status'    => 3,
+            'type_id'   => $this->id,
         ];
-
+        if($level == 1){
+            $where['type'] = 1;
+        }else{
+            $where['type'] = 2;
+        }
         $data = db(self::$table_goushui)
             ->where($where)
             ->select();
+        if(!empty($data)){
+           foreach ($data as $k=>$v){
+               //根据级别获取总平台配置
+               if($level == 1){ //分公司卖给普通代理的价格区间
+                   $pricespace = db(self::$table_shui)->where(['app_id'=>$this->app_id,'shui_id'=>$v['shui_id']])->value('betweenprice');
+               }else{ //普通代理卖给商户的价格区间
+                   $pricespace = db(self::$table_shui)->where(['app_id'=>$this->app_id,'shui_id'=>$v['shui_id']])->value('storeprice');
+               }
+               if(!empty($pricespace)){
+                   $pricespace = explode(',',$pricespace);
+                   $data[$k]['pricelow'] = $pricespace[0];
+                   $data[$k]['priceup']  = $pricespace[1];
+               }else{
+                   $data[$k]['pricelow'] = 0;
+                   $data[$k]['priceup']  = 0;
+               }
+           }
+        }
+        //dd($data);
         return view('myshui',[
             'data'  => $data,
-            'pricespace' => $pricespace,
         ]);
+    }
 
+    //设置水价
+
+    public function setprice()
+    {
+        if(Request::instance()->isAjax()) {
+            $where = [
+                'app_id' => $this->app_id,
+                'goushui_id' => input('goushui_id'),
+            ];
+            $price = floatval(input('price'));
+            $pricelow = floatval(input('pricelow'));
+            $priceup = floatval(input('priceup'));
+            if ($price >= $pricelow && $price <= $priceup) {
+                $res = db(self::$table_goushui)
+                    ->where($where)
+                    ->update(['price' => $price, 'updated_at' => time()]);
+                if ($res !== false) {
+                    return json(array('code' => 200, 'msg' => '操作成功'));
+                } else {
+                    return json(array('code' => 400, 'msg' => '操作失败'));
+                }
+            } else {
+                return json(array('code' => 400, 'msg' => '价格'.$price.'应在'.$pricelow.'到'.$priceup.'之间'));
+            }
+        }
     }
 }
 

@@ -145,7 +145,12 @@ class Saomapay extends Controller
 //                            //'status'     => 1,
 //                        ];
                         //根据代理ID 获取代理等级
-                        $level = db(self::$table_deputy)->where(['app_id' => $appid, 'deputy_id' => $order['deputy_id']])->value('level');
+                        $deputy = db(self::$table_deputy)
+                            ->where(['app_id' => $appid, 'deputy_id' => $order['deputy_id']])
+                            ->field('level,parentid')
+                            ->find();
+                        $level = $deputy['level'];
+                        $parentid = $deputy['parentid'];
                         if ($level == 1) {
                             //减少总后台水量
                             db(self::$table_shui)
@@ -158,7 +163,21 @@ class Saomapay extends Controller
                             Db::commit();
                             $result = true;
                         } else {
-
+                            if($parentid == 0){
+                                //减少总后台水量
+                                db(self::$table_shui)
+                                    ->where(['app_id' => $appid, 'shui_id' => $order['shui_id']])
+                                    ->setDec('stock', $order['stock']);
+                                Db::commit();
+                                $result = true;
+                            }else{
+                                //减少上级公司水量
+                                db(self::$table_goushui)
+                                    ->where(['app_id' => $appid, 'type_id' => $order['parentid'],'type'=>1,'shui_id'=>$order['shui_id']])
+                                    ->setDec('stock', $order['stock']);
+                                Db::commit();
+                                $result = true;
+                            }
                         }
                     }else{
 

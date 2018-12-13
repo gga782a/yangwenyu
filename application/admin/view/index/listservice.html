@@ -45,6 +45,7 @@
                         <tr>
                             <th>水序号</th>
                             <th>水名称</th>
+                            <th>总水量</th>
                             <th>水余量</th>
                             <th>普通代理购水价格</th>
                             <th>分公司购水价格</th>
@@ -61,16 +62,17 @@
                         <tr class="">
                             <td>{$vo.shui_id}</td>
                             <td>{$vo.name}</td>
-                            <th>{$vo.stock}</th>
-                            <th>{$vo.deputyprice}</th>
-                            <th>{$vo.companyprice}</th>
-                            <th>{$vo.storeprice}</th>
-                            <th>{$vo.betweenprice}</th>
+                            <td>{$vo.totalstock}</td>
+                            <td>{$vo.stock}</td>
+                            <td>{$vo.deputyprice}</td>
+                            <td>{$vo.companyprice}</td>
+                            <td>{$vo.storeprice}</td>
+                            <td>{$vo.betweenprice}</td>
                             <td>{$vo.created_at|date="Y-m-d H:i:s",###}</td>
                             <td>
                                 <span><a href="{:url('index/serviceorder',array('flag'=>'update','shui_id'=>$vo['shui_id']))}">编辑</a></span>
                                 |<span><a onclick="addstock({$vo['shui_id']})">补水量</a></span>
-                                |<span><a onclick="orderdetail({$vo['shui_id']})">订购详情</a></span>
+                                |<span><a href="{:url('index/orderdetail',array('shui_id'=>$vo['shui_id']))}">订购详情</a></span>
                             </td>
                             <!--<td>Internet Explorer 4.0-->
                             <!--</td>-->
