@@ -201,7 +201,6 @@ class Saomapay extends Controller
         return $result;
 
     }
-
     /**
      *
      * 产生随机字符串，不长于32位
