@@ -40,6 +40,7 @@
                     <form method="post" class="form-horizontal" id="form1" onsubmit="return false;">
                         <input type="hidden" name="shui_id" value="{$params.shui_id}" />
                         <input type="hidden" name="deputy_id" value="{$params.deputy_id}" />
+                        <input type="hidden" name="store_id" value="{$params.store_id}" />
                         <input type="hidden" name="app_id" value="{$params.app_id}" />
                         <input type="hidden" name="parentid" value="{$params.parentid}" />
                         <div class="form-group">
@@ -220,21 +221,22 @@
         }
     });
     $("#btn").on('click',function(){
-       var appid = $("input[name=app_id]").val();
-       var deputyid = $("input[name=deputy_id]").val();
-       var shui_id = $("input[name=shui_id]").val();
-       var parentid = $("input[name=parentid]").val();
-       var name = $("input[name=name]").val();
-       var price = $("input[name=price]").val();
-       var stock = $("input[name=stock]").val();
-       var receiver = $("input[name=receiver]").val();
-       var receiverphone = $("input[name=receiverphone]").val();
-       var receiveraddress = $("input[name=receiveraddress]").val();
-       var needpay = $("input[name=needpay]").val();
-       if(stock == ''||stock == null){
-           layer.msg('购水量必填');
-           return;
-       }
+        var appid = $("input[name=app_id]").val();
+        var deputyid = $("input[name=deputy_id]").val();
+        var store_id = $("input[name=store_id]").val();
+        var shui_id = $("input[name=shui_id]").val();
+        var parentid = $("input[name=parentid]").val();
+        var name = $("input[name=name]").val();
+        var price = $("input[name=price]").val();
+        var stock = $("input[name=stock]").val();
+        var receiver = $("input[name=receiver]").val();
+        var receiverphone = $("input[name=receiverphone]").val();
+        var receiveraddress = $("input[name=receiveraddress]").val();
+        var needpay = $("input[name=needpay]").val();
+        if(stock == ''||stock == null){
+            layer.msg('购水量必填');
+            return;
+        }
         if(receiver == ''||receiver == null){
             layer.msg('收货人必填');
             return;
@@ -252,10 +254,11 @@
         //ajax 获取二维码
         $.ajax({
             type:'post',
-            url:"{:url('deputy/creategoushuiorder')}",
+            url:"{:url('store/creategoushuiorder')}",
             data:{
                 'app_id':appid,
                 'deputy_id':deputyid,
+                'store_id':store_id,
                 'shui_id':shui_id,
                 'parentid':parentid,
                 'name':name,
@@ -286,7 +289,7 @@
     function check(id) {
         $.ajax({
             type:'post',
-            url:"{:url('deputy/check')}",
+            url:"{:url('store/check')}",
             data:{'order_id':id},
             dataType: 'json',
             success:function (data) {
@@ -295,7 +298,7 @@
                     $("#img").hide();
                     layer.msg('支付成功');
                     setTimeout(function () {
-                        window.location.href="{:url('deputy/serviceorder')}";
+                        window.location.href="{:url('store/serviceorder')}";
                     }, 1000);
                 }
             },

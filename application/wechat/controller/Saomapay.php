@@ -180,7 +180,12 @@ class Saomapay extends Controller
                             }
                         }
                     }else{
-
+                        //减少上级代理水量
+                        db(self::$table_goushui)
+                            ->where(['app_id' => $appid, 'type_id' => $order['deputy_id'],'type'=>2,'shui_id'=>$order['shui_id']])
+                            ->setDec('stock', $order['stock']);
+                        Db::commit();
+                        $result = true;
                     }
                 }catch (Exception $exception){
                     Db::rollback();

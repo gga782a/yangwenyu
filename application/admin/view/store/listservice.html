@@ -38,7 +38,7 @@
                 </div>
                 <div class="ibox-content">
                     <div class="">
-                        <a class="btn btn-primary " href="{:url('deputy/goushui')}">购水</a>
+                        <a class="btn btn-primary " href="{:url('store/goushui')}">购水</a>
                     </div>
                     <table class="table table-striped table-bordered table-hover " id="editable">
                         <thead>
@@ -143,7 +143,7 @@
         if(confirm('确定要删除吗')){
             $.ajax({
                 type:'post',
-                url:"{:url('deputy/delgoushuiorder')}",
+                url:"{:url('store/delgoushuiorder')}",
                 data:{'order_id':id},
                 dataType:'json',
                 success:function(data){
@@ -168,7 +168,7 @@
         if(confirm('确定要收获吗')){
             $.ajax({
                 type:'post',
-                url:"{:url('deputy/receive')}",
+                url:"{:url('store/receive')}",
                 data:{'order_id':id},
                 dataType:'json',
                 success:function(data){

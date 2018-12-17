@@ -1421,6 +1421,7 @@ class Index extends Common
         ];
         $order = db(self::$table_goushui_order)
             ->where($where)
+            ->page(input('page',1),input('pageshow',15))
             ->select();
         $statusarr = [
             '未支付', '支付成功，待发货', '待收货', '订单完成',
