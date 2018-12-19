@@ -49,6 +49,8 @@ class Index extends Common
 
     public static $table_goushui_order = 'goushui_order'; //水订单
 
+    public static $table_integral = 'integral'; // 积分
+
     public $time;
 
     public static $msg = [];
@@ -1497,6 +1499,8 @@ class Index extends Common
         if(Request::instance()->isAjax()) {
             $where = [
                 'app_id' => $this->id,
+                'parentid' => 0,
+                'store_id' => 0,
                 'status' => 0,
             ];
 
@@ -1525,6 +1529,71 @@ class Index extends Common
         ];
         db(self::$table_goushui_order)->where($where)->delete();
     }
+    /***********************************积分管理**********************************************************/
+
+    public function setintegral()
+    {
+        $where = [
+            'app_id'    => $this->id,
+            //'status'    => 1,
+        ];
+        $flag = input('flag');
+        if(Request::instance()->isAjax()){
+            $data = [
+                'jifen'     => (int)input('jifen'),
+                'needpay'   => floatval(input('needpay')),
+                'updated_at'=> time(),
+            ];
+            if($flag == 'add'){
+                $data['app_id']     = $this->id;
+                $data['status']     = 1;
+                $data['created_at'] = time();
+                $id = db(self::$table_integral)
+                    ->insertGetId($data);
+                if($id){
+                    return json(array('code'=>200,'msg'=>'操作成功'));
+                }else{
+                    return json(array('code'=>400,'msg'=>'操作失败'));
+                }
+            }else{
+                $where['integral_id'] = input('integral_id');
+                $res = db(self::$table_integral)
+                    ->where($where)
+                    ->update($data);
+                if($res!==false){
+                    return json(array('code'=>200,'msg'=>'操作成功'));
+                }else{
+                    return json(array('code'=>400,'msg'=>'操作失败'));
+                }
+            }
+        }else{
+            $data = db(self::$table_integral)
+                ->where($where)
+                ->page(input('page',1),input('pageshow',15))
+                ->select();
+            return view('listintegral',[
+                'data'  => $data,
+            ]);
+        }
+    }
+    //删除积分
+    public function delintegral()
+    {
+        //dd(222);
+        if(Request::instance()->isAjax()) {
+            $where = [
+                'app_id'     => $this->id,
+                'integral_id'=> $this->parme('integral_id'),
+            ];
+            $res = db(self::$table_integral)->where($where)->delete();
+            if ($res) {
+                return json(['code'=>200,'msg'=>'操作成功']);
+            } else {
+                return json(['code'=>400,'msg'=>'操作失败']);
+            }
+        }
+    }
+
     /***********************************商家后台开始**********************************************************/
     //门店管理
 

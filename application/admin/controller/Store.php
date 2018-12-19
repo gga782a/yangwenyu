@@ -30,6 +30,8 @@ class Store extends Common
     public static $table_goushui = 'goushui';
     public static $table_goushui_order = 'goushui_order';
     public static $table_pay_setting = 'pay_setting';
+    public static $table_integral = 'integral'; //积分
+    public static $table_integral_order = 'integral_order'; //积分订单
     public $time;
     public function __construct(Request $request = null)
     {
@@ -975,6 +977,200 @@ class Store extends Common
 //            return false;
 //        }
 //    }
+    /************************************************积分购买************************************************************/
+    //展示订单记录表
+    public function integrallist()
+    {
+        //dd(111);
+        $where = [
+            'app_id'   => $this->app_id,
+            'type_id'  => $this->store_id,
+            'type'     => '1',
+        ];
+
+        $data = db(self::$table_integral_order)
+            ->where($where)
+            ->page(input('page',1),input('pageshow',15))
+            ->select();
+        if(count($data)>0){
+            foreach ($data as $k=>$v){
+                $data[$k]['statusname'] = $v['status'] == 0?'未支付':'已支付';
+            }
+        }
+        //dd($data);
+        return view('integrallist',[
+            'data'  => $data,
+        ]);
+    }
+    //展示可购买积分
+    public function showintegrallist()
+    {
+        $where = [
+            'app_id' => $this->app_id,
+            'status' => 1,
+        ];
+
+        $data = db(self::$table_integral)
+            ->where($where)
+            ->select();
+        return view('showintegrallist',[
+            'data'  => $data,
+        ]);
+    }
+    //创建积分订单
+
+    public function createintegralorder()
+    {
+        if(Request::instance()->isAjax()){
+            $insert = [
+                'app_id'        => $this->app_id,
+                'type'          => 1,
+                'type_id'       => $this->store_id,
+                'integral_id'   => input('integral_id'),
+                'jifen'         => (int)input('jifen'),
+                'status'        => 0,
+                'needpay'       => floatval(input('needpay')),
+                'order_num'     => time().rand(000000,999999),
+                'created_at'    => time(),
+            ];
+            $id = db(self::$table_integral_order)->insertGetId($insert);
+            if($id){
+                //跳转到扫码支付页
+                //return json(['code'=>400,'msg'=>$id]);
+                $return = $this->saomapayintegral($id);
+                if($return === false){
+                    return json(['code'=>400,'msg'=>'操作失败']);
+                }else{
+                    return json(['code'=>200,'msg'=>$return,'id'=>$id]);
+                }
+            }else{
+                return json(['code'=>400,'msg'=>'操作失败']);
+            }
+        }
+    }
+
+    //扫码支付
+
+    public function saomapayintegral($id='')
+    {
+        $where = [
+            'app_id'   => $this->app_id,
+            'type_id'  => $this->store_id,
+            'type'     => '1',
+            'order_id' => $id
+        ];
+        //查询订单
+        $order = db(self::$table_integral_order)
+            ->where($where)
+            ->field('order_num,needpay,integral_id')
+            ->find();
+        //dd($order);
+        if($order){
+            //return json(['code'=>400,'msg'=>'操作失败']);
+            //获取商户信息
+            $paysetting  = db(self::$table_pay_setting)
+                ->where(['app_id'=>$this->app_id])
+                ->find();
+            //dd($paysetting);
+            if($paysetting){
+                //return json(['code'=>400,'msg'=>'操作失败']);
+                //调起扫码支付 生成二维码
+                $notify_url = "http://www.yilingjiu.cn/wechat/Saomapay/notifyintegral";
+                //$order['needpay']
+                $somapay = new Saomapay($order['integral_id'],$openid='', $paysetting['mch_id'], $paysetting['mch_key'],$order['order_num'],'购买积分',0.01,$id,$notify_url);
+                $return  = $somapay->pay();
+                //dd($return);
+                if($return['return_code'] == 'SUCCESS'&&$return['return_msg'] == 'OK'){
+                    //return json(['code'=>400,'msg'=>444]);
+                    $code_url = $return['code_url'];
+                    //生成二维码
+                    return $this->s_qr_code($code_url);
+                }else{
+                    return false;
+                }
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+
+    //检测是否支付成功
+
+    public function checkintegral()
+    {
+        if(Request::instance()->isAjax()){
+            $status = db(self::$table_integral_order)->where(['app_id'=>$this->app_id,'order_id'=>input('order_id')])->value('status');
+            if($status == 1){
+                return json(['code'=>200]);
+            }else{
+                return json(['code'=>400]);
+            }
+        }
+    }
+
+    //删除购买积分订单
+    public function delintegralorder()
+    {
+        //dd(222);
+        if(Request::instance()->isAjax()) {
+            $where = [
+                'app_id'    => $this->app_id,
+                'type'      => '1',
+                'type_id'   => $this->store_id,
+                'order_id'  => $this->parme('order_id')
+            ];
+            $res = db(self::$table_integral_order)->where($where)->delete();
+            if ($res) {
+                return json(['code'=>200,'msg'=>'操作成功']);
+            } else {
+                return json(['code'=>400,'msg'=>'操作失败']);
+            }
+        }
+    }
+
+    //超时不支付自动删除订单
+
+    public function autodel()
+    {
+        if(Request::instance()->isAjax()) {
+            $where = [
+                'app_id'    => $this->app_id,
+                'type'      => '1',
+                'type_id'   => $this->store_id,
+                'status'    => 0,
+            ];
+
+            $late = 7200;
+
+            $order = db(self::$table_integral_order)
+                ->where($where)
+                ->select();
+            if (!empty($order)) {
+                //选出满足自动收获条件的数据
+                foreach ($order as $k => $v) {
+                    if (time() > ($v['created_at'] + $late)) {
+                        $this->delorder($v['order_id']);
+                    }
+                }
+            }
+        }
+    }
+
+    //shuohuo
+    private function delorder($id)
+    {
+        $where = [
+            'app_id'    => $this->app_id,
+            'type'      => '1',
+            'type_id'   => $this->store_id,
+            'status'    => 0,
+            'order_id'  => $id
+        ];
+        db(self::$table_integral_order)->where($where)->delete();
+    }
+
     /************************************************订单总揽************************************************************/
 }
 

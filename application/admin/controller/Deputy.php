@@ -945,6 +945,31 @@ class Deputy extends Common
     //水订单列表
     public function shuiorder()
     {
+        $data = [];
+        //代理在分公司购买订单
+        $deputyorder = $this->deputyorder();
+        if($deputyorder!==false){
+            foreach ($deputyorder as $k1=>$v1){
+                $data[$k1] = $v1;
+            }
+        }
+        $count = count($data);
+        //商户在代理购水订单
+        $storeorder = $this->storeorder();
+        if($storeorder!==false){
+            foreach ($storeorder as $k2=>$v2){
+                $data[$count+$k2] = $v2;
+            }
+        }
+        return view('shuiorder',[
+            'data'  =>  $data
+        ]);
+    }
+
+    //代理在分公司购买订单
+
+    public function deputyorder()
+    {
         $where = [
             'app_id'       => $this->app_id,
             'parentid'     => $this->id
@@ -962,11 +987,40 @@ class Deputy extends Common
             foreach($data as $k=>$v){
                 $data[$k]['statusname'] = $statusarr[$v['status']];
             }
+            return $data;
+        }else{
+            return false;
         }
 
-        return view('shuiorder',[
-            'data'  =>  $data
-        ]);
+    }
+
+    //商户在代理购水订单
+
+    public function storeorder()
+    {
+        $where = [
+            'app_id'       => $this->app_id,
+            'deputy_id'    => $this->id,
+            'store_id'     => ['neq',0],
+        ];
+
+        $statusarr = [
+            '未支付','支付成功,待发货','待收货','订单完成'
+        ];
+
+        $data = db(self::$table_goushui_order)
+            ->where($where)
+            ->page(input('page',1),input('pageshow',15))
+            ->select();
+        if(!empty($data)){
+            foreach($data as $k=>$v){
+                $data[$k]['statusname'] = $statusarr[$v['status']];
+            }
+            return $data;
+        }else{
+            return false;
+        }
+
     }
     //确认发货
     public function fahuo()
@@ -974,7 +1028,7 @@ class Deputy extends Common
         if(Request::instance()->isAjax()) {
             $where = [
                 'app_id'    => $this->app_id,
-                'parentid'  => $this->id,
+                //'parentid'  => $this->id,
                 'order_id'  => $this->parme('order_id'),
             ];
             $res = db(self::$table_goushui_order)->where($where)->update(['status'=>2,'updated_at'=>time()]);
@@ -1010,6 +1064,26 @@ class Deputy extends Common
                     }
                 }
             }
+            $wheres = [
+                'app_id'    => $this->app_id,
+                'deputy_id' => $this->id,
+                'store_id'  => ['neq',0],
+                'status'    => 0,
+            ];
+
+            $late = 7200;
+
+            $order = db(self::$table_goushui_order)
+                ->where($wheres)
+                ->select();
+            if (!empty($order)) {
+                //选出满足自动收获条件的数据
+                foreach ($order as $k => $v) {
+                    if (time() > ($v['created_at'] + $late)) {
+                        $this->delorders($v['order_id']);
+                    }
+                }
+            }
         }
     }
 
@@ -1019,6 +1093,17 @@ class Deputy extends Common
         $where = [
             'app_id'    => $this->app_id,
             'parentid'  => $this->id,
+            'order_id'  => $id
+        ];
+        db(self::$table_goushui_order)->where($where)->delete();
+    }
+
+    private function delorders($id)
+    {
+        $where = [
+            'app_id'    => $this->app_id,
+            'deputy_id' => $this->id,
+            'store_id'  => ['neq',0],
             'order_id'  => $id
         ];
         db(self::$table_goushui_order)->where($where)->delete();

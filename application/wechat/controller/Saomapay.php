@@ -31,6 +31,8 @@ class Saomapay extends Controller
     public static $table_goushui = 'goushui';
     public static $table_shui = 'shui';
     public static $table_deputy = 'deputy';
+    public static $table_integral_order = 'integral_order';
+    public static $table_store = 'store';
     //初始化参数
     public function __construct($product_id='',$openid='', $mch_id='', $key='',$out_trade_no='',$body='',$total_fee=0.01,$attach='',$notify_url='')
     {
@@ -192,6 +194,73 @@ class Saomapay extends Controller
                     $result = false;
                 }
             }else{
+                $result = false;
+            }
+        }else{
+            $result = false;
+        }
+        // 返回状态给微信服务器
+        if ($result) {
+            $str='<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>';
+        }else{
+            $str='<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[签名失败]]></return_msg></xml>';
+        }
+        return $result;
+
+    }
+    //购买积分回调
+    public function notifyintegral()
+    {
+        //db('ceshi')->insertGetId(array('text1'=>'jifen','text2'=>4444));
+        $xml = file_get_contents("php://input");
+        //转换成数组
+        $data=$this->xmlToArray($xml);
+        //根据订单id获取app_id
+        $appid = db(self::$table_integral_order)->where(['order_id'=>$data['attach'],'status'=>0])->value('app_id');
+        $mch_key = db('pay_setting')->where('app_id',$appid)->value('mch_key');
+        $this->key = $mch_key;
+        //db('ceshi')->insertGetId(array('text1'=>'jifen','text2'=>json_encode($data)));
+        //比较签名
+        $data_sign = $data['sign'];
+        //db('ceshi')->insertGetId(array('text1'=>'jf','text2'=>$data_sign));
+        unset($data['sign']);
+        $sign=$this->getSign($data);
+        //db('ceshi')->insertGetId(array('text1'=>'jf','text2'=>$sign));
+        // 判断签名是否正确  判断支付状态
+        if ( ($sign===$data_sign) && ($data['return_code']=='SUCCESS') && ($data['result_code']=='SUCCESS') ){
+            //db('ceshi')->insertGetId(array('text1'=>'jff','text2'=>'ok'));
+            //查找订单
+            $order = db(self::$table_integral_order)->where(['order_id'=>$data['attach'],'status'=>0])->find();
+            //db('ceshi')->insertGetId(array('text1'=>'jffd','text2'=>json_encode($order)));
+            if($order){
+                //db('ceshi')->insertGetId(['text1'=>'jssssss','text2'=>'322']);
+                Db::startTrans();
+                try{
+                    //更改状态 添加表
+                    db(self::$table_integral_order)->where(['order_id'=>$data['attach'],'status'=>0])->update(['status'=>1,'paytime'=>time()]);
+                    //db('ceshi')->insertGetId(['text1'=>'js','text2'=>'322']);
+                    if($order['type'] == '1'){
+                        //db('ceshi')->insertGetId(['text1'=>'jss','text2'=>'333222']);
+                        //添加积分到store表
+                        $wheres =  [
+                            'app_id'    => $appid,
+                            'store_id'  => $order['type_id'],
+                        ];
+                        //db('ceshi')->insertGetId(['text1'=>'jssw','text2'=>'333222']);
+                        db(self::$table_store)->where($wheres)->setInc('integral',$order['jifen']);
+                        //db('ceshi')->insertGetId(['text1'=>'jssw1','text2'=>'333222']);
+                        db(self::$table_store)->where($wheres)->setInc('totalintegral',$order['jifen']);
+                        //db('ceshi')->insertGetId(['text1'=>'jssw2','text2'=>'333222']);
+                    }
+                    //db('ceshi')->insertGetId(['text1'=>'jsss','text2'=>'33333222']);
+                    Db::commit();
+                   $result = true;
+                }catch (Exception $exception){
+                    Db::rollback();
+                    $result = false;
+                }
+            }else{
+                //db('ceshi')->insertGetId(['text1'=>'jttt','text2'=>'33333222']);
                 $result = false;
             }
         }else{
