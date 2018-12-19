@@ -1171,6 +1171,45 @@ class Store extends Common
         db(self::$table_integral_order)->where($where)->delete();
     }
 
+    /************************************************资产总揽************************************************************/
+
+    public function assetprofile()
+    {
+        //总支出
+        //买水支出
+        $shuipaymoney = 0;
+        $shuipay = $this->shuipay();
+        if($shuipay!==false){
+            $shuipaymoney = $shuipay['money'];
+        }
+        dd($shuipaymoney);
+        //买积分支出
+        return view('assetprofile');
+    }
+    //买水支出
+    public function shuipay()
+    {
+        $where = [
+            'app_id'    => $this->app_id,
+            'deputy_id' => $this->deputy_id,
+            'parentid'  => 0,
+            'store_id'  => $this->store_id,
+            'status'    => ['in',[1,2,3]],
+        ];
+        $shuipay = db(self::$table_goushui_order)
+            ->where($where)
+            ->page(input('page',1),input('pageshow',15))
+            ->select();
+        $shuipaymoney = db(self::$table_goushui_order)
+            ->where($where)
+            ->sum('needpay');
+        if(!empty($shuipay)){
+            return array('data'=>$shuipay,'money'=>$shuipaymoney);
+        }else{
+            return false;
+        }
+
+    }
     /************************************************订单总揽************************************************************/
 }
 
