@@ -8,7 +8,6 @@
 ( function( $ ) {
 	$.fn.extend({
 		prettyFile: function( options ) {
-			console.log(101);
 			var defaults = {
 				text : "选择文件"
 			};

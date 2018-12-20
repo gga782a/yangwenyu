@@ -32,6 +32,9 @@ class Store extends Common
     public static $table_pay_setting = 'pay_setting';
     public static $table_integral = 'integral'; //积分
     public static $table_integral_order = 'integral_order'; //积分订单
+    public static $table_vipcard = 'vipcard'; // 会员卡
+    public static $table_recieve_vipcard = 'recieve_vipcard'; //领取会员卡表
+    public static $table_member = 'member'; // 会员
     public $time;
     public function __construct(Request $request = null)
     {
@@ -1210,6 +1213,175 @@ class Store extends Common
         }
 
     }
+
+    /************************************************会员卡设置************************************************************/
+
+    //设置会员卡
+
+    public function setvipcard()
+    {
+        $flag = input('flag');
+        $where = [
+            'app_id'    => $this->app_id,
+            'store_id'  => $this->store_id,
+        ];
+        if(Request::instance()->isPost()){
+            $shop = $this->parme('shop');
+            if(is_array($shop)){
+                $applyshop = implode(',',$shop);
+            }else{
+                $applyshop = 0;
+            }
+            if($this->parme('type') == 2){
+                if($this->parme('discount') >10){
+                    return $this->error('折扣不能超过10');
+                }
+            }
+            //dd($applyshop);
+            $data = [
+                'cardname'       => input('cardname'),
+                'applyshop'      => $applyshop,
+                'usecondition'   => intval(input('usecondition')),
+                'discount'       => intval(input('discount')),
+                'type'           => input('type',1),
+                'needpay'        => floatval(input('needpay')),
+                'validity'       => intval(input('validity')),
+                'updated_at'     => time(),
+            ];
+            if($flag == 'add'){
+                $data['app_id']  = $this->app_id;
+                $data['store_id']= $this->store_id;
+                $data['status']  = 1;
+                $data['created_at']= time();
+                $id = db(self::$table_vipcard)->insertGetId($data);
+                if($id){
+                    return $this->redirect('store/setvipcard');
+                }else{
+                    return $this->error('操作失败');
+                }
+            }else{
+                $where['card_id'] = input('card_id');
+                $res = db(self::$table_vipcard)->where($where)->update($data);
+                if($res!==false){
+                    return $this->redirect('store/setvipcard');
+                }else{
+                    return $this->error('操作失败');
+                }
+            }
+        }else{
+            if($flag == 'add'){
+                //获取商户下所有门店信息
+                $shop = db(self::$table_shop)
+                    ->where($where)
+                    ->field('shop_id,shop_name')
+                    ->select();
+                return view('addvipcard',[
+                    'shop' => $shop,
+                ]);
+            }elseif($flag == 'update'){
+                //获取商户下所有门店信息
+                $shop = db(self::$table_shop)
+                    ->where($where)
+                    ->field('shop_id,shop_name')
+                    ->select();
+                $where['card_id'] = input('card_id');
+                $data = db(self::$table_vipcard)->where($where)->find();
+                $applyshop = $data['applyshop'];
+                if($applyshop == 0){
+                    $applyshop = [];
+                }else{
+                    $applyshop = explode(',',$applyshop);
+                }
+                return view('editvipcard',[
+                    'data' => $data,
+                    'shop' => $shop,
+                    'applyshop' => $applyshop,
+                ]);
+            }else{
+                $data = db(self::$table_vipcard)
+                    ->where($where)
+                    ->page(input('page',1),input('pageshow',15))
+                    ->select();
+                if(count($data)>0){
+                    foreach($data as $k=>$v){
+                        if($v['applyshop'] == 0){
+                            $applyshopname = '全门店通用';
+                        }else{
+                            $applyshopname = '';
+                            $applyshop = trim($v['applyshop'],',');
+                            $applyshop = explode(',',$applyshop);
+                            foreach($applyshop as $k1=>$v1){
+                                $where['shop_id'] = $v1;
+                                $applyshopname .= db(self::$table_shop)
+                                    ->where($where)
+                                    ->value('shop_name').',';
+                            }
+
+                        }
+                        $data[$k]['applyshopname'] = trim($applyshopname,',');
+                    }
+                }
+
+                return view('vipcardlist',[
+                    'data'  => $data,
+                ]);
+            }
+        }
+    }
+
+    //删除会员卡
+
+    public function delvipcard()
+    {
+        if(Request::instance()->isAjax()){
+            $where = [
+                'app_id'    => $this->app_id,
+                'store_id'  => $this->store_id,
+                'card_id'   => $this->parme('card_id'),
+            ];
+            //判断会员卡是否被领取
+            $count = db(self::$table_recieve_vipcard)->where($where)->count();
+            if($count>0){
+                return json(array('code' => 400, 'msg' => '会员卡被领取了'));
+            }else {
+                $res = db(self::$table_vipcard)->where($where)->delete();
+                if ($res) {
+                    return json(array('code' => 200, 'msg' => '操作成功'));
+                } else {
+                    return json(array('code' => 400, 'msg' => '操作失败'));
+                }
+            }
+        }
+    }
+
+    //领取会员卡详情
+
+    public function recievecard()
+    {
+        $where = [
+            'app_id' => $this->app_id,
+            'store_id' => $this->store_id,
+            'card_id' => $this->parme('card_id'),
+        ];
+        $data = db(self::$table_recieve_vipcard)
+            ->where($where)
+            ->page(input('page', 1), input('pageshow', 15))
+            ->select();
+        if(!empty($data)){
+            foreach($data as $k=>$v){
+                $member = db(self::$table_member)
+                    ->where(['app_id'=>$this->app_id,'member_id'=>$v['member_id']])
+                    ->field('name,cover')
+                    ->find();
+                $data[$k]['member'] = $member;
+            }
+        }
+         return view('recievecard',[
+             'data' => $data,
+         ]);
+
+    }
+
     /************************************************订单总揽************************************************************/
 }
 

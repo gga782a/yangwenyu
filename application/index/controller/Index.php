@@ -346,7 +346,7 @@ class Index extends Common
 
     public function getshop()
     {
-        if(Request::instance()->isPost()){
+        if(Request::instance()->isAjax()){
             $lng = input('lng');
             $lat = input('lat');
             //dd($lng);
