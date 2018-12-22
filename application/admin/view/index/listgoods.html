@@ -53,6 +53,7 @@
                             <th>商品价格</th>
                             <th>商品状态</th>
                             <th>商品排序</th>
+                            <th>快递模板</th>
                             <th>创建时间</th>
                             <th>操作</th>
                         </tr>
@@ -80,7 +81,8 @@
                             {else /}
                                 下架
                             {/if}</td>
-                            <th>{$vo.sort}</th>
+                            <td>{$vo.sort}</th>
+                            <td>{$vo.expressname}</th>
                             <td>{$vo.created_at|date="Y-m-d H:i:s",###}</td>
                             <td>
                                 <span><a href="{:url('index/setgoods',array('flag'=>'update','goods_id'=>$vo['goods_id']))}">编辑</a></span>
@@ -97,6 +99,9 @@
                                 <a onclick="return up({$vo['goods_id']});">上架</a>
                             </span>
                                 {/if}
+                                |<span>
+                                <a href="{:url('index/choiceexpress',array('goods_id'=>$vo['goods_id'],'express_id'=>$vo['express_id']))}">选择快递模板</a>
+                            </span>
                             </td>
                             <!--<td>Internet Explorer 4.0-->
                             <!--</td>-->
@@ -165,6 +170,39 @@
             })
         }
     }
+
+    // function choiceexpress(id,expressid)
+    // {
+    //     layer.open({
+    //         type: 2,
+    //         area: ['80%', '80%'],
+    //         title:'领取详情',
+    //         fixed: false, //不固定
+    //         maxmin: true,
+    //         content: "choiceexpress?goods_id="+id+"&express_id="+expressid
+    //     });
+    //         // $.ajax({
+    //         //     type:'post',
+    //         //     url:'delgoods',
+    //         //     data:{'goods_id':$id},
+    //         //     dataType:'json',
+    //         //     success:function(data){
+    //         //         if(data.code==200) {
+    //         //             layer.msg(data.msg);
+    //         //             setTimeout(function () {
+    //         //                 window.location.reload();
+    //         //             }, 1000);
+    //         //         }else{
+    //         //             layer.msg(data.msg);
+    //         //
+    //         //         }
+    //         //     },
+    //         //     error:function(data){
+    //         //         console.log(data);
+    //         //     }
+    //         // })
+    //
+    // }
     function up($id)
     {
         if(confirm('确定要上架吗')){

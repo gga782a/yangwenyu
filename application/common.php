@@ -110,6 +110,21 @@ function douhao($num=1500900065,$res=''){
     }
 }
 
+//根据经纬度获取省市区
+
+function byLtGetCity($longitude,$latitude)
+{
+    $res = @file_get_contents('http://apis.map.qq.com/ws/geocoder/v1/?location=' . $latitude . ',' . $longitude . '&key=KBUBZ-N2YH6-JZHS6-MF7TF-U4HGT-TLFC7&get_poi=1');
+    $result = json_decode($res,true);
+    //dd($result['result']);
+    //["province"] =&gt; string(12) "黑龙江省"
+    //    ["city"] =&gt; string(12) "哈尔滨市"
+    //    ["district"] =&gt; string(9) "南岗区"
+    //    ["street"] =&gt; string(9) "宣化街"
+    $address_component = $result['result']['address_component'];
+    return array($result['result']['province'],$result['result']['city'],$result['result']['district']);
+}
+
 
 
 

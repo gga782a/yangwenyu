@@ -22,6 +22,10 @@ class Index extends Common
     public static $table_goods = 'goods';
     public static $table_member = 'member';
     public static $table_address = 'address';
+    public static $table_deputy = 'deputy';
+    public static $table_store = 'store';
+    public static $table_slyderadventures = 'slyderadventures';
+    public static $table_prize = 'prize';
     public function __construct(Request $request = null)
     {
         parent::__construct($request);
@@ -36,7 +40,52 @@ class Index extends Common
         if(!$this->member_id){
             return redirecturl('index');
         }
-        return view('index');
+        //根据门店id 获取代理id
+        $dpeuty_id = $this->deputy_id(input('shop_id'));
+        if((int)$dpeuty_id > 0) {
+            //获取大转盘
+            $dzp = $this->deputy_dzp($dpeuty_id);
+            if($dzp){
+                $prize = $dzp['prize']?json_decode($dzp['prize'],true):'';
+                //根据大转盘奖项ids获取奖项礼品
+               //$dzpprize = db()
+            }else{
+
+            }
+        }
+
+        return view('index',[
+            'dzp'  => $dzp,
+        ]);
+    }
+    private function deputy_id($shopid)
+    {
+        $dpeuty_id = db(self::$table_shop)->where('shop_id',$shopid)->value('deputy_id');
+        return $dpeuty_id;
+    }
+    private function deputy_dzp($deputyid)
+    {
+        $where = [
+            'deputy_id' => $deputyid,
+            'status'    => 1,
+            'type'      => 1,
+        ];
+        $dzpid = db(self::$table_deputy)->where($where)->value('type_id');
+        if((int)$dzpid>0){
+            $dzp = db(self::$table_slyderadventures)->where('active_id',$dzpid)->find();
+            return $dzp;
+        }else{
+            //代理不存在转盘则从平台随机选一个
+            $dzps = db(self::$table_slyderadventures)->select();
+            if(!empty($dzps)){
+                $dzp = $dzps[array_rand($dzps,1)];
+                return $dzp;
+            }else{
+                return false;
+            }
+
+        }
+
     }
 
     public function more()
@@ -388,6 +437,77 @@ class Index extends Common
             } else {
                 return json(['code'=>400,'msg'=>'操作失败']);
             }
+        }
+    }
+
+    //定位代理
+
+    public function location()
+    {
+        if(!$this->member_id){
+            //获取签名信息
+
+            return redirecturl('location');
+        }
+        //dd(222);
+        $getSignPackage = json_decode($this->getSignPackage(),true);
+        $where = [
+            'status'    => 1,
+        ];
+        $deputy = db(self::$table_deputy)
+            ->where($where)
+            ->field('deputy_name,deputy_id,parentid,level')
+            ->select();
+        return view('location',[
+            'deputy' => $deputy,
+            'signPackage' => $getSignPackage,
+        ]);
+    }
+
+    //ajax获取门店距离排序
+
+    public function getdeputy()
+    {
+        if(Request::instance()->isAjax()){
+            $lng = input('lng');
+            $lat = input('lat');
+            //获取省市区信息
+            $return = byLtGetCity($lng,$lat);
+            $province = $return[0]; //省
+            $city = $return[1]; //市
+            $county = $return[2];  //区
+            //根据省市区反查代理
+            $deputy_id = db(self::$table_deputy)
+                ->where(['province'=>$province,'city'=>$city,'county'=>$county])
+                ->value('deputy_id');
+            if(!$deputy_id){
+                $deputy_id = db(self::$table_deputy)
+                    ->where(['province'=>$province,'city'=>$city,'county'=>''])
+                    ->value('deputy_id');
+                if(!$deputy_id){
+                    return json(['code'=>400,'data'=>'暂无数据']);
+                }
+            }
+            //根据代理获取商户根据商户获取所有门店
+            $storeids = db(self::$table_store)
+                ->where(['deputy_id'=>$deputy_id,'status'=>1])
+                ->column('store_id');
+            if(empty($storeids)){
+                return json(['code'=>400,'data'=>'暂无数据']);
+            }
+            $shop = db(self::$table_shop)->where(['status'=>1])->whereIn('store_id',$storeids)->select();
+            if(!empty($shop)){
+                foreach($shop as $k=>$v){
+                    //获取距离
+                    $shop[$k]['distance'] = getdistance($lng,$lat,$v['longitude'],$v['latitude']);
+                }
+                //根据距离排序
+                $shop = arr_sort($shop,'distance',$order="asc");
+                return json(['code'=>200,'data'=>$shop,'deputy_id'=>$deputy_id]);
+            }else{
+                return json(['code'=>400,'data'=>'暂无数据']);
+            }
+
         }
     }
 

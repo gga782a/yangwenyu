@@ -1,0 +1,120 @@
+{include file='common/header' /}
+
+<body style="background-color: #F4F4F4;">
+{notempty name="$deputy"}
+<div style="background: #eee;height:30px;padding: 10px 0px;line-height: 30px;position: fixed;left: 0;top:0;z-index: 999;width:100%;">
+    <label style="font-size:12px;margin-left:2%;margin-right:3%;float: left;background: rgba(0,0,0,.2);color:#f9f9f9;border-radius:25%; padding:0px 5px;">切换代理</label>
+    <select id="location" style="float: left;padding:0px 2%;line-height: 30px;height: 30px; border: 1px solid #f5f5f5;border-radius:20px;">
+        {volist name='deputy' id="vo"}
+        <option value="{$vo.deputy_id}">{$vo.deputy_name}</option>
+        {/volist}
+    </select>
+</div>
+{/notempty}
+<div class="moreAdd" id="js_moreAdd" style="margin-top: 50px;">
+
+</div>
+<script src="http://res.wx.qq.com/open/js/jweixin-1.4.0.js"></script>
+<script>
+    wx.config({
+        debug: false,
+        appId: '{$signPackage["appId"]}',
+        timestamp: {$signPackage["timestamp"]},
+        nonceStr: '{$signPackage["nonceStr"]}',
+        signature: '{$signPackage["signature"]}',
+        jsApiList: [
+            // 所有要调用的 API 都要加到这个列表中
+            'checkJsApi',
+            'openLocation',
+            'getLocation'
+        ]
+    });
+    wx.ready(function () {
+        wx.checkJsApi({
+            jsApiList: ['getLocation'], // 需要检测的JS接口列表，所有JS接口列表见附录2,
+            success: function(res) {
+                if (res.checkResult.getLocation == false) {
+                    alert('你的微信版本太低，不支持微信JS接口，请升级到最新的微信版本！');
+
+                }
+            }
+        });
+        wx.getLocation({
+            type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+            success: function (res) {
+                var latitude = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+                var longitude = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+                var speed = res.speed; // 速度，以米/每秒计
+                var accuracy = res.accuracy; // 位置精度
+                console.log(longitude);
+                console.log(latitude);
+                //根据经纬度确定当前位置
+                $.ajax({
+                    type:'post',
+                    url:"{:url('index/index/getdeputy')}",
+                    data: {'lng':longitude,'lat':latitude},
+                    dataType:'json',
+                    success:function(data){
+
+                    },
+                    error:function(){
+                        layer.msg('网络错误');
+                    }
+                });
+                // $.ajax({
+                //     type:'post',
+                //     url:"{:url('index/index/getshop')}",
+                //     data: {'lng':longitude,'lat':latitude},
+                //     dataType:'json',
+                //     success:function(data){
+                //         data = JSON.parse(data);
+                //         console.log(data.data);
+                //         if(data.code==200){
+                //             var len = data.data.length;
+                //             console.log(len);
+                //             var str = '';
+                //             for (var i=0 ; i<len; i++){
+                //                 str += '<div class="clearfixed ulAddress">';
+                //                 str += '<div class="li">';
+                //                 str += '<div class="ol clearfixed">';
+                //                 str += '<div class="li title_name ellipsis">'+data.data[i].shop_name+'</div>';
+                //                 str += '<div class="li"><span class="gray">|</span> 距离 <span>'+data.data[i].distance+'</span></div>';
+                //                 str += '</div>';
+                //                 str += '<div class="ol gray clearfixed">';
+                //                 str += '<div class="li">地址: </div>';
+                //                 str += '<span class="li addressText ellipsis">'+data.data[i].position+data.data[i].address+'</span>';
+                //                 str += '</div>';
+                //                 str += '</div>';
+                //                 str += '<div class="li fr">';
+                //                 str += '<div class="ol yell">电话: <span>'+data.data[i].kefu_phone+'</span></div>';
+                //                 str += '</div>';
+                //                 str += '</div>';
+                //             }
+                //             $("#js_moreAdd").append(str);
+                //         }else{
+                //             layer.msg(data.data);
+                //         }
+                //     },
+                //     error:function(){
+                //         layer.msg('网络错误');
+                //     }
+                // });
+            },
+            cancel: function (res) {
+                alert('用户拒绝授权获取地理位置');
+            }
+        });
+        wx.openLocation({
+            latitude: 0, // 纬度，浮点数，范围为90 ~ -90
+            longitude: 0, // 经度，浮点数，范围为180 ~ -180。
+            name: '', // 位置名
+            address: '', // 地址详情说明
+            scale: 1, // 地图缩放级别,整形值,范围从1~28。默认为最大
+            infoUrl: '' // 在查看位置界面底部显示的超链接,可点击跳转
+        });
+    });
+    wx.error(function(res){
+        console.log(11111);
+    });
+</script>
+{include file='common/footer' /}

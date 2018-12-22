@@ -233,11 +233,9 @@ class Index extends Common
                if(!empty($data)){
                    foreach ($data as $k=>$v){
                        $activeperiod = json_decode($v['activeperiod'],true);
+                       //dd($activeperiod);
                        foreach ($activeperiod as $key=>$val){
                             $val = explode(',',$val);
-                            foreach ($val as $ke=>$va){
-                                $val[$ke] = date("Y-m-d H:i:s",$va);
-                            }
                             $activeperiod[$key] = $val;
                        }
                        $data[$k]['activeperiod'] = $activeperiod;
@@ -278,8 +276,19 @@ class Index extends Common
         $newtime = '';
         if(!empty($arr)){
             $timearr = explode('~',$arr);
-            foreach($timearr as $v){
-                $newtime .= strtotime(trim($v)).",";
+            //假设第一个数最大
+            $maxtimrarr = explode(':',$timearr[0]);
+            $max = (int)$maxtimrarr[0]*3600+(int)$maxtimrarr[1]*60+(int)$maxtimrarr[2];
+            foreach($timearr as $k=>$v){
+                //转换成数组
+                $vv = explode(':',$v);
+                $vvs = (int)$vv[0]*3600+(int)$vv[1]*60+(int)$v[2];
+                //比较大小
+                if($max < $vvs){
+                    $newtime = trim($timearr[0]).','.trim($timearr[1]);
+                }else{
+                    $newtime = trim($timearr[1]).','.trim($timearr[0]);
+                }
             }
         }
         $newtime = trim($newtime,',');
@@ -617,14 +626,23 @@ class Index extends Common
                     $activeperiod = json_decode($v['activeperiod'], true);
                     foreach ($activeperiod as $key => $val) {
                         $val = explode(',', $val);
-                        foreach ($val as $ke => $va) {
-                            $val[$ke] = date("Y-m-d H:i:s", $va);
-                        }
+//                        foreach ($val as $ke => $va) {
+//                            $val[$ke] = date("Y-m-d H:i:s", $va);
+//                        }
                         $activeperiod[$key] = $val;
                     }
                     $dzp[$k]['activeperiod'] = $activeperiod;
+                    $prize_ids = json_decode($v['prize'],true);
+                    foreach ($prize_ids as $ke=>$prize_id){
+                        $prizes[$ke] = db(self::$table_prize)
+                            ->where(['app_id'=>$this->id,'prize_id'=>$prize_id])
+                            ->field('name,probability')
+                            ->find();
+                    }
+                    $dzp[$k]['prizes'] = $prizes;
                 }
             }
+            //dd($data);
             return view('index/choicedzp',[
                 'data' => $dzp,
                 'active_id' => $active_id,
@@ -861,6 +879,13 @@ class Index extends Common
                         }
                         $data[$k]['logo'] = $logo;
                         $data[$k]['typename'] = db(self::$table_goods_type)->where('type_id',$v['type_id'])->value('type_name');
+                        if((int)$v['express_id'] == 0){
+                            $data[$k]['expressname'] = '暂无快递模板';
+                        }else{
+                            $data[$k]['expressname'] = db(self::$table_express_templete)
+                                ->where(['app_id'=>$this->id,'express_id'=>$v['express_id']])
+                                ->value('name');
+                        }
                     }
                 }
                 return view('listgoods',[
@@ -939,6 +964,46 @@ class Index extends Common
                 return json(['code'=>400,'msg'=>'操作失败']);
             }
         }
+    }
+
+    //选择快递模板
+    public function choiceexpress()
+    {
+        $goods_id = $this->parme('goods_id');
+        $express_id = $this->parme('express_id');
+        //dd($active_id);
+        if(Request::instance()->isPost()){
+            $where = [
+                'app_id'    => $this->id,
+                'goods_id'  => $goods_id,
+            ];
+            //dd($active_id);
+            $res = db(self::$table_goods)
+                ->where($where)
+                ->update(['express_id'=>$express_id,'updated_at'=>$this->time]);
+            if($res!==false){
+                return $this->redirect('index/setgoods');
+            }else{
+                $this->error('操作失败');
+            }
+        }else{
+            $where = [
+                'app_id'    => $this->id,
+                'status'    => 1,
+            ];
+            $data = db(self::$table_express_templete)
+                ->where($where)
+                ->page(input('page',1),input('pageshow',15))
+                ->select();
+            //dd($data);
+            return view('index/choiceexpress',[
+                'data'     => $data,
+                'goods_id' => $goods_id,
+                'express_id' => $express_id,
+            ]);
+        }
+
+
     }
 
     //图片上传
