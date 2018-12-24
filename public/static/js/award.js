@@ -15,9 +15,10 @@ var turnplate = {
 
 $(document).ready(function() {
 
-    turnplate.restaraunts = $('.canvasImg sapn');
+    turnplate.restaraunts = $('.canvasImg img');
     turnplate.colors = ["#FFF4D6", "#F7FBED", "#FFF4D6", "#F7FBED","#FFF4D6", "#F7FBED","#FFF4D6", "#F7FBED"];
-
+    var active_id = turnplate.restaraunts.attr('data_type_id');
+    console.log(active_id);
     //旋转转盘 item:奖品位置; txt：提示语;
     var rotateFn = function(item, txt, data) {
         var angles = item * (360 / turnplate.restaraunts.length) - (360 / (turnplate.restaraunts.length * 2));
@@ -54,6 +55,18 @@ $(document).ready(function() {
     });
 
     function lotteryStart() {
+        $.ajax({
+            type:'post',
+            url:"getactive",
+            data:{'id':active_id},
+            dataType:'json',
+            success:function (data) {
+                console.log(data);
+            },
+            error:function () {
+                alert('网络连接错误')
+            }
+        });
         if (num == 1) {
             var item = 1;
             var data = null;

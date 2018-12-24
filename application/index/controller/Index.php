@@ -50,8 +50,7 @@ class Index extends Common
             if($dzp){
                 $prize = $dzp['prize']?json_decode($dzp['prize'],true):'';
                 //根据大转盘奖项ids获取奖项礼品
-                $dzpprize = db(self::$table_prize)->whereIn('prize_id',$prize)->where(['sum'=>['>',0]])->column('name');
-                //dd($dzpprize);
+                $dzpprize = db(self::$table_prize)->whereIn('prize_id',$prize)->where(['sum'=>['>',0]])->order('probability asc')->column('cover');
             }else{
                 $dzp = [];
             }
@@ -61,6 +60,86 @@ class Index extends Common
             'dzp'  => $dzp,
             'dzpprize' => $dzpprize,
         ]);
+    }
+
+    //获取大转盘信息
+    public function getactive(){
+        if(Request::instance()->isAjax())
+        {
+            $id = input('id');
+            $dzp = db(self::$table_slyderadventures)->where('active_id',$id)->find();
+            //时间段
+            $isTrue = false;
+            $activeperiod = json_decode($dzp['activeperiod'],true);
+            //var_dump($activeperiod);
+            foreach($activeperiod as $k=>$v){
+                $aviabletime = explode('-',$v);
+                $nyr = date("Y-m-d",time());
+                $start = strtotime($nyr." ".$aviabletime[0]);
+                $end   = strtotime($nyr." ".$aviabletime[1]);
+                if($start <= time()&&$end >= time()){
+                    $isTrue = true;
+                }
+            }
+            //每人/时间段抽奖次数
+            $limit_collar = $dzp['limit_collar'];
+            if($isTrue === false){
+                return json(array('code'=>400,'msg'=>'当前时间不在抽奖时间段内，请查看活动公告'));
+            }else{
+                //抽奖概率计算
+                $prizeids = $dzp['prize'];
+                $this->probability($prizeids);
+//                $data = array(
+//                    'limit_collar'  => $limit_collar,
+//
+//                );
+                return json(array('code'=>200,'msg'=>$limit_collar));
+            }
+        }
+    }
+
+    private function probability($ids)
+    {
+        //根据ID获取礼品
+        $where = [
+            'prize_id'  => ['in',$ids],
+            'sum'       => ['>',0],
+        ];
+        $prize_arr = db(self::$table_prize)->where($where)->field('prize_id,name,probability')->select();
+        foreach ($prize_arr as $key => $val) {
+            $keys[$key] = $val['prize_id'];
+            $arr[$val['prize_id']] = $val['probability']*10000;
+        }
+        //根据概率获取奖品id
+        $prize_id = $this->getRand($arr);
+        $index = '';
+        foreach ($keys as $k=>$v){
+            if($prize_id == $v){
+                $index = $k;
+                break;
+            }
+        }
+        $data['prize_id'] = $prize_id;
+        $data['prize_name'] = $prize_arr[$index]['name']; //中奖奖品
+
+    }
+    //全概率
+    private function getRand($proArr)
+    {
+        $rs = ''; //z中奖结果
+        $proSum = array_sum($proArr); //概率数组的总概率精度
+        //概率数组循环
+        foreach ($proArr as $key => $proCur) {
+            $randNum = mt_rand(1, $proSum);
+            if ($randNum <= $proCur) {
+                $rs = $key;
+                break;
+            } else {
+                $proSum -= $proCur;
+            }
+        }
+        unset($proArr);
+        return $rs;
     }
     private function deputy_id($shopid)
     {

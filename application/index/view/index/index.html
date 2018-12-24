@@ -1,13 +1,13 @@
 {include file="common/header" /}
+{empty name="$dzp"}
+该门店未设置大转盘活动
+{else /}
 <div class="canvasImg" style="display: none;">
-    {empty name="$dzp"}
-       该门店未设置大转盘活动
-    {else /}
     {volist name='dzpprize' id="vo" key='k'}
-       <img src="__IMG__/indexRain{$k-1}.png" alt="" alt="" id="indexRain{$k-1}" data_id="6">
+       <img src="{$vo}" alt="" alt="" id="indexRain{$k-1}" data_id="6" data_type_id = "{$dzp['active_id']}">
     {/volist}
-    {/empty}
 </div>
+{/empty}
 <div class="main_turn">
     <div class="btns clearfixed">
         <div class="li recording" onclick="popups(this)" data-class="recording"><img src="__IMG__/recording.png" alt=""></div>

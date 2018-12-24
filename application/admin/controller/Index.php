@@ -235,7 +235,7 @@ class Index extends Common
                        $activeperiod = json_decode($v['activeperiod'],true);
                        //dd($activeperiod);
                        foreach ($activeperiod as $key=>$val){
-                            $val = explode(',',$val);
+                            $val = explode('-',$val);
                             $activeperiod[$key] = $val;
                        }
                        $data[$k]['activeperiod'] = $activeperiod;
@@ -285,13 +285,13 @@ class Index extends Common
                 $vvs = (int)$vv[0]*3600+(int)$vv[1]*60+(int)$v[2];
                 //比较大小
                 if($max < $vvs){
-                    $newtime = trim($timearr[0]).','.trim($timearr[1]);
+                    $newtime = trim($timearr[0]).'-'.trim($timearr[1]);
                 }else{
-                    $newtime = trim($timearr[1]).','.trim($timearr[0]);
+                    $newtime = trim($timearr[1]).'-'.trim($timearr[0]);
                 }
             }
         }
-        $newtime = trim($newtime,',');
+        $newtime = trim($newtime,'-');
         return $newtime;
     }
 
@@ -1151,7 +1151,7 @@ class Index extends Common
             if(!$this->parme('pics')){
                 return $this->error('请上传奖品封面');
             }
-            $insert['cover']       = $this->parme('pics');//奖项礼品封面
+            $insert['cover']       = trim($this->parme('pics'),',');//奖项礼品封面
             //$insert['type']        = $this->parme('type'); //活动类型
             $insert['name']        = $this->parme('name');  //奖品名称
             $insert['sum']         = $this->parme('sum');  //奖品数量
