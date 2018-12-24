@@ -15,7 +15,7 @@ var turnplate = {
 
 $(document).ready(function() {
 
-    turnplate.restaraunts = $('.canvasImg img')
+    turnplate.restaraunts = $('.canvasImg sapn');
     turnplate.colors = ["#FFF4D6", "#F7FBED", "#FFF4D6", "#F7FBED","#FFF4D6", "#F7FBED","#FFF4D6", "#F7FBED"];
 
     //旋转转盘 item:奖品位置; txt：提示语;
@@ -34,7 +34,7 @@ $(document).ready(function() {
             callback: function() {
                 //中奖页面与谢谢参与页面弹窗
                 $("#popus").fadeIn();
-                $('.mask').show()
+                $('.mask').show();
                 // $('.xxcy_text').html(turnplate.restaraunts[item - 1])
                 num = 2
             }
@@ -42,7 +42,7 @@ $(document).ready(function() {
     };
 
     /********弹窗页面控制**********/
-    var num = 1
+    var num = 1;
     $('.close_xxcy').click(function() {
         $('#popus').fadeOut();
         num = 1
@@ -51,7 +51,7 @@ $(document).ready(function() {
     /********抽奖开始**********/
     $('.tupBtn').click(function() {
         lotteryStart()
-    })
+    });
 
     function lotteryStart() {
         if (num == 1) {
@@ -85,7 +85,7 @@ function drawRouletteWheel() {
 
         for (var i = 0; i < turnplate.restaraunts.length; i++) {
             var angle = turnplate.startAngle + i * arc;
-            var id = 'indexRain'+i
+            var id = 'indexRain'+i;
             var img = document.getElementById(id);
             // 图片放到画布上
             
@@ -112,7 +112,7 @@ function drawRouletteWheel() {
             //rotate方法旋转当前的绘图
             ctx.rotate(angle + arc / 2 + Math.PI / 2);
 
-            ctx.drawImage(img,-50, -50,100,100) 
+            ctx.drawImage(img,-50, -50,100,100);
             //把当前画布返回（调整）到上一个save()状态之前 
             ctx.restore();
             //----绘制奖品结束----

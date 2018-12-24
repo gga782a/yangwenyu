@@ -18,6 +18,9 @@
     <link href="__ADMIN__/css/plugins/iCheck/custom.css" rel="stylesheet">
     <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="__ADMIN__/src/css/layui.css">
+    <link href="__ADMIN__/src/css/modules/layer/default/layer.css" rel="stylesheet">
+    <!-- 引用控制层插件样式 -->
+    <link rel="stylesheet" href="__ADMIN__/file_img/control/css/zyUpload.css" type="text/css">
 
 </head>
 
@@ -60,6 +63,19 @@
                                 <input type="text" class="form-control" name="probability" value="{$data.probability}" required>
                             </div>
                         </div>
+
+                        <div class="hr-line-dashed"></div>
+                        <div id="file-pretty" style="min-height:200px;">
+                            <div class="form-group">
+                                <label class="font-noraml col-sm-2 control-label">礼品封面</label>
+                            </div>
+                            <div id="demo" class="demo" style="height:200px;"></div>
+                            <!--<div class="form-group">-->
+                            <!--<label class="font-noraml">文件选择（多选）</label>-->
+                            <!--<input type="file" multiple="multiple" class="form-control">-->
+                            <!--</div>-->
+                            <input type="hidden" id='hiddepic' name="pics" value="{$data.cover}">
+                        </div>
                         <div class="hr-line-dashed"></div>
                         <div class="form-group">
                             <div class="col-sm-4 col-sm-offset-2">
@@ -76,6 +92,14 @@
 <script src="https://cdn.staticfile.org/jquery/2.1.4/jquery.min.js"></script>
 <script src="https://cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 <script src="__ADMIN__/js/content.min-v=1.0.0.js"></script>
+<script src="__ADMIN__/src/lay/modules/layer.js" charset="utf-8"></script>
+<script type="text/javascript" src="__ADMIN__/file_img/jquery-1.7.2.js"></script>
+<!-- 引用核心层插件 -->
+<script type="text/javascript" src="__ADMIN__/file_img/core/zyFile.js"></script>
+<!-- 引用控制层插件 -->
+<script type="text/javascript" src="__ADMIN__/file_img/control/js/zyUpload.js"></script>
+<!-- 引用初始化JS -->
+
 <!--<script src="__ADMIN__/js/plugins/chosen/chosen.jquery.js"></script>-->
 <!--<script src="__ADMIN__/js/plugins/jsKnob/jquery.knob.js"></script>-->
 <!--<script src="__ADMIN__/js/plugins/jasny/jasny-bootstrap.min.js"></script>-->

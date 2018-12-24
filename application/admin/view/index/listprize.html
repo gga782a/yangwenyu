@@ -46,6 +46,7 @@
                         <tr>
                             <th>礼品序号</th>
                             <th>礼品名称</th>
+                            <th>礼品封面</th>
                             <th>礼品数量</th>
                             <th>礼品中奖概率</th>
                             <th>创建时间</th>
@@ -59,6 +60,7 @@
                         <tr class="">
                             <td>{$vo.prize_id}</td>
                             <td>{$vo.name}</td>
+                            <td><img src="{$vo.cover}" style="width: 100px;"/></td>
                             <td>
                                 {$vo.sum}
                             </td>
@@ -117,7 +119,7 @@
         if(confirm('确定要删除吗')){
             $.ajax({
                 type:'post',
-                url:'delprize',
+                url:"{:url('index/delprize')}",
                 data:{'prize_id':$id},
                 dataType:'json',
                 success:function(data){

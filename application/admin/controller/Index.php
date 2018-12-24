@@ -1148,6 +1148,10 @@ class Index extends Common
             if(floatval($this->parme('probability'))>100){
                 return $this->error('中奖概率不能高于100');
             }
+            if(!$this->parme('pics')){
+                return $this->error('请上传奖品封面');
+            }
+            $insert['cover']       = $this->parme('pics');//奖项礼品封面
             //$insert['type']        = $this->parme('type'); //活动类型
             $insert['name']        = $this->parme('name');  //奖品名称
             $insert['sum']         = $this->parme('sum');  //奖品数量
@@ -1221,7 +1225,7 @@ class Index extends Common
             if($isfalse){
                 return json(['code'=>400,'msg'=>'礼品已被使用']);
             }
-            dd(22);
+            //dd(22);
             $where = [
                 'app_id' => $this->id,
                 'prize_id' => $this->parme('prize_id')

@@ -37,25 +37,29 @@ class Index extends Common
     public function index()
     {
         //dd($this->member_id);
-        if(!$this->member_id){
-            return redirecturl('index');
-        }
+//        if(!$this->member_id){
+//            return redirecturl('index');
+//        }
         //根据门店id 获取代理id
-        $dpeuty_id = $this->deputy_id(input('shop_id'));
+        $dpeuty_id = $this->deputy_id(3);
         if((int)$dpeuty_id > 0) {
             //获取大转盘
             $dzp = $this->deputy_dzp($dpeuty_id);
+            //dd($dzp);
+            $dzpprize = [];
             if($dzp){
                 $prize = $dzp['prize']?json_decode($dzp['prize'],true):'';
                 //根据大转盘奖项ids获取奖项礼品
-               //$dzpprize = db()
+                $dzpprize = db(self::$table_prize)->whereIn('prize_id',$prize)->where(['sum'=>['>',0]])->column('name');
+                //dd($dzpprize);
             }else{
-
+                $dzp = [];
             }
         }
 
         return view('index',[
             'dzp'  => $dzp,
+            'dzpprize' => $dzpprize,
         ]);
     }
     private function deputy_id($shopid)
