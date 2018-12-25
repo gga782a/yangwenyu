@@ -18,6 +18,10 @@ $(document).ready(function() {
     turnplate.restaraunts = $('.canvasImg img');
     turnplate.colors = ["#FFF4D6", "#F7FBED", "#FFF4D6", "#F7FBED","#FFF4D6", "#F7FBED","#FFF4D6", "#F7FBED"];
     var active_id = turnplate.restaraunts.attr('data_type_id');
+    var shop_id = turnplate.restaraunts.attr('data_shop_id');
+    var member_id = turnplate.restaraunts.attr('data_member_id');
+    var needpay = turnplate.restaraunts.attr('data_needpay');
+    var limit_collar = turnplate.restaraunts.attr('data_limit_collar');
     console.log(active_id);
     //旋转转盘 item:奖品位置; txt：提示语;
     var rotateFn = function(item, txt, data) {
@@ -55,23 +59,24 @@ $(document).ready(function() {
     });
 
     function lotteryStart() {
-        $.ajax({
-            type:'post',
-            url:"getactive",
-            data:{'id':active_id},
-            dataType:'json',
-            success:function (data) {
-                console.log(data);
-            },
-            error:function () {
-                alert('网络连接错误')
-            }
-        });
-        if (num == 1) {
+        if (num <= limit_collar&&num > 0) {
+            $.ajax({
+                type:'post',
+                url:"getactive",
+                data:{'id':active_id,'shop_id':shop_id,'member_id':member_id,'needpay':needpay},
+                dataType:'json',
+                success:function (data) {
+                    console.log(data);
+                },
+                error:function () {
+                    alert('网络连接错误')
+                }
+            });
             var item = 1;
             var data = null;
             rotateFn(item, turnplate.restaraunts[item - 1], data);
-            num = num + 1
+            num = num + 1;
+            needpay += 0.5;
         }else{
             alert('对不起您的次数已经用完')
         }

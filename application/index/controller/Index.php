@@ -40,6 +40,8 @@ class Index extends Common
 //        if(!$this->member_id){
 //            return redirecturl('index');
 //        }
+        //
+        $shop_id = input('shop_id',3);
         //根据门店id 获取代理id
         $dpeuty_id = $this->deputy_id(3);
         if((int)$dpeuty_id > 0) {
@@ -47,10 +49,18 @@ class Index extends Common
             $dzp = $this->deputy_dzp($dpeuty_id);
             //dd($dzp);
             $dzpprize = [];
+            $limit_collar = 0;
             if($dzp){
-                $prize = $dzp['prize']?json_decode($dzp['prize'],true):'';
+                $prize        = $dzp['prize']?json_decode($dzp['prize'],true):'';
+                $limit_collar = $dzp['limit_collar'];
                 //根据大转盘奖项ids获取奖项礼品
-                $dzpprize = db(self::$table_prize)->whereIn('prize_id',$prize)->where(['sum'=>['>',0]])->order('probability asc')->column('cover');
+                $dzpprize = db(self::$table_prize)
+                    ->whereIn('prize_id',$prize)
+                    ->where(['sum'=>['>',0]])
+                    ->order('probability asc')
+                    ->field('cover,prize_id')
+                    ->select();
+                dd($dzpprize);
             }else{
                 $dzp = [];
             }
@@ -59,6 +69,10 @@ class Index extends Common
         return view('index',[
             'dzp'  => $dzp,
             'dzpprize' => $dzpprize,
+            'shop_id' => $shop_id,
+            'member_id' => $this->member_id,
+            'needpay' => input('needpay',2),
+            '$limit_collar' => $limit_collar,
         ]);
     }
 
@@ -67,6 +81,8 @@ class Index extends Common
         if(Request::instance()->isAjax())
         {
             $id = input('id');
+            $shop_id = input('shop_id');
+            $member_id = input('member_id');
             $dzp = db(self::$table_slyderadventures)->where('active_id',$id)->find();
             //时间段
             $isTrue = false;
@@ -88,7 +104,23 @@ class Index extends Common
             }else{
                 //抽奖概率计算
                 $prizeids = $dzp['prize'];
-                $this->probability($prizeids);
+                $return = $this->probability($prizeids);
+                //写入订单
+                $shop = db(self::$table_shop)->where('shop_id',$shop_id)->field('shop_name,kefu_phone')->find();
+                $insert = [
+                    'shop_id'    => $shop_id,
+                    'shop_name'  => $shop['shop_name'],
+                    'kefu_phone' => $shop['kefu_phone'],
+                    'type'       => 1,
+                    'type_id'    => $id,
+                    'prize_id'   => $return['prize_id'],
+                    'prize_name' => $return['prize_name'],
+                    'dcode'      => $return['dcode'],
+                    'member_id'  => $member_id,
+                    'status'     => 0,
+
+
+                ];
 //                $data = array(
 //                    'limit_collar'  => $limit_collar,
 //
@@ -121,6 +153,9 @@ class Index extends Common
         }
         $data['prize_id'] = $prize_id;
         $data['prize_name'] = $prize_arr[$index]['name']; //中奖奖品
+        //随机兑奖码
+        $data['dcode'] = $this->createNoncestr();
+        return $data;
 
     }
     //全概率

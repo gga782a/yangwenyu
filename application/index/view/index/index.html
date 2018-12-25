@@ -4,7 +4,8 @@
 {else /}
 <div class="canvasImg" style="display: none;">
     {volist name='dzpprize' id="vo" key='k'}
-       <img src="{$vo}" alt="" alt="" id="indexRain{$k-1}" data_id="6" data_type_id = "{$dzp['active_id']}">
+       <img src="{$vo}" alt="" alt="" id="indexRain{$k-1}" data_id="6" data_limit_collar="{$limit_collar}"
+            data_type_id = "{$dzp['active_id']}" data_shop_id="{$shop_id}" data_member_id="{$member_id}" data_needpay="{$needpay}">
     {/volist}
 </div>
 {/empty}
