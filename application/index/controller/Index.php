@@ -12,6 +12,7 @@ use think\Cache;
 use think\Cookie;
 use think\Request;
 use think\Session;
+use app\wechat\controller\Jsapipay;
 
 class Index extends Common
 {
@@ -26,20 +27,23 @@ class Index extends Common
     public static $table_store = 'store';
     public static $table_slyderadventures = 'slyderadventures';
     public static $table_prize = 'prize';
+    public static $table_active_order = 'active_order';
+    private  $key;
     public function __construct(Request $request = null)
     {
         parent::__construct($request);
         $this->member_id = $this->check();
         $this->appId = _config('AppId');
         $this->appSecret = _config('AppSecret');
+        $this->key = 'c56d0e9a7ccec67b4ea131655038d604';
     }
 
     public function index()
     {
         //dd($this->member_id);
-//        if(!$this->member_id){
-//            return redirecturl('index');
-//        }
+        if(!$this->member_id){
+            return redirecturl('index');
+        }
         //
         $shop_id = input('shop_id',3);
         //根据门店id 获取代理id
@@ -50,8 +54,37 @@ class Index extends Common
             //dd($dzp);
             $dzpprize = [];
             $limit_collar = 0;
+            $prizekeys = [];
+            $alreadynum = 0;
             if($dzp){
+                $isTrue = false;
+                //查找活动订单表已参加次数
+                $whereactive = [
+                    'shop_id'   => $shop_id,
+                    'type'      => 1,
+                    'type_id'   => $dzp['active_id'],
+                    'status'    => 1,
+                    'member_id' => $this->member_id,
+                ];
                 $prize        = $dzp['prize']?json_decode($dzp['prize'],true):'';
+                $activeperiod = json_decode($dzp['activeperiod'],true);  //大转盘时间段
+                //var_dump($activeperiod);
+                foreach($activeperiod as $k=>$v){
+                    $aviabletime = explode('-',$v);
+                    $nyr = date("Y-m-d",time());
+                    $start = strtotime($nyr." ".$aviabletime[0]);
+                    $end   = strtotime($nyr." ".$aviabletime[1]);
+                    if($start <= time()&&$end >= time()){
+                        //dd(111);
+                        $whereactive['paytime'] = ['between time',[$start,$end]];
+                        $alreadynum = db(self::$table_active_order)->where($whereactive)->count();
+                        $isTrue = true;
+                    }
+                }
+                if(!$isTrue){
+                    $alreadynum = 0;
+                }
+                //d($alreadynum);
                 $limit_collar = $dzp['limit_collar'];
                 //根据大转盘奖项ids获取奖项礼品
                 $dzpprize = db(self::$table_prize)
@@ -60,19 +93,29 @@ class Index extends Common
                     ->order('probability asc')
                     ->field('cover,prize_id')
                     ->select();
-                dd($dzpprize);
+                if(!empty($dzpprize)) {
+                    foreach ($dzpprize as $ke=>$v) {
+                        $prizekeys[$v['prize_id']] = $ke;
+                    }
+                }
+                //dd($dzpprize);
             }else{
                 $dzp = [];
             }
         }
-
+        //dd(json_encode($prizekeys));
+        $needpay = 2+0.5*$alreadynum;
         return view('index',[
             'dzp'  => $dzp,
             'dzpprize' => $dzpprize,
             'shop_id' => $shop_id,
             'member_id' => $this->member_id,
-            'needpay' => input('needpay',2),
-            '$limit_collar' => $limit_collar,
+            'needpay' => $needpay,
+            'fee'     => 2,
+            'increfee'=> 0.5,
+            'limit_collar' => $limit_collar,
+            'prizekeys' => json_encode($prizekeys),
+            'alreadynum' => $alreadynum,
         ]);
     }
 
@@ -83,6 +126,9 @@ class Index extends Common
             $id = input('id');
             $shop_id = input('shop_id');
             $member_id = input('member_id');
+            $prizekeys = input('prizekeys');
+            $needpay   = floatval(input('needpay'));
+            $prizekeys = json_decode($prizekeys);
             $dzp = db(self::$table_slyderadventures)->where('active_id',$id)->find();
             //时间段
             $isTrue = false;
@@ -102,9 +148,22 @@ class Index extends Common
             if($isTrue === false){
                 return json(array('code'=>400,'msg'=>'当前时间不在抽奖时间段内，请查看活动公告'));
             }else{
+                $returnk = '';  //第几个位置中奖
                 //抽奖概率计算
-                $prizeids = $dzp['prize'];
+                $prizeids = json_decode($dzp['prize']);
+                //dd($prizeids);
                 $return = $this->probability($prizeids);
+                foreach($prizekeys as $k1=>$v1){
+                    if($k1 == $return['prize_id']){
+                        $returnk = $v1;
+                        break;
+                    }
+                }
+                $return['returnk'] = $returnk;
+                $return['appId'] = $this->appId;
+                $return['nonceStr'] = $this->createNoncestr();
+                $return['timeStamp'] = time();
+
                 //写入订单
                 $shop = db(self::$table_shop)->where('shop_id',$shop_id)->field('shop_name,kefu_phone')->find();
                 $insert = [
@@ -118,16 +177,105 @@ class Index extends Common
                     'dcode'      => $return['dcode'],
                     'member_id'  => $member_id,
                     'status'     => 0,
-
-
+                    'order_num'  => $shop_id.time().rand(100000,999999),
+                    'created_at' => time(),
+                    'needpay'    => $needpay,
                 ];
-//                $data = array(
-//                    'limit_collar'  => $limit_collar,
-//
-//                );
-                return json(array('code'=>200,'msg'=>$limit_collar));
+                //写入订单列表
+                $id = db(self::$table_active_order)->insertGetId($insert);
+                if($id){
+                    $return['id'] = $id;
+                    //获取h5调起微信支付
+                    $result = $this->jsapipay($insert,$id);
+                    if($result['return_code']=='SUCCESS'&&$result['result_code']=='SUCCESS'){
+                        $return['package'] = "prepay_id=".$result['prepay_id'];
+                        $return['signType'] = 'MD5';
+                        //重新进行签名
+                        $sign = $this->createsign($return['timeStamp'],$return['nonceStr'],$return['package'],$return['signType']);
+                        $return['paySign'] = $sign;
+                        return json(array('code'=>200,'msg'=>json_encode($return)));
+                    }else{
+                        return json(array('code'=>400,'msg'=>$result['return_msg']));
+                    }
+                }else{
+                    return json(array('code'=>400,'msg'=>'操作失败'));
+                }
             }
         }
+    }
+
+    //不支付就删除订单
+    public function delactiveorder()
+    {
+        if(Request::instance()->isAjax()){
+            $order_id = input('order_id');
+            $where = [
+                'order_id'  => $order_id,
+                'status'    => 0,
+            ];
+            db(self::$table_active_order)->where($where)->delete();
+        }
+    }
+    //重新进行签名
+
+    private function createsign($timeStamp,$nonceStr,$package,$signType)
+    {
+        //请求参数 appId、timeStamp、nonceStr、package、signType
+        $params = [
+            'appId'         => $this->appId,  //公众账号ID
+            'timeStamp'     => $timeStamp, //时间戳
+            'nonceStr'      => $nonceStr, //生成随机字符串
+            'package'       => $package, //商品描述
+            'signType'      => $signType,
+        ];
+        $sign = $this->getSign($params);
+        return $sign;
+    }
+
+    //作用：生成签名
+    private function getSign($Obj) {
+        foreach ($Obj as $k => $v) {
+            $Parameters[$k] = $v;
+        }
+        //签名步骤一：按字典序排序参数
+        ksort($Parameters);
+        $String = $this->formatBizQueryParaMap($Parameters, false);
+        //签名步骤二：在string后加入KEY
+        $String = $String . "&key=" . $this->key;
+        //签名步骤三：MD5加密
+        $String = md5($String);
+        //签名步骤四：所有字符转为大写
+        $result_ = strtoupper($String);
+        return $result_;
+    }
+
+    ///作用：格式化参数，签名过程需要使用
+    private function formatBizQueryParaMap($paraMap, $urlencode) {
+        $buff = "";
+        ksort($paraMap);
+        foreach ($paraMap as $k => $v) {
+            if ($urlencode) {
+                $v = urlencode($v);
+            }
+            $buff .= $k . "=" . $v . "&";
+        }
+        $reqPar = '';
+        if (strlen($buff) > 0) {
+            $reqPar = substr($buff, 0, strlen($buff) - 1);
+        }
+        return $reqPar;
+    }
+
+    //获取jsapi微信支付
+
+    public function jsapipay($insert,$id)
+    {
+        $notify_url = 'http://www.yilingjiu.cn/wechat/Jsapipay/notify';
+        $openid = 'os-5N1ZgTUrkGgasKpmQHpFc5R5E';// db(self::$table_member)->where('member_id',$insert['member_id'])->value('openid');
+        $attach = $id.':'.$insert['prize_id'];
+        $pay = new Jsapipay('',$openid, $mch_id='1514213421', $key='c56d0e9a7ccec67b4ea131655038d604',$insert['order_num'],'大转盘活动',$total_fee=0.01,$attach,$notify_url,'JSAPI');
+        $return = $pay->pay();
+        return $return;
     }
 
     private function probability($ids)
@@ -137,11 +285,18 @@ class Index extends Common
             'prize_id'  => ['in',$ids],
             'sum'       => ['>',0],
         ];
-        $prize_arr = db(self::$table_prize)->where($where)->field('prize_id,name,probability')->select();
+        //dd($where);
+        $arr = $keys = [];
+        $prize_arr = db(self::$table_prize)
+            ->where($where)
+            ->field('prize_id,name,probability')
+            ->select();
+        //dd($prize_arr);
         foreach ($prize_arr as $key => $val) {
             $keys[$key] = $val['prize_id'];
             $arr[$val['prize_id']] = $val['probability']*10000;
         }
+        //dd($keys);
         //根据概率获取奖品id
         $prize_id = $this->getRand($arr);
         $index = '';
@@ -194,10 +349,9 @@ class Index extends Common
             return $dzp;
         }else{
             //代理不存在转盘则从平台随机选一个
-            $dzps = db(self::$table_slyderadventures)->select();
+            $dzps = db(self::$table_slyderadventures)->find();
             if(!empty($dzps)){
-                $dzp = $dzps[array_rand($dzps,1)];
-                return $dzp;
+                return $dzps;
             }else{
                 return false;
             }
@@ -630,6 +784,15 @@ class Index extends Common
     }
 
 
+    public function test()
+    {
+        //假设抽奖时间段为 05:00:00--07:00,08:00:00--10:00:00 我在六点抽了俩次
+        $choutime = date("Y-m-d",time())." 06:00:00";
+        $nowtime  = time();
+        //判断当前时间 在哪个时间段  //然后判断抽奖时间是否在这个时间段 如果在则证明次数有效 否则次数清零
+
+        //return view('test');
+    }
 }
 
 

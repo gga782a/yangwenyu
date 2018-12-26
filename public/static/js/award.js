@@ -20,9 +20,12 @@ $(document).ready(function() {
     var active_id = turnplate.restaraunts.attr('data_type_id');
     var shop_id = turnplate.restaraunts.attr('data_shop_id');
     var member_id = turnplate.restaraunts.attr('data_member_id');
-    var needpay = turnplate.restaraunts.attr('data_needpay');
+    var needpay = parseFloat(turnplate.restaraunts.attr('data_needpay'));
     var limit_collar = turnplate.restaraunts.attr('data_limit_collar');
-    console.log(active_id);
+    var prizekeys = turnplate.restaraunts.attr('data_prizekeys');
+    var alreadynum = parseInt(turnplate.restaraunts.attr('data_alreadynum'));
+    console.log(active_id,shop_id,member_id,needpay,limit_collar);
+    console.log(prizekeys);
     //旋转转盘 item:奖品位置; txt：提示语;
     var rotateFn = function(item, txt, data) {
         var angles = item * (360 / turnplate.restaraunts.length) - (360 / (turnplate.restaraunts.length * 2));
@@ -41,13 +44,13 @@ $(document).ready(function() {
                 $("#popus").fadeIn();
                 $('.mask').show();
                 // $('.xxcy_text').html(turnplate.restaraunts[item - 1])
-                num = 2
+                num = data
             }
         });
     };
 
     /********弹窗页面控制**********/
-    var num = 1;
+    var num = alreadynum;
     $('.close_xxcy').click(function() {
         $('#popus').fadeOut();
         num = 1
@@ -59,24 +62,80 @@ $(document).ready(function() {
     });
 
     function lotteryStart() {
-        if (num <= limit_collar&&num > 0) {
+        alert(needpay);
+        alert(num);
+        alert(limit_collar);
+        if (num < limit_collar) {
             $.ajax({
                 type:'post',
                 url:"getactive",
-                data:{'id':active_id,'shop_id':shop_id,'member_id':member_id,'needpay':needpay},
+                data:{'id':active_id,'shop_id':shop_id,'member_id':member_id,'needpay':needpay,'prizekeys':prizekeys},
                 dataType:'json',
                 success:function (data) {
                     console.log(data);
+                    var str = '';
+                    if(data.code == 200){
+                        var arr = JSON.parse(data.msg);
+                        console.log(arr['prize_name']);
+                        var item = JSON.parse(data.msg)['returnk'];
+                        $(".dcode").empty();
+                        str += '<div class="li til">恭喜您获得</div>';
+                        str += '<div class="prize">'+arr["prize_name"]+'</div>';
+                        str += '<div class="num">兑换编码: <span>'+arr["dcode"]+'</span></div>';
+                        str += '<div class="tel">请联系门店工作人员兑奖</div>';
+                        function onBridgeReady(){
+                            WeixinJSBridge.invoke(
+                                'getBrandWCPayRequest', {
+                                    "appId":arr['appId'],     //公众号名称，由商户传入
+                                    "timeStamp":arr['timeStamp'],         //时间戳，自1970年以来的秒数
+                                    "nonceStr":arr['nonceStr'], //随机串
+                                    "package":arr['package'],
+                                    "signType":"MD5",         //微信签名方式：
+                                    "paySign":arr['paySign'] //微信签名
+                                },
+                                function(res){
+                                    if(res.err_msg == "get_brand_wcpay_request:ok" ){
+                                        // 使用以上方式判断前端返回,微信团队郑重提示：
+                                        //res.err_msg将在用户支付成功后返回ok，但并不保证它绝对可靠。
+                                        num = num + 1;
+                                        needpay = needpay+0.5;
+                                        rotateFn(item, turnplate.restaraunts[item - 1], num);
+                                        $(".dcode").append(str);
+                                    }else{
+                                        //删除订单arr['id']
+                                        var order_id = arr['id'];
+                                        $.ajax({
+                                            type:'post',
+                                            url:"delactiveorder",
+                                            data:{'order_id':order_id},
+                                            dataType:'json',
+                                            success:function () {
+
+                                            },
+                                            error:function () {
+
+                                            }
+                                        });
+
+                                    }
+                                });
+                        }
+                        if (typeof WeixinJSBridge == "undefined"){
+                            if( document.addEventListener ){
+                                document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+                            }else if (document.attachEvent){
+                                document.attachEvent('WeixinJSBridgeReady', onBridgeReady);
+                                document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+                            }
+                        }else{
+                            onBridgeReady();
+                        }
+                    }
                 },
                 error:function () {
                     alert('网络连接错误')
                 }
             });
-            var item = 1;
-            var data = null;
-            rotateFn(item, turnplate.restaraunts[item - 1], data);
-            num = num + 1;
-            needpay += 0.5;
         }else{
             alert('对不起您的次数已经用完')
         }

@@ -4,7 +4,8 @@
 {else /}
 <div class="canvasImg" style="display: none;">
     {volist name='dzpprize' id="vo" key='k'}
-       <img src="{$vo}" alt="" alt="" id="indexRain{$k-1}" data_id="6" data_limit_collar="{$limit_collar}"
+       <img src="{$vo['cover']}" alt="" alt="" id="indexRain{$k-1}" data_id="6"
+            data_limit_collar="{$limit_collar}" data_prizekeys ='{$prizekeys}' data_alreadynum="{$alreadynum}"
             data_type_id = "{$dzp['active_id']}" data_shop_id="{$shop_id}" data_member_id="{$member_id}" data_needpay="{$needpay}">
     {/volist}
 </div>
@@ -25,7 +26,7 @@
         </div>
     </div>
     <div class="limit clearfixed">
-        可抽奖次数: <span>3</span>次 第一次玩 <span>2</span>元
+        可抽奖次数: <span>{$limit_collar}</span>次 第一次玩 <span>{$fee}</span>元 下一次玩 每一次多增加<span>{$increfee}</span>元
     </div>
     <div class="banner">
         <div class="turnplate" style="background-image:url(__IMG__/yuan.png);background-size:100% 100%;">
@@ -77,7 +78,7 @@
     </div>
     <div class="empty"></div>
     <div class="footerBtn">
-        <div class="btnMoney tupBtn">立即抽奖￥<span>2.00</span>元</div>
+        <div class="btnMoney tupBtn">立即抽奖</div>
     </div>
     <div id="rule" class="_popups">
         <div class="clearfixed">
@@ -134,12 +135,8 @@
         </div>
         <div class="popupsImg">
             <img src="__IMG__/popups.png" alt="">
-            <div class="popupsCon">
-                <div class="li til">恭喜您获得</div>
-                <div class="prize">茅台酒一瓶</div>
-                <div class="prize">价值999元</div>
-                <div class="num">兑换编码: <span>32568792146</span></div>
-                <div class="tel">请联系门店工作人员兑奖</div>
+            <div class="popupsCon dcode">
+
             </div>
         </div>
     </div>

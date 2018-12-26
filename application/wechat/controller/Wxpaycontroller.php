@@ -3,6 +3,7 @@ namespace Api\Controller;
 use Think\Controller;
 class WxpayController extends Controller {
 
+    protected $config;
 	protected function _initialize(){
 
 		if($_SERVER['REQUEST_METHOD'] != 'POST'){

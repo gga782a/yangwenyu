@@ -12,7 +12,7 @@ use think\Db;
 use think\Exception;
 use think\Request;
 
-class Saomapay extends Controller
+class Jsapipay extends Controller
 {
     public $appId;
     public $appSecret;
@@ -34,8 +34,10 @@ class Saomapay extends Controller
     public static $table_deputy = 'deputy';
     public static $table_integral_order = 'integral_order';
     public static $table_store = 'store';
+    public static $table_active_order = 'active_order';
+    public static $table_prize = 'prize';
     //初始化参数
-    public function __construct($product_id='',$openid='', $mch_id='', $key='',$out_trade_no='',$body='',$total_fee=0.01,$attach='',$notify_url='',$trade_type='NATIVE')
+    public function __construct($product_id='',$openid='', $mch_id='', $key='',$out_trade_no='',$body='',$total_fee=0.01,$attach='',$notify_url='',$trade_type='JSAPI')
     {
         //构成微信支付所需的参数
         $this->appId        = _config('AppID');
@@ -55,7 +57,8 @@ class Saomapay extends Controller
     //供外部调用的微信支付接口
 
     public function pay(){
-       return $this->unifiedOrder();
+        //
+        return $this->unifiedOrder();
     }
 
     //统一下单接口
@@ -67,7 +70,6 @@ class Saomapay extends Controller
         $params = [
             'appid'         => $this->appId,  //公众账号ID
             'mch_id'        => $this->mch_id, //商户号
-            'device_info'   => 'WEB', //PC网页或公众号内支付可以传"WEB"
             'nonce_str'     => self::getNonceStr(), //生成随机字符串
             'body'          => $this->body, //商品描述
             'attach'        => $this->attach,
@@ -76,7 +78,7 @@ class Saomapay extends Controller
             'spbill_create_ip' => Request::instance()->ip(), //终端IP
             'notify_url'    => $this->notify_url,  //通知地址
             'trade_type'    => $this->trade_type, //saoma
-            'product_id'    => $this->product_id, //trade_type=NATIVE时，此参数必传
+            'openid'        => $this->openid,
         ];
         //dd($params);
         //获取签名
@@ -115,83 +117,35 @@ class Saomapay extends Controller
 
     public function notify()
     {
-        //db('ceshi')->insertGetId(array('text1'=>'saoma','text2'=>4444));
         $xml = file_get_contents("php://input");
         //转换成数组
-        $data=$this->xmlToArray($xml);
-        //根据订单id获取app_id
-        $appid = db(self::$table_goushui_order)->where(['order_id'=>$data['attach'],'status'=>0])->value('app_id');
-        $mch_key = db('pay_setting')->where('app_id',$appid)->value('mch_key');
+        $data = $this->xmlToArray($xml);
+        $attach = explode(':',$data['attach']);
+        $order_id = $attach[0];
+        $prize_id = $attach[1];
+        db('ceshi')->insertGetId(array('text1'=>json_encode($data),'text2'=>4444));
+        //db('ceshi')->insertGetId(array('text1'=>$attach,'text2'=>5555));
+        $mch_key = db('pay_setting')->where('app_id',1)->value('mch_key');
         $this->key = $mch_key;
-        //db('ceshi')->insertGetId(array('text1'=>'saomadata','text2'=>json_encode($data)));
         //比较签名
         $data_sign = $data['sign'];
-        //db('ceshi')->insertGetId(array('text1'=>'saoma1','text2'=>$data_sign));
         unset($data['sign']);
         $sign=$this->getSign($data);
-        //db('ceshi')->insertGetId(array('text1'=>'saoma2','text2'=>$sign));
-        // 判断签名是否正确  判断支付状态
         if ( ($sign===$data_sign) && ($data['return_code']=='SUCCESS') && ($data['result_code']=='SUCCESS') ){
-            db('ceshi')->insertGetId(array('text1'=>'saoma','text2'=>'ok'));
+            db('ceshi')->insertGetId(array('text1'=>'汗','text2'=>'ok'));
             //查找订单
-            $order = db(self::$table_goushui_order)->where(['order_id'=>$data['attach'],'status'=>0])->find();
+            $order = db(self::$table_active_order)->where(['order_id'=>$order_id,'status'=>0])->find();
             if($order){
                 Db::startTrans();
                 try{
                     //更改状态 减少库存 添加goushui表
-                    db(self::$table_goushui_order)->where(['order_id'=>$data['attach'],'status'=>0])->update(['status'=>1,'paytime'=>time()]);
-                    if($order['store_id'] == 0) {
-//                        $insert = [
-//                            'app_id'     => $appid,
-//                            //'shui_id'    => $order['shui_id'],
-//                            'name'       => $order['name'],
-//                            'stock'      => $order['stock'],
-//                            'created_at' => time(),
-//                            //'status'     => 1,
-//                        ];
-                        //根据代理ID 获取代理等级
-                        $deputy = db(self::$table_deputy)
-                            ->where(['app_id' => $appid, 'deputy_id' => $order['deputy_id']])
-                            ->field('level,parentid')
-                            ->find();
-                        $level = $deputy['level'];
-                        $parentid = $deputy['parentid'];
-                        if ($level == 1) {
-                            //减少总后台水量
-                            db(self::$table_shui)
-                                ->where(['app_id' => $appid, 'shui_id' => $order['shui_id']])
-                                ->setDec('stock', $order['stock']);
-                            //增加数据到goushui表
-//                            $insert['type'] = 1;
-//                            $insert['type_id'] = $order['deputy_id'];
-//                            db(self::$table_goushui)->insertGetId($insert);
-                            Db::commit();
-                            $result = true;
-                        } else {
-                            if($parentid == 0){
-                                //减少总后台水量
-                                db(self::$table_shui)
-                                    ->where(['app_id' => $appid, 'shui_id' => $order['shui_id']])
-                                    ->setDec('stock', $order['stock']);
-                                Db::commit();
-                                $result = true;
-                            }else{
-                                //减少上级公司水量
-                                db(self::$table_goushui)
-                                    ->where(['app_id' => $appid, 'type_id' => $order['parentid'],'type'=>1,'shui_id'=>$order['shui_id']])
-                                    ->setDec('stock', $order['stock']);
-                                Db::commit();
-                                $result = true;
-                            }
-                        }
-                    }else{
-                        //减少上级代理水量
-                        db(self::$table_goushui)
-                            ->where(['app_id' => $appid, 'type_id' => $order['deputy_id'],'type'=>2,'shui_id'=>$order['shui_id']])
-                            ->setDec('stock', $order['stock']);
+                    db(self::$table_active_order)->where(['order_id'=>$order_id,'status'=>0])->update(['status'=>1,'paytime'=>time()]);
+                    //减少上级代理水量
+                    db(self::$table_prize)
+                        ->where(['prize_id' => $prize_id])
+                        ->setDec('sum', 1);
                         Db::commit();
                         $result = true;
-                    }
                 }catch (Exception $exception){
                     Db::rollback();
                     $result = false;
@@ -209,79 +163,6 @@ class Saomapay extends Controller
             $str='<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[签名失败]]></return_msg></xml>';
         }
         return $result;
-
-    }
-    //购买积分回调
-    public function notifyintegral()
-    {
-        //db('ceshi')->insertGetId(array('text1'=>'jifen','text2'=>4444));
-        $xml = file_get_contents("php://input");
-        //转换成数组
-        $data=$this->xmlToArray($xml);
-        //根据订单id获取app_id
-        $appid = db(self::$table_integral_order)->where(['order_id'=>$data['attach'],'status'=>0])->value('app_id');
-        $mch_key = db('pay_setting')->where('app_id',$appid)->value('mch_key');
-        $this->key = $mch_key;
-        //db('ceshi')->insertGetId(array('text1'=>'jifen','text2'=>json_encode($data)));
-        //比较签名
-        $data_sign = $data['sign'];
-        //db('ceshi')->insertGetId(array('text1'=>'jf','text2'=>$data_sign));
-        unset($data['sign']);
-        $sign=$this->getSign($data);
-        //db('ceshi')->insertGetId(array('text1'=>'jf','text2'=>$sign));
-        // 判断签名是否正确  判断支付状态
-        if ( ($sign===$data_sign) && ($data['return_code']=='SUCCESS') && ($data['result_code']=='SUCCESS') ){
-            //db('ceshi')->insertGetId(array('text1'=>'jff','text2'=>'ok'));
-            //查找订单
-            $order = db(self::$table_integral_order)->where(['order_id'=>$data['attach'],'status'=>0])->find();
-            //db('ceshi')->insertGetId(array('text1'=>'jffd','text2'=>json_encode($order)));
-            if($order){
-                //db('ceshi')->insertGetId(['text1'=>'jssssss','text2'=>'322']);
-                Db::startTrans();
-                try{
-                    //更改状态 添加表
-                    db(self::$table_integral_order)->where(['order_id'=>$data['attach'],'status'=>0])->update(['status'=>1,'paytime'=>time()]);
-                    //db('ceshi')->insertGetId(['text1'=>'js','text2'=>'322']);
-                    if($order['type'] == '1'){
-                        //db('ceshi')->insertGetId(['text1'=>'jss','text2'=>'333222']);
-                        //添加积分到store表
-                        $wheres =  [
-                            'app_id'    => $appid,
-                            'store_id'  => $order['type_id'],
-                        ];
-                        //db('ceshi')->insertGetId(['text1'=>'jssw','text2'=>'333222']);
-                        db(self::$table_store)->where($wheres)->setInc('integral',$order['jifen']);
-                        //db('ceshi')->insertGetId(['text1'=>'jssw1','text2'=>'333222']);
-                        db(self::$table_store)->where($wheres)->setInc('totalintegral',$order['jifen']);
-                        //db('ceshi')->insertGetId(['text1'=>'jssw2','text2'=>'333222']);
-                    }
-                    //db('ceshi')->insertGetId(['text1'=>'jsss','text2'=>'33333222']);
-                    Db::commit();
-                   $result = true;
-                }catch (Exception $exception){
-                    Db::rollback();
-                    $result = false;
-                }
-            }else{
-                //db('ceshi')->insertGetId(['text1'=>'jttt','text2'=>'33333222']);
-                $result = false;
-            }
-        }else{
-            $result = false;
-        }
-        // 返回状态给微信服务器
-        if ($result) {
-            $str='<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>';
-        }else{
-            $str='<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[签名失败]]></return_msg></xml>';
-        }
-        return $result;
-
-    }
-
-    public function h5pay()
-    {
-
     }
     /**
      *
