@@ -32,6 +32,7 @@ class Authorize extends Controller
      */
     public function get_url($redirect_uri ='',$state='STATE')
     {
+        //dd(111);
         //dd(input('redirecturl'));
         $redirect_uri = $redirect_uri ? $redirect_uri : 'http://www.yilingjiu.cn/wechat/authorize/get_url_s?redirecturl='.input('redirecturl');
         $redirect_uri = urlencode($redirect_uri);
@@ -51,9 +52,10 @@ class Authorize extends Controller
         if(empty($code)){
             $code = input('code');
         }
+        //dd($code);
         //获取网页授权token  openid
         $data = $this->get_access_token($this->appId,$this->appSecret,$code);
-
+        //dd($data);
         $openid = $data->openid;
 
         $refresh_token = $data->refresh_token;
@@ -63,33 +65,38 @@ class Authorize extends Controller
 
         //根据openid获取用户信息
         $userdata = $this->get_user($access_token,$openid);
-
+        //dd($userdata);
         $where = [
             'openid' => $userdata->openid,
             'status' => 1,
         ];
         $userone = db(self::$table_member)->where($where)->find();
+        //dd($userone);
         //获取用户信息
         if(!empty($userone)){
             $member_id = $userone['member_id'];
         }else{
+            //dd($userdata);
             //插入数据到数据库 用户不存在添加
             $ini['openid'] = $userdata->openid;
             //$ini['app_id'] = $this->id;
             $ini['name']   = $userdata->nickname;
-            $ini['cover']  = $userdata->headimgurls;
+            $ini['cover']  = $userdata->headimgurl;
             $ini['updated_at'] = time();
             $ini['created_at'] = time();
             $ini['status']    = 1;
+            //dd($ini);
             $member_id    = db(self::$table_member)->insertGetId($ini);
         }
         if($member_id){
+            //dd($member_id);
             Session::set("member_id",$member_id);
             if(input('redirecturl')){
                 $url = 'http://www.yilingjiu.cn/index/index/'.input('redirecturl').'?member_id='.$member_id;
             }else{
                 $url = 'http://www.yilingjiu.cn/index/index/index?member_id='.$member_id;
             }
+            //dd($url);
             return $this->redirect($url);
         }else{
             return $this->error();
@@ -109,7 +116,7 @@ class Authorize extends Controller
         $data_token = json_decode(curl_request($url,true));
         //var_dump($data_token);
         if(array_key_exists('errcode',$data_token)){
-            return $this->error(json_encode(['code'=>$data_token->errcode,'data'=>$data_token->errmsg]));
+            return $this->error(json_encode(['errcode'=>$data_token->errcode,'data'=>$data_token->errmsg]));
         }else{
             cache('access_token',$data_token->access_token,7000);
             return $data_token;
@@ -126,12 +133,13 @@ class Authorize extends Controller
         //判断缓存是否过期
         if(cache('access_token'))
         {
+            //dd(11);
             $access_token = cache('access_token');
         }else{
             $url = "https://api.weixin.qq.com/sns/oauth2/refresh_token?appid={$this->appId}&grant_type=refresh_token&refresh_token={$refresh_token}";
             $data_token = json_decode(curl_request($url,true));
             if(array_key_exists('errcode',$data_token)){
-                return $this->error(json_encode(['code'=>$data_token->errcode,'msg'=>$data_token->errmsg]));
+                return $this->error(json_encode(['errcode'=>$data_token->errcode,'msg'=>$data_token->errmsg]));
             }else{
                 cache('access_token',$data_token->access_token,7000);
                 $access_token = $data_token->access_token;
@@ -152,7 +160,7 @@ class Authorize extends Controller
         $http = "https://api.weixin.qq.com/sns/userinfo?access_token={$access_token}&openid={$openid}&lang=zh_CN";
         $data = json_decode(curl_request($http));
         if(array_key_exists('errcode',$data)){
-            return $this->error(json_encode(['code'=>$data->errcode,'msg'=>$data->errmsg]));
+            return $this->error(json_encode(['errcode'=>$data->errcode,'msg'=>$data->errmsg]));
         }else{
             return $data;
         }
