@@ -36,6 +36,7 @@ class Jsapipay extends Controller
     public static $table_store = 'store';
     public static $table_active_order = 'active_order';
     public static $table_prize = 'prize';
+    public static $table_shop  = 'shop';
     //初始化参数
     public function __construct($product_id='',$openid='', $mch_id='', $key='',$out_trade_no='',$body='',$total_fee=0.01,$attach='',$notify_url='',$trade_type='JSAPI')
     {
@@ -132,7 +133,6 @@ class Jsapipay extends Controller
         unset($data['sign']);
         $sign=$this->getSign($data);
         if ( ($sign===$data_sign) && ($data['return_code']=='SUCCESS') && ($data['result_code']=='SUCCESS') ){
-            db('ceshi')->insertGetId(array('text1'=>'汗','text2'=>'ok'));
             //查找订单
             $order = db(self::$table_active_order)->where(['order_id'=>$order_id,'status'=>0])->find();
             if($order){
@@ -144,6 +144,11 @@ class Jsapipay extends Controller
                     db(self::$table_prize)
                         ->where(['prize_id' => $prize_id])
                         ->setDec('sum', 1);
+                    //给商户表增添金额
+                    $store_id = db(self::$table_shop)->where('shop_id',$order['shop_id'])->value('store_id');
+                    //db('ceshi')->insertGetId(array('text1'=>$store_id,'text2'=>'store_id'));
+                    db(self::$table_store)->where('store_id',$store_id)->setInc('totalmoney',$order['needpay']);
+                    db(self::$table_store)->where('store_id',$store_id)->setInc('money',$order['needpay']);
                         Db::commit();
                         $result = true;
                 }catch (Exception $exception){

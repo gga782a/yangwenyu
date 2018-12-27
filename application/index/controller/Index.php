@@ -44,8 +44,9 @@ class Index extends Common
         if(!$this->member_id){
             return redirecturl('index');
         }
-        //
         $shop_id = input('shop_id',3);
+        //获取当前门店信息
+        $shop = db(self::$table_shop)->where('shop_id',$shop_id)->find();
         //根据门店id 获取代理id
         $dpeuty_id = $this->deputy_id(3);
         if((int)$dpeuty_id > 0) {
@@ -103,6 +104,18 @@ class Index extends Common
                 $dzp = [];
             }
         }
+        //展示前五条中奖纪录
+        $activeorder = db(self::$table_active_order)
+            ->where(['shop_id'=>$shop_id,'status'=>1])
+            ->order('paytime desc')
+            ->limit(0,5)
+            ->select();
+        if(!empty($activeorder)){
+            foreach($activeorder as $kk=>$vv){
+                $activeorder[$kk]['member'] = db(self::$table_member)->where('member_id',$vv['member_id'])
+                    ->field('name,cover')->find();
+            }
+        }
         //dd(json_encode($prizekeys));
         $needpay = 2+0.5*$alreadynum;
         return view('index',[
@@ -116,7 +129,32 @@ class Index extends Common
             'limit_collar' => $limit_collar,
             'prizekeys' => json_encode($prizekeys),
             'alreadynum' => $alreadynum,
+            'shop'      => $shop,
+            'activeorder' => $activeorder,
         ]);
+    }
+
+    //ajax获取前五条中奖纪录
+
+    public function activeorder()
+    {
+        if(Request::instance()->isAjax()) {
+            $shop_id = input('shop_id', 3);
+            $activeorder = db(self::$table_active_order)
+                ->where(['shop_id' => $shop_id, 'status' => 1])
+                ->order('paytime desc')
+                ->limit(0, 5)
+                ->select();
+            if (!empty($activeorder)) {
+                foreach ($activeorder as $kk => $vv) {
+                    $activeorder[$kk]['member'] = db(self::$table_member)->where('member_id', $vv['member_id'])
+                        ->field('name,cover')->find();
+                }
+                return json(array('code'=>200,'data'=>$activeorder));
+            }else{
+                return json(array('code'=>400,'data'=>'暂无中奖纪录'));
+            }
+        }
     }
 
     //获取大转盘信息
@@ -271,7 +309,7 @@ class Index extends Common
     public function jsapipay($insert,$id)
     {
         $notify_url = 'http://www.yilingjiu.cn/wechat/Jsapipay/notify';
-        $openid = 'os-5N1ZgTUrkGgasKpmQHpFc5R5E';// db(self::$table_member)->where('member_id',$insert['member_id'])->value('openid');
+        $openid = db(self::$table_member)->where('member_id',$insert['member_id'])->value('openid');//'os-5N1ZgTUrkGgasKpmQHpFc5R5E';
         $attach = $id.':'.$insert['prize_id'];
         $pay = new Jsapipay('',$openid, $mch_id='1514213421', $key='c56d0e9a7ccec67b4ea131655038d604',$insert['order_num'],'大转盘活动',$total_fee=0.01,$attach,$notify_url,'JSAPI');
         $return = $pay->pay();

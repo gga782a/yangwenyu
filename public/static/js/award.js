@@ -62,9 +62,9 @@ $(document).ready(function() {
     });
 
     function lotteryStart() {
-        alert(needpay);
-        alert(num);
-        alert(limit_collar);
+        // alert(needpay);
+        // alert(num);
+        // alert(limit_collar);
         if (num < limit_collar) {
             $.ajax({
                 type:'post',
@@ -72,6 +72,7 @@ $(document).ready(function() {
                 data:{'id':active_id,'shop_id':shop_id,'member_id':member_id,'needpay':needpay,'prizekeys':prizekeys},
                 dataType:'json',
                 success:function (data) {
+                    //alert(222);
                     console.log(data);
                     var str = '';
                     if(data.code == 200){
@@ -94,6 +95,43 @@ $(document).ready(function() {
                                     "paySign":arr['paySign'] //微信签名
                                 },
                                 function(res){
+                                    $.ajax({
+                                        type:'post',
+                                        url:"activeorder",
+                                        data:{'shop_id':shop_id},
+                                        dataType:'json',
+                                        success:function (datamsg) {
+                                            //alert(datamsg);
+                                            var js_infor = '';
+                                            var js_recording = '';
+                                            if(data.code == 200){
+                                                console.log(datamsg.data.length);
+                                                for(var i = 0; i < datamsg.data.length;i++){
+                                                    js_infor += '<div class="clearfixed inforUl">';
+                                                    js_infor += '<div class="li inforImg">';
+                                                    js_infor += '<img src="'+datamsg.data[i].member["cover"]+'" alt="">';
+                                                    js_infor += '</div>';
+                                                    js_infor += '<div class="li padding1 nick ellipsis">'+datamsg.data[i].member["name"]+'</div>';
+                                                    js_infor += '<div class="li fr padding1 con ellipsis">'+datamsg.data[i].prize_name+'</div>';
+                                                    js_infor += '</div>';
+
+                                                    js_recording += '<div class="clearfixed inforUl">';
+                                                    js_recording += '<div class="li inforImg">';
+                                                    js_recording += '<img src="'+datamsg.data[i].member["cover"]+'" alt="">';
+                                                    js_recording += '</div>';
+                                                    js_recording += '<div class="li padding1 nick ellipsis">'+datamsg.data[i].member["name"]+'</div>';
+                                                    js_recording += '<div class="li fr padding1 con ellipsis">'+datamsg.data[i].prize_name+'</div>';
+                                                    js_recording += '</div>';
+                                                    console.log(datamsg.data[i].prize_name);
+                                                }
+                                                $(".js_infor").html(js_infor);
+                                                $(".js_recording").html(js_recording);
+                                            }
+                                        },
+                                        error:function () {
+
+                                        }
+                                    });
                                     if(res.err_msg == "get_brand_wcpay_request:ok" ){
                                         // 使用以上方式判断前端返回,微信团队郑重提示：
                                         //res.err_msg将在用户支付成功后返回ok，但并不保证它绝对可靠。
@@ -130,6 +168,9 @@ $(document).ready(function() {
                         }else{
                             onBridgeReady();
                         }
+                    }else{
+                        //alert(11);
+                        alert(data.msg);
                     }
                 },
                 error:function () {

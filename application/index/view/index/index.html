@@ -21,7 +21,7 @@
     <div class="more">
         <div class="clearfixed">
             <div class="li">当前门店:</div>
-            <div class="li">小六子烧烤刷</div>
+            <div class="li">{$shop.shop_name}</div>
             <div class="li white" onclick="jump(this)" data-href="{:url('index/more')}">点击查看更多</div>
         </div>
     </div>
@@ -34,11 +34,23 @@
             <img id="tupBtn" class="pointer tupBtn" src="__IMG__/btn.png" />
         </div>
     </div>
+
     <div class="infor">
         <div class="inforTitle">
             <img src="__IMG__/inforTitle.png" alt="">
         </div>
-        <div class="inforCon">
+        <div class="inforCon js_infor">
+            {notempty name="$activeorder"}
+            {volist name="activeorder" id="vos"}
+            <div class="clearfixed inforUl">
+                <div class="li inforImg">
+                    <img src="{$vos.member['cover']}" alt="">
+                </div>
+                <div class="li padding1 nick ellipsis">{$vos.member['name']}</div>
+                <div class="li fr padding1 con ellipsis">{$vos.prize_name}</div>
+            </div>
+            {/volist}
+            {else /}
             <div class="clearfixed inforUl">
                 <div class="li inforImg">
                     <img src="__IMG__/yuan.png" alt="">
@@ -74,8 +86,10 @@
                 <div class="li padding1 nick ellipsis">微信昵称</div>
                 <div class="li fr padding1 con ellipsis">矿泉水一瓶价值3元</div>
             </div>
+            {/notempty}
         </div>
     </div>
+
     <div class="empty"></div>
     <div class="footerBtn">
         <div class="btnMoney tupBtn">立即抽奖</div>
@@ -91,7 +105,18 @@
         </div>
     </div>
     <div id="recording" class="_popups">
-        <div class="inforCon inforPopups">
+        <div class="inforCon inforPopups js_recording">
+            {notempty name="$activeorder"}
+            {volist name="activeorder" id="vol"}
+            <div class="clearfixed inforUl">
+                <div class="li inforImg">
+                    <img src="{$vol.member['cover']}" alt="">
+                </div>
+                <div class="li padding1 nick ellipsis">{$vol.member['name']}</div>
+                <div class="li fr padding1 con ellipsis">{$vol.prize_name}</div>
+            </div>
+            {/volist}
+            {else /}
             <div class="clearfixed inforUl">
                 <div class="li inforImg">
                     <img src="__IMG__/yuan.png" alt="">
@@ -127,6 +152,7 @@
                 <div class="li padding1 nick ellipsis">微信昵称</div>
                 <div class="li fr padding1 con ellipsis">矿泉水一瓶价值3元</div>
             </div>
+            {/notempty}
         </div>
     </div>
     <div id="popus" class="_popups" style="top:40%;">
