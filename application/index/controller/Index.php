@@ -726,6 +726,11 @@ class Index extends Common
         }
     }
 
+    public function aa()
+    {
+        dd(11);
+    }
+
     public function douhao()
     {
        dd(douhao());

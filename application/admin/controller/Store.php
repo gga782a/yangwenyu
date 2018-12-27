@@ -35,6 +35,9 @@ class Store extends Common
     public static $table_vipcard = 'vipcard'; // 会员卡
     public static $table_recieve_vipcard = 'recieve_vipcard'; //领取会员卡表
     public static $table_member = 'member'; // 会员
+    public static $table_active_order = "active_order"; //活动订单列表
+    public static $table_slyderadventures = "slyderadventures"; //大转盘
+
     public $time;
     public function __construct(Request $request = null)
     {
@@ -472,7 +475,7 @@ class Store extends Common
     {
         $where = [
             'app_id'    => $this->app_id,
-            'deputy_id' => $this->deputy_id,
+            //'deputy_id' => $this->deputy_id,
             'store_id'  => $this->store_id,
         ];
         $statusarr = [
@@ -751,7 +754,7 @@ class Store extends Common
         if(Request::instance()->isAjax()) {
             $where = [
                 'app_id'    => $this->app_id,
-                'deputy_id' => $this->deputy_id,
+                //'deputy_id' => $this->deputy_id,
                 'store_id'  => $this->store_id,
                 'order_id'  => $this->parme('order_id')
             ];
@@ -1182,19 +1185,67 @@ class Store extends Common
         //买水支出
         $shuipaymoney = 0;
         $shuipay = $this->shuipay();
+        //组装数据
+        $paydata = [];
         if($shuipay!==false){
             $shuipaymoney = $shuipay['money'];
+            foreach($shuipay['data'] as $k1=>$v1){
+                $paydata[$k1]['order_id'] = $v1['order_id'];
+                $paydata[$k1]['type']     = '买水';
+                $paydata[$k1]['obj']   = db(self::$table_deputy)
+                    ->where(['deputy_id'=>$v1['deputy_id']])
+                    ->value('deputy_name');
+                $paydata[$k1]['needpay']  = $v1['needpay'];
+                $paydata[$k1]['order_num']= $v1['order_num'];
+                $paydata[$k1]['created_at']= $v1['created_at'];
+            }
         }
-        dd($shuipaymoney);
+        //dd($paydata);
+        $count = count($paydata);
+        //dd($shuipaymoney);
         //买积分支出
-        return view('assetprofile');
+        $integralpaymoney = 0;
+        $integralpay = $this->integralpay();
+        if($integralpay!==false){
+            $integralpaymoney = $integralpay['money'];
+            foreach($integralpay['data'] as $k2=>$v2){
+                $paydata[$k2+$count]['order_id'] = $v2['order_id'];
+                $paydata[$k2+$count]['type']     = '买积分';
+                $paydata[$k2+$count]['obj']   = '总平台';
+                $paydata[$k2+$count]['needpay']  = $v2['needpay'];
+                $paydata[$k2+$count]['order_num']= $v2['order_num'];
+                $paydata[$k2+$count]['created_at']= $v2['created_at'];
+            }
+        }
+        $totalpay = $shuipaymoney+$integralpaymoney;
+        //总收入 总积分 实际收入
+        $member = db(self::$table_store)->where('store_id',$this->store_id)->find();
+        $totalincome = $member['totalmoney'];
+        if(($totalincome - $totalpay) > 0){
+            $shijiincome = douhao($totalincome - $totalpay);
+        }else{
+            $shijiincome = '-'.douhao($totalpay - $totalincome);
+        }
+        $totalintegral = $member['totalintegral'];
+        $integral      = $member['integral'];
+        return view('assetprofile',[
+            'shuipaymoney'      => douhao($shuipaymoney),
+            'integralpaymoney'  => douhao($integralpaymoney),
+            'totalpay'          => douhao($totalpay),
+            'paydata'           => $paydata,
+            'totalincome'       => douhao($totalincome),
+            'shijiincome'       => $shijiincome,
+            'totalintegral'     => douhao($totalintegral),
+            'integral'          => douhao($integral),
+        ]);
     }
+
     //买水支出
     public function shuipay()
     {
         $where = [
             'app_id'    => $this->app_id,
-            'deputy_id' => $this->deputy_id,
+            //'deputy_id' => $this->deputy_id,
             'parentid'  => 0,
             'store_id'  => $this->store_id,
             'status'    => ['in',[1,2,3]],
@@ -1213,6 +1264,31 @@ class Store extends Common
         }
 
     }
+
+    //买积分支出
+    public function integralpay()
+    {
+        $where = [
+            'app_id'    => $this->app_id,
+            'type'      => 1,
+            'type_id'   => $this->store_id,
+            'status'    => 1,
+        ];
+        $integralpay = db(self::$table_integral_order)
+            ->where($where)
+            ->page(input('page',1),input('pageshow',15))
+            ->select();
+        $integralpaymoney = db(self::$table_integral_order)
+            ->where($where)
+            ->sum('needpay');
+        if(!empty($integralpay)){
+            return array('data'=>$integralpay,'money'=>$integralpaymoney);
+        }else{
+            return false;
+        }
+
+    }
+
 
     /************************************************会员卡设置************************************************************/
 
@@ -1390,6 +1466,96 @@ class Store extends Common
 
     }
     /************************************************订单总揽************************************************************/
+    //活动订单列表
+    public function activeorder()
+    {
+        //查找商户下所有的门店
+        $shopids = $this->getshopids($this->store_id);
+        $where = [
+            'shop_id'   => ['in',$shopids],
+        ];
+        //查找订单列表
+        $orders = db(self::$table_active_order)
+            ->where($where)
+            ->page(input('page',1),input('pageshow',15))
+            ->select();
+        if(!empty($orders)){
+            foreach($orders as $k=>$v){
+                $orders[$k]['member'] = db(self::$table_member)
+                    ->where(['member_id'=>$v['member_id']])
+                    ->field('name,cover')
+                    ->find();
+                $orders[$k]['shop'] = db(self::$table_shop)
+                    ->where(['shop_id'=>$v['shop_id']])
+                    ->field('shop_name,kefu_phone')
+                    ->find();
+                if($v['type'] == 1){
+                    $activetitle = db(self::$table_slyderadventures)
+                        ->where(['active_id'=>$v['type_id']])
+                        ->value('activetitle');
+                }else{
+                    $activetitle = '商家优惠';
+                }
+                $orders[$k]['activetitle'] = $activetitle;
+            }
+        }
+        return view('activeorder',[
+            'data'  => $orders,
+        ]);
+    }
+
+    //查找商户下所有的门店
+
+    public function getshopids($id)
+    {
+        $where = [
+            'store_id' => $id,
+        ];
+
+        return db(self::$table_shop)->where($where)->column('shop_id');
+    }
+
+    /************************************************系统管理************************************************************/
+
+    //重置密码
+
+    public function resetpwd()
+    {
+        if(Request::instance()->isPost()){
+            $rule = [
+                'pwd' => 'require|confirm:repwd|alphaNum|min:4|max:18',
+            ];
+            $field = [
+                'username' => '账号',
+                'pwd' => '密码',
+            ];
+            $validate = new Validate($rule, self::$msg, $field);
+            if (!$validate->check($this->parme)) {
+                $this->error($validate->getError());
+            } else {
+                $pwd = md5(sha1($this->parme('pwd')));
+                //dd($pwd);
+                    $res = db(self::$table_store)
+                    ->where('store_id',$this->store_id)
+                    //->select();
+                    ->update(['pwd'=>$pwd,'updated_at'=>$this->time]);
+                //dd($res);
+                if($res!==false){
+                    $this->success('操作成功');
+                }else{
+                    $this->error('操作失败');
+                }
+            }
+        }else{
+            $username = db(self::$table_store)
+                ->where(['store_id'=>$this->store_id])
+                ->value('username');
+            //$username = 'aa';
+            return view('resetpwd',[
+                'username' => $username
+            ]);
+        }
+    }
 }
 
 
