@@ -1,0 +1,63 @@
+{include file='common/header' /}
+
+<body style="background-color: #F4F4F4;">
+<div class="me">
+    <div style="margin-bottom: 10px;">
+    <?php
+              $pic = explode(',',trim($shop['pic_arr'],','));
+                 if(!empty($pic)){
+                    echo "<img src='$pic[0]' style='width:100%;height:200px;'>";
+    }
+    ?>
+    </div>
+    <div class="clearfixed">
+        <div class="li">
+            <div class="clearfixed">
+                <div class="li" style="border-left: 5px solid #FFB032;padding-left: 5px;font-size: 16px;">{$shop.shop_name}</div>
+            </div>
+            <div class="gray" style="font-size: 12px;">客服电话：{$shop.kefu_phone}</div>
+            <div class="gray" style="font-size: 12px;">地址：{$shop.position}{notempty name="$shop['address']"}{$shop.address}{else /}{/notempty}</div>
+        </div>
+    </div>
+
+</div>
+<div class="icon clearfixed top" style="border-bottom: 1px solid #eee;">
+    <div class="li four" style="width: 100%;">
+        <div class="dl">
+            <label>门店活动：</label>
+            {notempty name="$dzp"}
+            <a href="{:url('index/index',array('shop_id'=>$shop['shop_id']))}" style="display:inline-block;padding: 5px 15px;border: 1px solid #FFB032;border-radius: 5px;">
+                <span>
+                    大转盘
+                </span>
+            </a>
+            {else /}
+            {/notempty}
+            {notempty name="$vipcards"}
+            <a href="" style="display:inline-block;padding: 5px 15px;border: 1px solid #FFB032;border-radius: 5px;">
+                <span>
+                    会员卡
+                </span>
+            </a>
+            {else /}
+            {/notempty}
+        </div>
+    </div>
+</div>
+<div class="shopTop clearfixed">
+    <div>
+        <?php
+            $pic = explode(',',trim($shop['pic_arr'],','));
+                if(!empty($pic)){
+                    $len = count($pic);
+                    if($len >1){
+                        for($i=1;$i<$len;$i++){
+                            echo "<img src='$pic[$i]' style='width:100%;padding: 10px 0px;'>";
+                        }
+                    }
+                }
+        ?>
+
+    </div>
+</div>
+{include file='common/footer' /}

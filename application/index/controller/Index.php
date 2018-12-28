@@ -28,6 +28,7 @@ class Index extends Common
     public static $table_slyderadventures = 'slyderadventures';
     public static $table_prize = 'prize';
     public static $table_active_order = 'active_order';
+    public static $table_vipcard = 'vipcard';
     private  $key;
     public function __construct(Request $request = null)
     {
@@ -714,10 +715,16 @@ class Index extends Common
             if(!empty($shop)){
                 foreach($shop as $k=>$v){
                     //获取距离
-                    $shop[$k]['distance'] = getdistance($lng,$lat,$v['longitude'],$v['latitude']);
+                    $s = getdistance($lng,$lat,$v['longitude'],$v['latitude']);
+                    $shop[$k]['distances'] = $s;
+                    if($s/1000<1){
+                        $shop[$k]['distance'] =  round($s,2).'m';
+                    }else{
+                        $shop[$k]['distance'] =  round(($s/1000),2).'km';
+                    }
                 }
                 //根据距离排序
-                $shop = arr_sort($shop,'distance',$order="asc");
+                $shop = arr_sort($shop,'distances',$order="asc");
                 return json_encode(['code'=>200,'data'=>$shop]);
             }else{
                 return json_encode(['code'=>400,'data'=>'暂无数据']);
@@ -786,43 +793,56 @@ class Index extends Common
         if(Request::instance()->isAjax()){
             $lng = input('lng');
             $lat = input('lat');
-            //获取省市区信息
-            $return = byLtGetCity($lng,$lat);
-            $province = $return[0]; //省
-            $city = $return[1]; //市
-            $county = $return[2];  //区
-            //根据省市区反查代理
-            $deputy_id = db(self::$table_deputy)
-                ->where(['province'=>$province,'city'=>$city,'county'=>$county])
-                ->value('deputy_id');
-            if(!$deputy_id){
+            $deputy_id = input('deputy_id');
+            //dd(11111);
+            if($lng&&$lat&&(int)$deputy_id == 0) {
+                //获取省市区信息
+                $return = byLtGetCity($lng, $lat);
+                //dd($return);
+                //dd($return);
+                $province = mb_substr($return[0], 0, mb_strlen($return[0]) - 1); //省
+                $city = mb_substr($return[1], 0, mb_strlen($return[1]) - 1); //市
+                $county = $return[2];  //区
+                //根据省市区反查代理
                 $deputy_id = db(self::$table_deputy)
-                    ->where(['province'=>$province,'city'=>$city,'county'=>''])
+                    ->where(['province' => $province, 'city' => $city, 'county' => $county])
                     ->value('deputy_id');
-                if(!$deputy_id){
-                    return json(['code'=>400,'data'=>'暂无数据']);
+                if (!$deputy_id) {
+                    $deputy_id = db(self::$table_deputy)
+                        ->where(['province' => $province, 'city' => $city])
+                        ->value('deputy_id');
+                    if (!$deputy_id) {
+                        return json(['code' => 400, 'data' => '暂无数据']);
+                    }
                 }
             }
             //根据代理获取商户根据商户获取所有门店
             $storeids = db(self::$table_store)
-                ->where(['deputy_id'=>$deputy_id,'status'=>1])
+                ->where(['deputy_id' => $deputy_id, 'status' => 1])
                 ->column('store_id');
-            if(empty($storeids)){
-                return json(['code'=>400,'data'=>'暂无数据']);
+            if (empty($storeids)) {
+                return json(['code' => 400, 'data' => '暂无数据']);
             }
-            $shop = db(self::$table_shop)->where(['status'=>1])->whereIn('store_id',$storeids)->select();
-            if(!empty($shop)){
-                foreach($shop as $k=>$v){
+            $shop = db(self::$table_shop)->where(['status' => 1])->whereIn('store_id', $storeids)->select();
+            if (!empty($shop)) {
+                foreach ($shop as $k => $v) {
                     //获取距离
-                    $shop[$k]['distance'] = getdistance($lng,$lat,$v['longitude'],$v['latitude']);
-                }
-                //根据距离排序
-                $shop = arr_sort($shop,'distance',$order="asc");
-                return json(['code'=>200,'data'=>$shop,'deputy_id'=>$deputy_id]);
-            }else{
-                return json(['code'=>400,'data'=>'暂无数据']);
-            }
+                    $s = getdistance($lng, $lat, $v['longitude'], $v['latitude']);
+                    $shop[$k]['distances'] = $s;
+                    if ($s / 1000 < 1) {
+                        $shop[$k]['distance'] = round($s, 2) . 'm';
+                    } else {
+                        $shop[$k]['distance'] = round(($s / 1000), 2) . 'km';
+                    }
 
+                }
+                //dd(arr_sort($shop,'distances',$order="asc"));
+                //根据距离排序
+                $shop = arr_sort($shop, 'distance', $order = "asc");
+                return json(['code' => 200, 'data' => $shop, 'deputy_id' => $deputy_id]);
+            } else {
+                return json(['code' => 400, 'data' => '暂无数据']);
+            }
         }
     }
 
@@ -835,6 +855,63 @@ class Index extends Common
         //判断当前时间 在哪个时间段  //然后判断抽奖时间是否在这个时间段 如果在则证明次数有效 否则次数清零
 
         //return view('test');
+    }
+
+    /**************************************门店详情****************************************************/
+    public function shopdes()
+    {
+        $shop_id = input('shop_id');
+        $store_id = input('store_id');
+        //获取门店详情
+        $shop = db(self::$table_shop)
+            ->where('shop_id',$shop_id)
+            ->find();
+        //获取门店会员卡
+        $vipcards = $this->getcards($shop_id,$store_id);
+        //获取门店大转盘活动
+        $deputy_id = $shop['deputy_id'];
+        $dzp = $this->deputy_dzp($deputy_id);
+        //dd($dzp);
+        if($dzp===false){
+            $dzp = [];
+        }
+
+        return view('shopdes',[
+            'shop'      => $shop,
+            'vipcards'  => $vipcards,
+            'dzp'       => $dzp,
+        ]);
+    }
+
+    //获取门店会员卡
+
+    private function getcards($shopid,$storeid)
+    {
+        $cards = db(self::$table_vipcard)
+            ->where(['status'=>1,'store_id'=>$storeid])
+            ->select();
+        $applycards = [];
+        if(!empty($cards)){
+            foreach($cards as $k=>$v){
+                if($v['applyshop'] == 0){
+                    $applycards[$k] = $v;
+                }else{
+                    $v['applyshop'] = explode(',',$v['applyshop']);
+                    if(in_array($shopid,$v['applyshop'])){
+                        $applycards[$k] = $v;
+                    }
+                }
+            }
+        }
+        $vipcards = [];
+        if(!empty($applycards)){
+            foreach($applycards as $val){
+                $vipcards[] = $val;
+            }
+            return $vipcards;
+        }else{
+            return [];
+        }
     }
 }
 

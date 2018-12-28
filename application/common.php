@@ -66,11 +66,7 @@ function getdistance($lng1, $lat1, $lng2, $lat2) {
 //    var_dump($lng2);
 //    var_dump($lat2);
 //    dd($s);
-    if($s/1000<1){
-        return round($s,2).'m';
-    }else{
-        return round(($s/1000),2).'km';
-    }
+    return $s;
 }
 
 //二维数组 排序
@@ -114,7 +110,7 @@ function douhao($num=1500900065,$res=''){
 
 function byLtGetCity($longitude,$latitude)
 {
-    $res = @file_get_contents('http://apis.map.qq.com/ws/geocoder/v1/?location=' . $latitude . ',' . $longitude . '&key=KBUBZ-N2YH6-JZHS6-MF7TF-U4HGT-TLFC7&get_poi=1');
+    $res = @file_get_contents('https://apis.map.qq.com/ws/geocoder/v1/?location=' . $latitude . ',' . $longitude . '&key=NDFBZ-NLB6I-VINGK-5YCAR-6ATH6-VHF5U&get_poi=1');
     $result = json_decode($res,true);
     //dd($result['result']);
     //["province"] =&gt; string(12) "黑龙江省"
@@ -122,7 +118,7 @@ function byLtGetCity($longitude,$latitude)
     //    ["district"] =&gt; string(9) "南岗区"
     //    ["street"] =&gt; string(9) "宣化街"
     $address_component = $result['result']['address_component'];
-    return array($result['result']['province'],$result['result']['city'],$result['result']['district']);
+    return array($address_component['province'],$address_component['city'],$address_component['district']);
 }
 
 

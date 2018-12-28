@@ -15,6 +15,7 @@
 
 </div>
 <script src="http://res.wx.qq.com/open/js/jweixin-1.4.0.js"></script>
+<script src="https://cdn.staticfile.org/jquery/2.1.4/jquery.min.js"></script>
 <script>
     wx.config({
         debug: false,
@@ -55,7 +56,36 @@
                     data: {'lng':longitude,'lat':latitude},
                     dataType:'json',
                     success:function(data){
-
+                        console.log(data.data);
+                        $("#js_moreAdd").empty();
+                        if(data.code==200){
+                            var len = data.data.length;
+                            console.log(len);
+                            var str = '';
+                            for (var i=0 ; i<len; i++){
+                                str += '<a href="http://www.yilingjiu.cn/index/index/shopdes?shop_id='+data.data[i].shop_id+'&store_id='+data.data[i].store_id+'">';
+                                str += '<div class="clearfixed ulAddress">';
+                                str += '<div class="li">';
+                                str += '<div class="ol clearfixed">';
+                                str += '<div class="li title_name ellipsis">'+data.data[i].shop_name+'</div>';
+                                str += '<div class="li"><span class="gray">|</span> 距离 <span>'+data.data[i].distance+'</span></div>';
+                                str += '</div>';
+                                str += '<div class="ol gray clearfixed">';
+                                str += '<div class="li">地址: </div>';
+                                str += '<span class="li addressText ellipsis">'+data.data[i].position+data.data[i].address+'</span>';
+                                str += '</div>';
+                                str += '</div>';
+                                str += '<div class="li fr">';
+                                str += '<div class="ol yell">电话: <span>'+data.data[i].kefu_phone+'</span></div>';
+                                str += '</div>';
+                                str += '</div>';
+                                str += '</a>';
+                            }
+                            $("#js_moreAdd").html(str);
+                            $("#location option[value='"+data.deputy_id+"']").attr("selected","selected");
+                        }else{
+                            layer.msg(data.data);
+                        }
                     },
                     error:function(){
                         layer.msg('网络错误');
@@ -115,6 +145,51 @@
     });
     wx.error(function(res){
         console.log(11111);
+    });
+
+    $("#location").on('change',function(){
+        var id = $(this).val();
+        $.ajax({
+            type:'post',
+            url:"{:url('index/index/getdeputy')}",
+            data: {'deputy_id':id},
+            dataType:'json',
+            success:function(data){
+                console.log(data.data);
+                $("#js_moreAdd").empty();
+                if(data.code==200){
+                    var len = data.data.length;
+                    console.log(len);
+                    var str = '';
+                    for (var i=0 ; i<len; i++){
+                        str += '<a href="http://www.yilingjiu.cn/index/index/shopdes?shop_id='+data.data[i].shop_id+'&store_id='+data.data[i].store_id+'">';
+                        str += '<div class="clearfixed ulAddress">';
+                        str += '<div class="li">';
+                        str += '<div class="ol clearfixed">';
+                        str += '<div class="li title_name ellipsis">'+data.data[i].shop_name+'</div>';
+                        str += '<div class="li"><span class="gray">|</span> 距离 <span>'+data.data[i].distance+'</span></div>';
+                        str += '</div>';
+                        str += '<div class="ol gray clearfixed">';
+                        str += '<div class="li">地址: </div>';
+                        str += '<span class="li addressText ellipsis">'+data.data[i].position+data.data[i].address+'</span>';
+                        str += '</div>';
+                        str += '</div>';
+                        str += '<div class="li fr">';
+                        str += '<div class="ol yell">电话: <span>'+data.data[i].kefu_phone+'</span></div>';
+                        str += '</div>';
+                        str += '</div>';
+                        str += '</a>';
+                    }
+                    $("#js_moreAdd").html(str);
+                    $("#location option[value='"+data.deputy_id+"']").attr("selected","selected");
+                }else{
+                    layer.msg(data.data);
+                }
+            },
+            error:function(){
+                layer.msg('网络错误');
+            }
+        });
     });
 </script>
 {include file='common/footer' /}
