@@ -1,0 +1,40 @@
+{include file='common/header' /}
+
+<body style="background-color: #F4F4F4;">
+<div class="me">
+    <div style="margin-bottom: 10px;">
+        {notempty name="$data"}
+        {volist name="data" id="vo"}
+        <div style="background: rgb(0,0,0);border-radius: 5px;height:200px;color:#fff;overflow: hidden;position: relative;margin-bottom: 5px;">
+            <div style="margin-top: 10px;">
+                <span style="padding: 10px;">有效期{$vo.validity == 0?'永久':$vo.validity.'个月'}</span>
+                <span style="background: #e1143a;padding: 3px 15px;border: 1px solid #FFB032;font-size: 12px;border-radius: 10px;position: absolute;right:10px;top:-3px;">
+                    {$vo.type == 1?'满减卡':'折扣卡'}
+                </span>
+            </div>
+            <div style="clear: both;"></div>
+            <div style="text-align:center;width: 100%;">
+                <span style="font-size: 27px;display:inline-block;margin-left: 10px;margin-top: 10px;">
+                    {$vo.cardname}
+                </span>
+            </div>
+            <div style="font-size: 21px;margin-top: 10px;text-align: center;">
+                {if condition=" $vo['type'] == 1"}
+                满{$vo.usecondition}元 减{$vo.discount}元
+                {else /}
+                满{$vo.usecondition}元 打{$vo.discount}折
+                {/if}
+            </div>
+            <div style="font-size: 16px;position: absolute;bottom:10px;left: 0;text-align: center;width: 100%;">
+                <button style="color:#e1143a;font-weight:bold;padding: 2px 35%;border: 1px solid #e1143a;background: #0C0C0C;border-radius: 10px;">
+                    {$vo.needpay == 0?'免费':$vo.needpay}领取
+                </button>
+            </div>
+        </div>
+        {/volist}
+        {else /}
+           该门店尚未设置会员卡
+        {/notempty}
+    </div>
+</div>
+{include file='common/footer' /}
