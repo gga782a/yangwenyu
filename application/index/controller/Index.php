@@ -11,6 +11,8 @@ namespace app\index\controller;
 use app\Qiniu;
 use think\Cache;
 use think\Cookie;
+use think\Db;
+use think\Exception;
 use think\Request;
 use think\Session;
 use app\wechat\controller\Jsapipay;
@@ -30,6 +32,10 @@ class Index extends Common
     public static $table_prize = 'prize';
     public static $table_active_order = 'active_order';
     public static $table_vipcard = 'vipcard';
+    public static $table_recieve_vipcard = 'recieve_vipcard';
+    public static $table_vipcard_order = 'vipcard_order';
+    //商户会员列表
+    public static $table_store_member = 'store_member';
     private  $key;
     public function __construct(Request $request = null)
     {
@@ -404,13 +410,15 @@ class Index extends Common
     {
         if(!$this->member_id){
             //获取签名信息
-
             return redirecturl('more');
         }
+        $shopid = input('shop_id');
+        //dd($shopid);
         //dd(222);
         $getSignPackage = json_decode($this->getSignPackage(),true);
         return view('more',[
             'signPackage' => $getSignPackage,
+            'shop_id'     => $shopid,
         ]);
     }
     public function address()
@@ -710,9 +718,25 @@ class Index extends Common
         if(Request::instance()->isAjax()){
             $lng = input('lng');
             $lat = input('lat');
+            $shopid = input('shop_id');
+            //dd($shopid);
+            $where = [
+                'status'    => 1,
+            ];
+            if(!empty($shopid)){
+                $deputy_id = $this->deputy_id($shopid);
+                if($deputy_id){
+                    //根据代理获取商户根据商户获取所有门店
+                    $storeids = db(self::$table_store)
+                        ->where(['deputy_id' => $deputy_id, 'status' => 1])
+                        ->column('store_id');
+                    if (!empty($storeids)) {
+                        $where['store_id'] = ['in',$storeids];
+                    }
+                }
+            }
             //dd($lng);
-
-            $shop = db(self::$table_shop)->where(['status'=>1])->select();
+            $shop = db(self::$table_shop)->where($where)->select();
             if(!empty($shop)){
                 foreach($shop as $k=>$v){
                     //获取距离
@@ -950,19 +974,150 @@ class Index extends Common
 
     public function vipcardlist()
     {
-//        if(!$this->member_id){
-//            //获取签名信息
-//
-//            return redirecturl('vipcardlist');
-//        }
+        if(!$this->member_id){
+            //获取签名信息
+
+            return redirecturl('vipcardlist');
+        }
         $shop_id = input('shop_id');
         $store_id = input('store_id');
         //获取门店会员卡
         $vipcards = $this->getcards($shop_id,$store_id);
         //dd($vipcards);
         return view('vipcardlist',[
-            'data' => $vipcards,
+            'data'      => $vipcards,
+            'member_id' => $this->member_id,
+            'store_id'  => $store_id,
         ]);
+    }
+
+    //领取会员卡
+
+    public function recievecard()
+    {
+        if(Request::instance()->isAjax()) {
+            //dd(1);
+            //判断是否领取过会员卡
+            $where = [
+                'app_id'        => input('app_id'),
+                'store_id'      => input('store_id'),
+                'member_id'     => input('member_id'),
+                'card_id'       => input('card_id'),
+            ];
+            $count = db(self::$table_recieve_vipcard)->where($where)->count();
+            if ($count > 0) {
+                return json(array('code' => 400, 'msg'=>'已经领取过了'));
+            }
+            $validity = (int)input('validity');
+            $insert['app_id']   = input('app_id');
+            $insert['store_id'] = input('store_id');
+            $insert['member_id']= input('member_id');
+            $insert['card_id']  = input('card_id');
+            $insert['money']    = input('needpay');
+            if ($validity == 0) {
+                $insert['endtime'] = null;
+            } else {
+                $validitytime = $validity * 24 * 3600;
+                $insert['endtime'] = time() + $validitytime;
+            }
+            $insert['created_at'] = time();
+            $inserts = [
+                'app_id'        => input('app_id'),
+                'store_id'      => input('store_id'),
+                'member_id'     => input('member_id'),
+                'totalmoney'    => floatval(input('totalmoney')),
+                'yue'           => floatval(input('yue')),
+                'created_at'    => time(),
+                'updated_at'    => time(),
+                'status'        => 1,
+            ];
+            //存入我的会员卡 存入商户会员列表
+            Db::startTrans();
+            try {
+                db(self::$table_recieve_vipcard)->insertGetId($insert);
+                db(self::$table_store_member)->insertGetId($inserts);
+                Db::commit();
+                return json(array('code' => 200, 'msg'=>'领取成功'));
+            } catch (Exception $e) {
+                Db::rollback();
+                return json(array('code' => 400, 'msg'=>'领取失败'));
+            }
+        }
+    }
+
+    //付费领取会员卡订单
+    public function recievecardorder(){
+        if(Request::instance()->isAjax())
+        {
+            //判断是否领取过会员卡
+            $where = [
+                'app_id'        => input('app_id'),
+                'store_id'      => input('store_id'),
+                'member_id'     => input('member_id'),
+                'card_id'       => input('card_id'),
+            ];
+            $count = db(self::$table_recieve_vipcard)->where($where)->count();
+            if ($count > 0) {
+                return json(array('code' => 400, '已经领取过了'));
+            }
+            $insert['app_id']   = input('app_id');
+            $insert['store_id'] = input('store_id');
+            $insert['member_id']= input('member_id');
+            $insert['card_id']  = input('card_id');
+            $insert['needpay']  = floatval(input('needpay'));
+            $insert['type']     = 1;
+            $insert['status']   = 0;
+            $insert['order_num']= input('store_id').time().rand(100000,999999);
+            $insert['created_at']= time();
+            //dd($insert);
+            $id = db(self::$table_vipcard_order)->insertGetId($insert);
+            if($id){
+                $return['id'] = $id;
+                $return['appId'] = $this->appId;
+                $return['nonceStr'] = $this->createNoncestr();
+                $return['timeStamp'] = time();
+                //获取h5调起微信支付
+                $result = $this->cardjsapipay($insert,$id);
+                if($result['return_code']=='SUCCESS'&&$result['result_code']=='SUCCESS'){
+                    $return['package'] = "prepay_id=".$result['prepay_id'];
+                    $return['signType'] = 'MD5';
+                    //重新进行签名
+                    $sign = $this->createsign($return['timeStamp'],$return['nonceStr'],$return['package'],$return['signType']);
+                    $return['paySign'] = $sign;
+                    return json(array('code'=>200,'msg'=>json_encode($return)));
+                }else{
+                    return json(array('code'=>400,'msg'=>$result['return_msg']));
+                }
+            }else{
+                return json(array('code'=>400,'msg'=>'操作失败'));
+            }
+        }
+    }
+
+    //获取jsapi微信支付
+
+    public function cardjsapipay($insert,$id)
+    {
+        $notify_url = 'http://www.yilingjiu.cn/wechat/Jsapipay/notify_card';
+        $openid = db(self::$table_member)->where('member_id',$insert['member_id'])->value('openid');//'os-5N1ZgTUrkGgasKpmQHpFc5R5E';
+        $attach = $id;
+        $pay = new Jsapipay('',$openid, $mch_id='1514213421', $key='c56d0e9a7ccec67b4ea131655038d604',$insert['order_num'],'领取会员卡',$total_fee=0.01,$attach,$notify_url,'JSAPI');
+        $return = $pay->pay();
+        //dd($return);
+        return $return;
+    }
+
+    //不支付就删除订单
+    public function delvipcardorder()
+    {
+        if(Request::instance()->isAjax()){
+            $order_id = input('order_id');
+            $where = [
+                'order_id'  => $order_id,
+                'status'    => 0,
+            ];
+            db(self::$table_vipcard_order)->where($where)->delete();
+        }
     }
 
 }

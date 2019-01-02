@@ -22,7 +22,7 @@
         <div class="clearfixed">
             <div class="li">当前门店:</div>
             <div class="li">{$shop.shop_name}</div>
-            <div class="li white" onclick="jump(this)" data-href="{:url('index/more')}">点击查看更多</div>
+            <div class="li white" onclick="jump(this)" data-href="{:url('index/more',array('shop_id'=>$shop_id))}">点击查看更多</div>
         </div>
     </div>
     <div class="limit clearfixed">
