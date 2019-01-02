@@ -1035,7 +1035,20 @@ class Index extends Common
             Db::startTrans();
             try {
                 db(self::$table_recieve_vipcard)->insertGetId($insert);
-                db(self::$table_store_member)->insertGetId($inserts);
+                //判断是否已是商户会员
+                $wheres = [
+                    'app_id'        => input('app_id'),
+                    'store_id'      => input('store_id'),
+                    'member_id'     => input('member_id'),
+                ];
+                $len = db(self::$table_store_member)->where($wheres)->count();
+//                if($len >0){
+//                    db(self::$table_store_member)->where($wheres)->setInc('totalmoney',$inserts['totalmoney']);
+//                    db(self::$table_store_member)->where($wheres)->setInc('yue',$inserts['yue']);
+//                }
+                if($len == 0){
+                    db(self::$table_store_member)->insertGetId($inserts);
+                }
                 Db::commit();
                 return json(array('code' => 200, 'msg'=>'领取成功'));
             } catch (Exception $e) {
