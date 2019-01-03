@@ -159,6 +159,13 @@
                         }else{
                             onBridgeReady();
                         }
+                    }else{
+                        document.getElementsByClassName('tip')[0].innerHTML = data.msg;
+                        document.getElementById('js_msg_error').style.display = 'none';
+                        document.getElementById('js_msg').style.display = 'block';
+                        document.getElementById('close_btn').onclick = function(){
+                            yin.style.display = 'none';
+                        }
                     }
                 },
                 error:function () {

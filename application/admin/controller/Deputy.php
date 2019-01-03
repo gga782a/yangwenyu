@@ -85,6 +85,16 @@ class Deputy extends Common
                     $id = db(self::$table_store)->insertGetId($data);
                 //}
                 if($id){
+                    //添加默认商户积分比例
+                    $insert = [
+                        'app_id'    => $this->app_id,
+                        'store_id'  => $id,
+                        'conf_var'  => 'integralbl',//积分比例
+                        'conf_val'  => '1:10', //比例值
+                        'created_at'=> time(),
+                        'updated_at'=> time(),
+                    ];
+                    db('store_config')->insertGetId($insert);
                     return $this->redirect('deputy/setstore');
                 }else{
                     return $this->error('添加失败');

@@ -29,7 +29,7 @@
         <div class="col-sm-12">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
-                    <h5>会员卡领取列表</h5>
+                    <h5>会员列表</h5>
                     <div class="ibox-tools">
                         <a class="collapse-link">
                             <i class="fa fa-chevron-up"></i>
@@ -41,9 +41,13 @@
                         <thead>
                         <tr>
                             <th>序号</th>
-                            <th>领取人名字</th>
-                            <th>领取人头像</th>
-                            <th>领取时间</th>
+                            <th>会员名字</th>
+                            <th>会员头像</th>
+                            <th>总消费</th>
+                            <th>应得积分</th>
+                            <th>已得积分</th>
+                            <th>加入时间</th>
+                            <th>操作</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -51,15 +55,25 @@
                         {else /}
                         {volist name='data' id="vo"}
                         <tr class="">
-                            <td>{$vo.recieve_id}</td>
+                            <td>{$vo.smember_id}</td>
                             <td>{$vo.member_name}</td>
                             <td><img src="{$vo.member_cover}"></td>
+                            <td>{$vo.totalpay}</td>
+                            <td>{$vo.ydintegral}</td>
+                            <td>{$vo.totalintegral}</td>
                             <td>{$vo.created_at|date='Y-m-d H:i:s',###}</td>
-                            <!--<td>Internet Explorer 4.0-->
-                            <!--</td>-->
-                            <!--<td>Win 95+</td>-->
-                            <!--<td class="center">4</td>-->
-                            <!--<td class="center">X</td>-->
+                            <td>
+                                <span>
+                                    <a onclick="giveintegral({$vo['smember_id']},{$storeintegral});">
+                                        赠送积分
+                                    </a>
+                                </span> |
+                                <span>
+                                    <a onclick="">
+                                        消费详情
+                                    </a>
+                                </span>
+                            </td>
                         </tr>
                         {/volist}
                         {/empty}
@@ -98,6 +112,52 @@
     function fnClickAddRow() {
         $("#editable").dataTable().fnAddData(["Custom row", "New row", "New row", "New row", "New row", "New row", "New row"])
     }
+    function giveintegral(id,integral) {
+        layui.use(['form','layer'],function(){
+            var form = layui.form;
+            var layer = layui.layer;
+            str = '<div>';
+            str += "<label for='level'>则送积分：</label>";
+            str += "<input type='text' name='jf' id='jf'>";
+            str += "<span style='color: red;'>可赠送积分:"+integral+"</span>";
+            str += '</div>';
+            var index = layer.open({
+                title:"赠送积分",
+                area:['325px'],
+                content:str,
+                btn:['确定','取消'],
+                yes:function(){
+                    var jf = $("#jf").val();
+                    $.ajax({
+                        type:'post',
+                        url:"{:url('store/giveintegral')}",
+                        data:{'jf':jf,'smember_id':id},
+                        dataType:'json',
+                        success:function(data){
+                            if(data.code==200) {
+                                layer.msg(data.msg);
+                                setTimeout(function () {
+                                    window.location.reload();
+                                }, 1000);
+                            }else{
+                                layer.msg(data.msg);
+                            }
+                        },
+                        error:function(data){
+                            console.log(data);
+                        }
+                    })
+                },
+                btn2:function(){
+                    layer.closeAll(index); //关闭当前窗口
+                }
+            });
+
+            // 渲染表单
+            form.render();
+        });
+    }
+
 </script>
 
 

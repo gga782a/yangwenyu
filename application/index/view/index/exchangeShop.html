@@ -10,12 +10,12 @@
             <div class="li">
                 <div class="clearfixed">
                     <div class="li">我的积分</div>
-                    <div class="li llow">55500</div>
+                    <div class="li llow">{$integral}</div>
                 </div>
                 <div class="gray">使用积分您可以兑换更多奖品和福利</div>
             </div>
             <div class="li fr">
-                <div class="integbtn llow">积分商城</div>
+                <div class="integbtn llow"><a href="{:url('index/shopIndex')}">积分商城</a></div>
             </div>
         </div>
     </div>
@@ -31,7 +31,7 @@
         </a>
         </div>
         <div class="li four">
-            <a href="#">
+            <a href="{:url('index/shopIndex')}">
             <div class="dl">
                 <div class="dd">
                     <img src="__IMG__/bill2.png" alt="">
@@ -66,6 +66,7 @@
            {notempty name="$data"}
             {volist name="data" id="vo"}
             <div class="li">
+                <a href="{:url('index/shopDetail',array('goods_id'=>$vo['goods_id']))}">
                 <div class="padding15">
                     <div class="shopConTitle ellipsis bottom3">{$vo.goods_name}</div>
                     <div class="shopConidt gray ellipsis bottom3">{$vo.goods_desc}</div>
@@ -74,12 +75,19 @@
                         <div class="li small gray itg pr2">积分</div>
                         <div class="li smallBtn yellow eca">兑换</div>
                     </div>
-                    <a href="{:url('index/shopDetail',array('goods_id'=>$vo['goods_id']))}">
                         <div class="shopImg">
-                            <img src="__IMG__/rule_popups.png" alt="">
+                            <?php
+                                $pic = trim($vo['pic_arr'],',');
+                                if($pic){
+                                    $pic = explode(',',$pic);
+                                    echo "<img src='$pic[0]' >";
+                                }else{
+                                    echo "<img src='__IMG__/rule_popups.png' alt=''>";
+                                }
+                            ?>
                         </div>
-                    </a>
                 </div>
+                </a>
             </div>
             {/volist}
            {/notempty}

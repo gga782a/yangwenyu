@@ -1,32 +1,45 @@
 ﻿{include file="common/header" /}
 <body>
 	<!-- 头部 -->
+	{notempty name="$data"}
+	{volist name="data" id="vo"}
 	<div class="shopTop clearfixed">
 		<div class="li blackImg"><img src="img/black.png" alt=""></div>
-	    <div class="topTitle li">日常家居</div>
+	    <div class="topTitle li">{$vo['type_name']}</div>
 	</div>
     <div class="shopBox">
     	<div class="clearfixed shopbor">
-			{notempty name="$data"}
-			{volist name="data" id="vo"}
+			{empty name="$vo['goods']"}
+			{else /}
+			{volist name="$vo['goods']" id="vol"}
     		<div class="li">
+				<a href="{:url('index/shopDetail',array('goods_id'=>$vol['goods_id']))}">
     			<div class="padding15">
-	    			<div class="shopConTitle ellipsis bottom3">{$vo.goods_name}</div>
-	    			<div class="shopConidt gray ellipsis bottom3">{$vo.goods_desc}</div>
+	    			<div class="shopConTitle ellipsis bottom3">{$vol.goods_name}</div>
+	    			<div class="shopConidt gray ellipsis bottom3">{$vol.goods_desc}</div>
 	    			<div class="clearfixed bottom3">
-	    				<div class="li yellow font14 pr2">{$vo.price}</div>
+	    				<div class="li yellow font14 pr2">{$vol.price}</div>
 	    				<div class="li small gray itg pr2">积分</div>
 	    				<div class="li smallBtn yellow eca">兑换</div>
 	    			</div>
-	    			<a href="shopDetail.html">
-		    			<div class="shopImg">
-		    				<img src="__IMG__/rule_popups.png" alt="">
-		    			</div>
-	    			</a>
+						<div class="shopImg">
+							<?php
+                                $pic = trim($vol['pic_arr'],',');
+                                if($pic){
+                                    $pic = explode(',',$pic);
+                                    echo "<img src='$pic[0]' >";
+							}else{
+							echo "<img src='__IMG__/rule_popups.png' alt=''>";
+							}
+							?>
+						</div>
 	    		</div>
+				</a>
     		</div>
 			{/volist}
-			{/notempty}
+			{/empty}
     	</div>
     </div>
+	{/volist}
+	{/notempty}
 	{include file="common/footer" /}

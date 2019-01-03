@@ -24,6 +24,8 @@ class Index extends Common
     private $appSecret;
     public static $table_shop = 'shop';
     public static $table_goods = 'goods';
+    public static $table_goods_type = 'goods_type';
+    public static $table_goods_order = 'goods_order';
     public static $table_member = 'member';
     public static $table_address = 'address';
     public static $table_deputy = 'deputy';
@@ -36,6 +38,7 @@ class Index extends Common
     public static $table_vipcard_order = 'vipcard_order';
     //商户会员列表
     public static $table_store_member = 'store_member';
+    public static $table_express_templete = 'express_templete';
     private  $key;
     public function __construct(Request $request = null)
     {
@@ -525,9 +528,14 @@ class Index extends Common
         if(!$this->member_id){
             return redirecturl('exchangeShop');
         }
-        $data = db(self::$table_goods)->where(['status'=>0])->select();
+        //获取我的可用积分
+        $integral = db(self::$table_store_member)
+            ->where('member_id',$this->member_id)
+            ->sum('integral');
+        $data = db(self::$table_goods)->where(['status'=>0])->order('sort desc')->limit(4)->select();
         return view('exchangeShop',[
             'data' => $data,
+            'integral' => $integral,
         ]);
     }
 
@@ -551,7 +559,88 @@ class Index extends Common
         if(!$this->member_id){
             return redirecturl('orderPay');
         }
+
         return view('orderPay');
+    }
+
+    //检测用户是否可以购买商品
+    public function checkgoods()
+    {
+        if(Request::instance()->isAjax()) {
+            $goods_id = input('goods_id');
+            $stock = (int)input('stock',1);
+            //获取用户总积分
+            $integral = db(self::$table_store_member)
+                ->where('member_id',$this->member_id)
+                ->sum('integral');
+            //获取商品信息
+            $goods = db(self::$table_goods)->where('goods_id',$goods_id)->find();
+            if($goods){
+                $appid      = $goods['app_id'];
+                $goodsname  = $goods['goods_name'];
+                $expressid  = $goods['express_id'];
+                $goodsprice = $goods['price'];
+                $goodsstock = $goods['stock'];
+                if($stock>$goodsstock){
+                    return json(array('code'=>400,'msg'=>'商品库存不足，商品剩余'.$goodsstock));
+                }
+                $payintegral = (int)($goodsprice*$stock);
+                if($payintegral>$integral){
+                    return json(array('code'=>400,'msg'=>'会员可用积分不足'));
+                }
+                //生成订单
+                //运费
+                $freight = 0;
+                if($expressid>0) {
+                    $express = db(self::$table_express_templete)
+                        ->where(['app_id' => $appid, 'express_id' => $expressid])
+                        ->find();
+                    if ($express) {
+                        switch ($express['ismail']) {
+                            case 1: //包邮
+                                $freight = 0;
+                                break;
+                            case 2: //买家承担运费
+                                $freight = $express['basefee']+($stock-1)*$express['increfee'];
+                                break;
+                            case 3: //满足件数包邮
+                                if((int)$express['usecondition']>$stock){
+                                    $freight = $express['basefee']+($stock-1)*$express['increfee'];
+                                }
+                                break;
+                            case 4: //满足金额包邮
+                                $freight = $express['basefee']+($stock-1)*$express['increfee'];
+                                break;
+                            default: //默认包邮哟
+                                $freight = 0;
+                                break;
+                        }
+                    }
+                }
+                $insert = [
+                    'app_id'    => $appid,
+                    'goods_id'  => $goods_id,
+                    'goods_name'=> $goodsname,
+                    'integral'  => $goodsprice,
+                    'member_id' => $this->member_id,
+                    'order_num' => date("Ymd").time().rand(10000,99999),
+                    'status'    => 0,
+                    'created_at'=> time(),
+                    'stock'     => $stock,
+                    'totalintegral'=> $payintegral,
+                    'freight'   => $freight,
+                    'needpay'   => $freight,
+                ];
+                $id = db(self::$table_goods_order)->insertGetId($insert);
+                if($id){
+                    return json(array('code'=>200,'msg'=>'成功'));
+                }else{
+                    return json(array('code'=>400,'msg'=>'兑换失败'));
+                }
+            }else{
+                return json(array('code'=>400,'msg'=>'系统错误'));
+            }
+        }
     }
     public function payment()
     {
@@ -589,8 +678,28 @@ class Index extends Common
         if(!$this->member_id){
             return redirecturl('sharelt');
         }
-        //$data = db(self::$table_goods)->where(['goods_id'=>input('goods_id')])->find();
-        return view('shopDetail');
+        $data = db(self::$table_goods)->where(['goods_id'=>input('goods_id')])->find();
+        //dd($data);
+        //兑换记录 取最新三条
+        $duihuan = db(self::$table_goods_order)
+                ->where(['goods_id'=>input('goods_id'),'status'=>1])
+                ->order('paytime desc')
+                ->limit(3)
+                ->select();
+        if(!empty($duihuan)){
+            foreach ($duihuan as $k=>$v){
+                $member = db(self::$table_member)
+                    ->where('member_id',$v['member_id'])
+                    ->field('cover,name')
+                    ->find();
+                $duihuan[$k]['name'] = $member['name'];
+                $duihuan[$k]['cover']= $member['cover'];
+            }
+        }
+        return view('shopDetail',[
+            'data' => $data,
+            'duihuan'=> $duihuan,
+        ]);
     }
 
     public function shopDetailList()
@@ -605,7 +714,14 @@ class Index extends Common
         if(!$this->member_id){
             return redirecturl('shopIndex');
         }
-        $data = db(self::$table_goods)->where(['status'=>0])->select();
+        //获取商品分类
+        $data = db(self::$table_goods_type)->where(['status'=>1])->order('sort asc')->select();
+        if(!empty($data)){
+            foreach ($data as $k=>$v){
+                $data[$k]['goods'] = db(self::$table_goods)->where(['type_id'=>$v['type_id']])->select();
+            }
+        }
+        //dd($data);
         return view('shopIndex',[
             'data' => $data,
         ]);
@@ -1071,7 +1187,7 @@ class Index extends Common
             ];
             $count = db(self::$table_recieve_vipcard)->where($where)->count();
             if ($count > 0) {
-                return json(array('code' => 400, '已经领取过了'));
+                return json(array('code' => 400, 'msg'=>'已经领取过了'));
             }
             $insert['app_id']   = input('app_id');
             $insert['store_id'] = input('store_id');

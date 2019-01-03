@@ -37,6 +37,9 @@ class Store extends Common
     public static $table_member = 'member'; // 会员
     public static $table_active_order = "active_order"; //活动订单列表
     public static $table_slyderadventures = "slyderadventures"; //大转盘
+    public static $table_store_member  = 'store_member'; // 商户会员
+    public static $table_vipcard_order = 'vipcard_order'; //会员卡订单
+    public static $table_store_config  = 'store_config'; //商户设置
 
     public $time;
     public function __construct(Request $request = null)
@@ -1435,9 +1438,9 @@ class Store extends Common
     public function recievecard()
     {
         $where = [
-            'app_id' => $this->app_id,
+            'app_id'   => $this->app_id,
             'store_id' => $this->store_id,
-            'card_id' => $this->parme('card_id'),
+            'card_id'  => $this->parme('card_id'),
         ];
         $data = db(self::$table_recieve_vipcard)
             ->where($where)
@@ -1446,10 +1449,11 @@ class Store extends Common
         if(!empty($data)){
             foreach($data as $k=>$v){
                 $member = db(self::$table_member)
-                    ->where(['app_id'=>$this->app_id,'member_id'=>$v['member_id']])
+                    ->where(['member_id'=>$v['member_id']])
                     ->field('name,cover')
                     ->find();
-                $data[$k]['member'] = $member;
+                $data[$k]['member_name'] = $member['name'];
+                $data[$k]['member_cover'] = $member['cover'];
             }
         }
          return view('recievecard',[
@@ -1463,7 +1467,118 @@ class Store extends Common
      */
     public function member()
     {
+        $where = [
+            'app_id'   => $this->app_id,
+            'store_id' => $this->store_id,
+        ];
+        $data = db(self::$table_store_member)
+            ->where($where)
+            ->page(input('page', 1), input('pageshow', 15))
+            ->select();
+        if(!empty($data)){
+            foreach($data as $k=>$v){
+                $member = db(self::$table_member)
+                    ->where(['member_id'=>$v['member_id']])
+                    ->field('name,cover')
+                    ->find();
+                $data[$k]['member_name'] = $member['name'];
+                $data[$k]['member_cover'] = $member['cover'];
+                //购买会员卡消费
+                $payvipcardmoney = floatval($this->payvipcard($v['member_id']));
+                //大转盘消费
+                $paydzpmoney = floatval($this->paydzp($v['member_id']));
+                //活动消费 优惠买单
+                $yhmdmoney = 0;
+                //总消费
+                $totalpay = $payvipcardmoney+$paydzpmoney+$yhmdmoney;
+                //根据总消费获取相应积分
+                $integral = $this->getintegral($totalpay);
+                $data[$k]['totalpay']   = $totalpay;
+                $data[$k]['ydintegral'] = $integral;
+            }
+            //获取商户可用积分
+            $storeintegral = db(self::$table_store)->where($where)->value('integral');
+        }
+        return view('storemember',[
+            'data' => $data,
+            'storeintegral' => $storeintegral,
+        ]);
+    }
 
+    //购买会员卡消费
+    private function payvipcard($memberid)
+    {
+        $where = [
+            'app_id'    => $this->app_id,
+            'store_id'  => $this->store_id,
+            'member_id' => $memberid,
+            'status'    => 1,
+        ];
+        $money = db(self::$table_vipcard_order)->where($where)->sum('needpay');
+        return $money;
+    }
+
+    //大转盘消费
+    private function paydzp($memberid)
+    {
+        //获取商户下的门店
+        $shopids = db(self::$table_shop)->where(['store_id'=>$this->store_id])->column('shop_id');
+        $where = [
+            'member_id' => $memberid,
+            'shop_id'   => ['in',$shopids],
+            'status'    => 1,
+        ];
+        $money = db(self::$table_active_order)->where($where)->sum('needpay');
+
+        return $money;
+    }
+
+    //根据总消费获取相应积分
+    private function getintegral($money)
+    {
+        $integral = 0;
+        //获取商户配置
+        $integralbl = db(self::$table_store_config)
+            ->where(['app_id'=>$this->app_id,'store_id'=>$this->store_id,'conf_var'=>'integralbl'])->value('conf_val');
+        if($integralbl){
+           $integralbl = explode(':',$integralbl);
+           $bl = $integralbl[0]/$integralbl[1];
+           $integral = ceil($bl*$money);
+        }
+        return $integral;
+    }
+
+    //赠送积分
+
+    public function giveintegral()
+    {
+        if(Request::instance()->isAjax()){
+            $smember_id = input('smember_id');
+            $jf = (int)input('jf');
+            //获取商户可用积分
+            $where = [
+                'app_id'   => $this->app_id,
+                'store_id' => $this->store_id,
+            ];
+            $storeintegral = db(self::$table_store)->where($where)->value('integral');
+            if($jf > $storeintegral){
+                return json(array('code'=>400,'msg'=>'商户积分不足'));
+            }
+            //开启事物
+            Db::startTrans();
+            try{
+                //增加商户会员积分
+                db(self::$table_store_member)->where($where)->where(['smember_id'=>$smember_id])->setInc('totalintegral',$jf);
+                db(self::$table_store_member)->where($where)->where(['smember_id'=>$smember_id])->setInc('integral',$jf);
+                //减少商户可用积分
+                db(self::$table_store)->where($where)->setDec('integral',$jf);
+                Db::commit();
+                return json(array('code'=>200,'msg'=>'赠送成功'));
+            }catch(Exception $exception){
+                Db::rollback();
+                return json(array('code'=>400,'msg'=>'赠送失败'));
+            }
+        }
     }
     /************************************************订单总揽************************************************************/
     //活动订单列表

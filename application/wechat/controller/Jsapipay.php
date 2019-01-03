@@ -180,8 +180,8 @@ class Jsapipay extends Controller
         //转换成数组
         $data = $this->xmlToArray($xml);
         $attach = $data['attach'];
-        db('ceshi')->insertGetId(array('text1'=>json_encode($data),'text2'=>'card'));
-        //db('ceshi')->insertGetId(array('text1'=>$attach,'text2'=>5555));
+        //db('ceshi')->insertGetId(array('text1'=>json_encode($data),'text2'=>'card'));
+        db('ceshi')->insertGetId(array('text1'=>$attach,'text2'=>'ssaaa'));
         $mch_key = db('pay_setting')->where('app_id',1)->value('mch_key');
         $this->key = $mch_key;
         //比较签名
@@ -190,16 +190,19 @@ class Jsapipay extends Controller
         $sign=$this->getSign($data);
         if ( ($sign===$data_sign) && ($data['return_code']=='SUCCESS') && ($data['result_code']=='SUCCESS') ){
             //查找订单
-            $order = db(self::$table_active_order)->where(['order_id'=>$attach,'status'=>0])->find();
+            $order = db(self::$table_vipcard_order)->where(['order_id'=>$attach,'status'=>0])->find();
+            db('ceshi')->insertGetId(array('text1'=>333,'text2'=>'s2222'));
             if($order){
                 Db::startTrans();
                 try{
                     //更改状态
                     db(self::$table_vipcard_order)->where(['order_id'=>$attach,'status'=>0])->update(['status'=>1,'paytime'=>time()]);
+                    db('ceshi')->insertGetId(array('text1'=>1111,'text2'=>'s2222'));
                     //添加我的会员卡
                     $validity = db(self::$table_vipcard)
                         ->where(['card_id' => $order['card_id']])
                         ->value('validity');
+                    db('ceshi')->insertGetId(array('text1'=>2222,'text2'=>'s2222'));
                     $insert['app_id']   = $order['app_id'];
                     $insert['store_id'] = $order['store_id'];
                     $insert['member_id']= $order['member_id'];
@@ -213,6 +216,7 @@ class Jsapipay extends Controller
                     }
                     $insert['created_at'] = time();
                     db(self::$table_recievr_vipcard)->insertGetId($insert);
+                    db('ceshi')->insertGetId(array('text1'=>'recieve','text2'=>'s5555'));
                     //更改商户会员钱或者添加
                     $inserts = [
                         'app_id'        => $order['app_id'],
@@ -236,10 +240,11 @@ class Jsapipay extends Controller
                     }else{
                         db(self::$table_store_member)->insertGetId($inserts);
                     }
+                    db('ceshi')->insertGetId(array('text1'=>'recieve222','text2'=>'s55533333'));
                     //给商户表增添金额
-                    //db('ceshi')->insertGetId(array('text1'=>$store_id,'text2'=>'store_id'));
                     db(self::$table_store)->where('store_id',$order['store_id'])->setInc('totalmoney',$order['needpay']);
                     db(self::$table_store)->where('store_id',$order['store_id'])->setInc('money',$order['needpay']);
+                    db('ceshi')->insertGetId(array('text1'=>'2222222','text2'=>'store_id'));
                     Db::commit();
                     $result = true;
                 }catch (Exception $exception){
