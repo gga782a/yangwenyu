@@ -110,7 +110,7 @@
 						dataType:'json',
 						success:function (data) {
 							if(data.code == 200){
-                                window.location.href="http://www.yilingjiu.cn/index/index/orderPay?goods_id="+id+"&stock="+stock;
+                                window.location.href="http://www.yilingjiu.cn/index/index/orderPay?order_id="+data.msg;
 							}else{
                                 layer.msg(data.msg);
 							}

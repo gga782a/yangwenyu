@@ -64,7 +64,7 @@
                             <td>{$vo.created_at|date='Y-m-d H:i:s',###}</td>
                             <td>
                                 <span>
-                                    <a onclick="giveintegral({$vo['smember_id']},{$storeintegral});">
+                                    <a onclick="giveintegral({$vo['smember_id']},{$storeintegral},{$vo['member_id']});">
                                         赠送积分
                                     </a>
                                 </span> |
@@ -112,7 +112,7 @@
     function fnClickAddRow() {
         $("#editable").dataTable().fnAddData(["Custom row", "New row", "New row", "New row", "New row", "New row", "New row"])
     }
-    function giveintegral(id,integral) {
+    function giveintegral(id,integral,memberid) {
         layui.use(['form','layer'],function(){
             var form = layui.form;
             var layer = layui.layer;
@@ -131,7 +131,7 @@
                     $.ajax({
                         type:'post',
                         url:"{:url('store/giveintegral')}",
-                        data:{'jf':jf,'smember_id':id},
+                        data:{'jf':jf,'smember_id':id,'member_id':memberid},
                         dataType:'json',
                         success:function(data){
                             if(data.code==200) {

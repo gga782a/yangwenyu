@@ -41,6 +41,11 @@ class Jsapipay extends Controller
     public static $table_vipcard_order = 'vipcard_order';
     public static $table_recievr_vipcard = 'recieve_vipcard';
     public static $table_store_member = 'store_member';
+
+    public static $table_goods_order = 'goods_order';
+    public static $table_goods = 'goods';
+    public static $table_member = 'member';
+    public static $table_user = 'user';
     //初始化参数
     public function __construct($product_id='',$openid='', $mch_id='', $key='',$out_trade_no='',$body='',$total_fee=0.01,$attach='',$notify_url='',$trade_type='JSAPI')
     {
@@ -245,6 +250,65 @@ class Jsapipay extends Controller
                     db(self::$table_store)->where('store_id',$order['store_id'])->setInc('totalmoney',$order['needpay']);
                     db(self::$table_store)->where('store_id',$order['store_id'])->setInc('money',$order['needpay']);
                     db('ceshi')->insertGetId(array('text1'=>'2222222','text2'=>'store_id'));
+                    Db::commit();
+                    $result = true;
+                }catch (Exception $exception){
+                    Db::rollback();
+                    $result = false;
+                }
+            }else{
+                $result = false;
+            }
+        }else{
+            $result = false;
+        }
+        // 返回状态给微信服务器
+        if ($result) {
+            $str='<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>';
+        }else{
+            $str='<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[签名失败]]></return_msg></xml>';
+        }
+        return $result;
+    }
+
+    //积分兑换回调
+
+    public function notify_qrdh()
+    {
+        $xml = file_get_contents("php://input");
+        //转换成数组
+        $data = $this->xmlToArray($xml);
+        $attach = $data['attach'];
+        //db('ceshi')->insertGetId(array('text1'=>json_encode($data),'text2'=>'card'));
+        db('ceshi')->insertGetId(array('text1'=>$attach,'text2'=>'jf'));
+        $mch_key = db('pay_setting')->where('app_id',1)->value('mch_key');
+        $this->key = $mch_key;
+        //比较签名
+        $data_sign = $data['sign'];
+        unset($data['sign']);
+        $sign=$this->getSign($data);
+        if ( ($sign===$data_sign) && ($data['return_code']=='SUCCESS') && ($data['result_code']=='SUCCESS') ){
+            //查找订单
+            $order = db(self::$table_goods_order)->where(['order_id'=>$attach,'status'=>0])->find();
+            db('ceshi')->insertGetId(array('text1'=>333,'text2'=>'jfff'));
+            if($order){
+                Db::startTrans();
+                try{
+                    //更改状态
+                    db(self::$table_goods_order)->where(['order_id'=>$attach,'status'=>0])->update(['status'=>1,'paytime'=>time()]);
+                    db('ceshi')->insertGetId(array('text1'=>1111,'text2'=>'jddd'));
+                    //减少物品库存
+                    db(self::$table_goods)->where('goods_id',$order['goods_id'])->setDec('stock',$order['stock']);
+                    db('ceshi')->insertGetId(array('text1'=>2222,'text2'=>'jsss'));
+                    //减少会员可用积分
+                    db(self::$table_member)->where('member_id',$order['member_id'])->setDec('integral',$order['totalintegral']);
+                    db('ceshi')->insertGetId(array('text1'=>'recieve','text2'=>'s5555'));
+                    //更改user表钱
+                    $wheres = [
+                        'user_id'       => $order['app_id'],
+                    ];
+                    db(self::$table_user)->where($wheres)->setInc('income',$order['needpay']);
+                    db('ceshi')->insertGetId(array('text1'=>'recieve222','text2'=>'3uuu'));
                     Db::commit();
                     $result = true;
                 }catch (Exception $exception){

@@ -358,7 +358,7 @@ class Index extends Common
         $data['prize_id'] = $prize_id;
         $data['prize_name'] = $prize_arr[$index]['name']; //中奖奖品
         //随机兑奖码
-        $data['dcode'] = $this->createNoncestr();
+        $data['dcode'] = $prize_id.date("Ymd").$this->createNoncestr(6).rand(10000,99999);
         return $data;
 
     }
@@ -436,6 +436,8 @@ class Index extends Common
             'address_id'=> input('address_id'),
         ];
         $flag = input('flag');
+        $url  = input('url');
+        $orderid = input('order_id');
         if(Request::instance()->isPost()){
             $insert = [
                 'name'      => input('name'),
@@ -452,27 +454,32 @@ class Index extends Common
                 $insert['created_at']= time();
                 $id = db(self::$table_address)->insertGetId($insert);
                 if($id){
-                    return $this->redirect('index/address');
+                    return $this->redirect('index/address',['url'=>$url,'order_id'=>$orderid]);
                 }else{
                    return $this->error('操作失败');
                 }
             }else{
                 $res = db(self::$table_address)->where($where)->update($insert);
                 if($res !== false){
-                    return $this->redirect('index/address');
+                    return $this->redirect('index/address',['url'=>$url,'order_id'=>$orderid]);
                 }else{
                     return $this->error('操作失败');
                 }
             }
         }else{
             if($flag == 'add'){
-                return view('addaddress');
+                return view('addaddress',[
+                    'url' => $url,
+                    'orderid'=>$orderid
+                ]);
             }else if($flag == 'update'){
                 $data = db(self::$table_address)
                     ->where($where)
                     ->find();
                 return view('updateaddress',[
                     'data' => $data,
+                    'url'  => $url,
+                    'orderid'=>$orderid
                 ]);
             }else{
                 $address = db(self::$table_address)
@@ -481,6 +488,8 @@ class Index extends Common
                     ->select();
                 return view('address',[
                     'data' => $address,
+                    'url'  => $url,
+                    'orderid'=>$orderid
                 ]);
             }
         }
@@ -529,9 +538,9 @@ class Index extends Common
             return redirecturl('exchangeShop');
         }
         //获取我的可用积分
-        $integral = db(self::$table_store_member)
+        $integral = db(self::$table_member)
             ->where('member_id',$this->member_id)
-            ->sum('integral');
+            ->value('integral');
         $data = db(self::$table_goods)->where(['status'=>0])->order('sort desc')->limit(4)->select();
         return view('exchangeShop',[
             'data' => $data,
@@ -559,8 +568,173 @@ class Index extends Common
         if(!$this->member_id){
             return redirecturl('orderPay');
         }
+        $address_id = input('address_id',0);
+        //获取已有订单
+        $data = db(self::$table_goods_order)
+            ->where(['order_id'=>input('order_id'),'status'=>0])
+            ->find();
+        //获取收货地址
+        $address = [];
+        if($address_id){
+            $address = db(self::$table_address)->where(['address_id'=>$address_id])->find();
+        }
+        return view('orderPay',[
+            'data' => $data,
+            'address' => $address,
+            'address_id' => $address_id,
+        ]);
+    }
 
-        return view('orderPay');
+    //qrdh确定兑换运费为0
+
+    public function qrdh()
+    {
+        if(Request::instance()->isAjax()){
+            $order_id        = input('order_id');
+            $address_id      = input('address_id');
+            $reciever        = '';
+            $recieverphone   = '';
+            $recieveraddress = '';
+            $address         = db(self::$table_address)->where(['address_id'=>$address_id])->find();
+            if($address){
+                $reciever        = $address['name'];
+                $recieverphone   = $address['phone'];
+                $recieveraddress = $address['position'].$address['address'];
+            }
+            $order = db(self::$table_goods_order)
+                ->where(['order_id'=>$order_id,'status'=>0])
+                ->find();
+            if($order){
+                Db::startTrans();
+                try{
+                    //更改订单
+                    db(self::$table_goods_order)
+                        ->where('order_id',$order_id)
+                        ->update([
+                            'address_id'=>$address_id,
+                            'updated_at'=>time(),
+                            'status'=>1,
+                            'paytime'=>time(),
+                            'reciever' => $reciever,
+                            'recieverphone' =>$recieverphone,
+                            'recieveraddress' =>$recieveraddress,
+                            ]
+                        );
+                    //减少物品库存
+                    db(self::$table_goods)->where('goods_id',$order['goods_id'])->setDec('stock',$order['stock']);
+                    //减少会员可用积分
+                    db(self::$table_member)->where('member_id',$order['member_id'])->setDec('integral',$order['totalintegral']);
+                    Db::commit();
+                    return json(array('code'=>200,'msg'=>'兑换成功'));
+                }catch(Exception $exception){
+                    Db::rollback();
+                    return json(array('code'=>400,'msg'=>'兑换失败'));
+                }
+            }else{
+                return json(array('code'=>400,'msg'=>'兑换失败'));
+            }
+        }
+    }
+
+    //付费确认兑换
+
+    public function payqrdh()
+    {
+        $order_id = input('order_id');
+        $address_id = input('address_id');
+        $reciever        = '';
+        $recieverphone   = '';
+        $recieveraddress = '';
+        $address         = db(self::$table_address)->where(['address_id'=>$address_id])->find();
+        if($address){
+            $reciever        = $address['name'];
+            $recieverphone   = $address['phone'];
+            $recieveraddress = $address['position'].$address['address'];
+        }
+        $freight  = floatval(input('freight'));
+        $order = db(self::$table_goods_order)
+            ->where(['order_id'=>$order_id,'status'=>0])
+            ->find();
+        if($order){
+            //更改订单
+            $res = db(self::$table_goods_order)
+                ->where('order_id',$order_id)
+                ->update([
+                    'address_id'=>$address_id,
+                    'updated_at'=>time(),
+                    'freight'   => $freight,
+                    'needpay'   => $freight,
+                    'reciever' => $reciever,
+                    'recieverphone' =>$recieverphone,
+                    'recieveraddress' =>$recieveraddress,
+                ]);
+            if($res !== false){
+                $return['id'] = $order_id;
+                $return['appId'] = $this->appId;
+                $return['nonceStr'] = $this->createNoncestr();
+                $return['timeStamp'] = time();
+                //获取h5调起微信支付
+                $result = $this->qrdhjsapipay($order,$order_id);
+                if($result['return_code']=='SUCCESS'&&$result['result_code']=='SUCCESS'){
+                    $return['package'] = "prepay_id=".$result['prepay_id'];
+                    $return['signType'] = 'MD5';
+                    //重新进行签名
+                    $sign = $this->createsign($return['timeStamp'],$return['nonceStr'],$return['package'],$return['signType']);
+                    $return['paySign'] = $sign;
+                    return json(array('code'=>200,'msg'=>json_encode($return)));
+                }else{
+                    return json(array('code'=>400,'msg'=>$result['return_msg']));
+                }
+            }else{
+                return json(array('code'=>400,'msg'=>'兑换失败'));
+            }
+
+            //付费
+//            Db::startTrans();
+//            try{
+//                //更改订单
+//                db(self::$table_goods_order)
+//                    ->where('order_id',$order_id)
+//                    ->update(['address_id'=>$address_id,'updated_at'=>time(),'status'=>1,'paytime'=>time()]);
+//                //减少物品库存
+//                db(self::$table_goods)->where('goods_id',$order['goods_id'])->setDec('stock',$order['stock']);
+//                //减少会员可用积分
+//                db(self::$table_member)->where('member_id',$order['member_id'])->setDec('integral',$order['totalintegral']);
+//                Db::commit();
+//                return json(array('code'=>200,'msg'=>'兑换成功'));
+//            }catch(Exception $exception){
+//                Db::rollback();
+//                return json(array('code'=>400,'msg'=>'兑换失败'));
+//            }
+        }else{
+            return json(array('code'=>400,'msg'=>'兑换失败'));
+        }
+    }
+
+    //不支付就删除订单
+    public function delgoodsorder()
+    {
+        if(Request::instance()->isAjax()){
+            $order_id = input('order_id');
+            $where = [
+                'order_id'  => $order_id,
+                'status'    => 0,
+            ];
+            db(self::$table_goods_order)->where($where)->delete();
+        }
+    }
+
+    //获取jsapi微信支付
+
+    public function qrdhjsapipay($insert,$id)
+    {
+        $notify_url = 'http://www.yilingjiu.cn/wechat/Jsapipay/notify_qrdh';
+        $openid = db(self::$table_member)->where('member_id',$insert['member_id'])->value('openid');//'os-5N1ZgTUrkGgasKpmQHpFc5R5E';
+        $attach = $id;
+        $pay = new Jsapipay('',$openid, $mch_id='1514213421', $key='c56d0e9a7ccec67b4ea131655038d604',$insert['order_num'],'积分兑换',$total_fee=0.01,$attach,$notify_url,'JSAPI');
+        $return = $pay->pay();
+        //dd($return);
+        return $return;
     }
 
     //检测用户是否可以购买商品
@@ -570,9 +744,9 @@ class Index extends Common
             $goods_id = input('goods_id');
             $stock = (int)input('stock',1);
             //获取用户总积分
-            $integral = db(self::$table_store_member)
+            $integral = db(self::$table_member)
                 ->where('member_id',$this->member_id)
-                ->sum('integral');
+                ->value('integral');
             //获取商品信息
             $goods = db(self::$table_goods)->where('goods_id',$goods_id)->find();
             if($goods){
@@ -588,6 +762,8 @@ class Index extends Common
                 if($payintegral>$integral){
                     return json(array('code'=>400,'msg'=>'会员可用积分不足'));
                 }
+                $typeid = db(self::$table_goods)->where('goods_id',$goods_id)->value('type_id');
+                $typename = db(self::$table_goods_type)->where('type_id',$typeid)->value('type_name');
                 //生成订单
                 //运费
                 $freight = 0;
@@ -630,10 +806,12 @@ class Index extends Common
                     'totalintegral'=> $payintegral,
                     'freight'   => $freight,
                     'needpay'   => $freight,
+                    'type_id'   => $typeid,
+                    'type_name' => $typename,
                 ];
                 $id = db(self::$table_goods_order)->insertGetId($insert);
                 if($id){
-                    return json(array('code'=>200,'msg'=>'成功'));
+                    return json(array('code'=>200,'msg'=>$id));
                 }else{
                     return json(array('code'=>400,'msg'=>'兑换失败'));
                 }

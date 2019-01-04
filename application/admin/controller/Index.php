@@ -50,6 +50,9 @@ class Index extends Common
     public static $table_goushui_order = 'goushui_order'; //水订单
 
     public static $table_integral = 'integral'; // 积分
+    public static $table_integral_order = 'integral_order'; // 积分订单
+
+    public static $table_goods_order = 'goods_order'; // 积分商城订单
 
     public $time;
 
@@ -1597,6 +1600,193 @@ class Index extends Common
             'order_id'  => $id
         ];
         db(self::$table_goushui_order)->where($where)->delete();
+    }
+    //积分订单列表
+    public function integralorder()
+    {
+        $where = [
+            'app_id'    => $this->id,
+        ];
+        $integralorder = db(self::$table_integral_order)
+            ->where($where)
+            ->page(input('page',1),input('pageshow',15))
+            ->select();
+        if(count($integralorder) > 0){
+            foreach($integralorder as $k=>$v){
+                $integralorder[$k]['type'] = '';
+                $integralorder[$k]['name'] = '';
+                $integralorder[$k]['phone'] = '';
+                if($v['type'] == 1){
+                    $type = '商户';
+                    $store = db(self::$table_store)->where('store_id',$v['type_id'])->field('storename,storemobile')->find();
+                    if($store){
+                        $integralorder[$k]['name'] = $store['storename'];
+                        $integralorder[$k]['phone'] = $store['storemobile'];
+                    }
+                }else if($v['type'] == 2){
+                    $type = '代理';
+                    $deputy = db(self::$table_deputy)->where('deputy_id',$v['type_id'])->field('deputy_name,phone')->find();
+                    if($deputy){
+                        $integralorder[$k]['name'] = $deputy['deputy_name'];
+                        $integralorder[$k]['phone'] = $deputy['phone'];
+                    }
+                }else{
+                    $type = '未知';
+                }
+                $integralorder[$k]['type'] = $type;
+            }
+        }
+
+        return view('integralorder',[
+            'data' => $integralorder,
+        ]);
+    }
+
+    //超时不支付自动删除订单
+
+    public function autodeljf()
+    {
+        if(Request::instance()->isAjax()) {
+            $where = [
+                'app_id' => $this->id,
+                'status' => 0,
+            ];
+
+            $late = 7200;
+
+            $order = db(self::$table_integral_order)
+                ->where($where)
+                ->select();
+            if (!empty($order)) {
+                //选出满足自动收获条件的数据
+                foreach ($order as $k => $v) {
+                    if (time() > ($v['created_at'] + $late)) {
+                        $this->delorderjf($v['order_id']);
+                    }
+                }
+            }
+        }
+    }
+
+    private function delorderjf($id)
+    {
+        $where = [
+            'app_id'    => $this->id,
+            'order_id'  => $id
+        ];
+        db(self::$table_integral_order)->where($where)->delete();
+    }
+    //积分商城兑换列表
+    public function exchangeshop()
+    {
+       $where = [
+           'app_id' => $this->id,
+       ];
+        $statusarr = [
+            '未支付','支付成功,待发货','待收货','订单完成'
+        ];
+       $data = db(self::$table_goods_order)
+           ->where($where)
+           ->page(input('page',1),input('pageshow',15))
+           ->select();
+       if(count($data) >0){
+           foreach($data as $k=>$v){
+               $data[$k]['statusname'] = $statusarr[$v['status']];
+           }
+       }
+
+       return view('exchangeshop',[
+           'data' => $data,
+       ]);
+    }
+
+    //确认发货
+
+    public function fahuogoods()
+    {
+        if(Request::instance()->isAjax()) {
+            $where = [
+                'app_id'    => $this->id,
+                'order_id'  => $this->parme('order_id'),
+            ];
+            $res = db(self::$table_goods_order)->where($where)->update(['status'=>2,'updated_at'=>time(),'shouhuotime'=>time()]);
+            if ($res) {
+                return json(['code'=>200,'msg'=>'操作成功']);
+            } else {
+                return json(['code'=>400,'msg'=>'操作失败']);
+            }
+        }
+    }
+
+    //超时一天不支付自动删除订单
+
+    public function autodelgoods()
+    {
+        if(Request::instance()->isAjax()) {
+            $where = [
+                'app_id' => $this->id,
+                'status' => 0,
+            ];
+
+            $late = 86400;
+
+            $order = db(self::$table_goods_order)
+                ->where($where)
+                ->select();
+            if (!empty($order)) {
+                //选出满足自动收获条件的数据
+                foreach ($order as $k => $v) {
+                    if (time() > ($v['created_at'] + $late)) {
+                        $this->delordergoods($v['order_id']);
+                    }
+                }
+            }
+        }
+    }
+
+    //shuohuo
+    private function delordergoods($id)
+    {
+        $where = [
+            'app_id'    => $this->id,
+            'order_id'  => $id
+        ];
+        db(self::$table_goods_order)->where($where)->delete();
+    }
+
+    //三天后自动确认收货
+
+    public function autoreceive()
+    {
+        if(Request::instance()->isAjax()) {
+            $where = [
+                'app_id' => $this->id,
+                'status' => 2,
+            ];
+
+            $late = 24 * 60 * 60 * 3;
+
+            $order = db(self::$table_goods_order)
+                ->where($where)
+                ->select();
+            if (!empty($order)) {
+                //选出满足自动收获条件的数据
+                foreach ($order as $k => $v) {
+                    if (time() > ($v['shouhuotime'] + $late)) {
+                        $this->shouhuo($v['order_id']);
+                    }
+                }
+            }
+        }
+    }
+
+    private function shouhuo($id)
+    {
+        $where = [
+            'app_id'    => $this->id,
+            'order_id'  => $id
+        ];
+        db(self::$table_goods_order)->where($where)->update(['status'=>3,'updated_at'=>time()]);
     }
     /***********************************积分管理**********************************************************/
 

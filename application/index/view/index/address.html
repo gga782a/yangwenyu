@@ -6,7 +6,7 @@
         {volist name="data" id="vo"}
         <div class="dl clearfixed" style="border-bottom: 1px solid #eee;">
             <div class="dt li">
-                <div class="pTRBL">
+                <div class="pTRBL" onclick="getaddress({$vo['address_id']},'{$url}',{$orderid})">
                     <div class="clearfixed">
                         <div class="li">{$vo.name}</div>
                         <div class="li left15">{$vo.phone}</div>
@@ -20,7 +20,7 @@
                         onclick="return del({$vo['address_id']});"
                 >删除</a></div>
                 <div  style="float: right;line-height: 36px;width: 30px;margin-right: 10px;">
-                    <a href="{:url('index/address',array('address_id'=>$vo['address_id'],'flag'=>'update'))}">修改</a>
+                    <a href="{:url('index/address',array('address_id'=>$vo['address_id'],'flag'=>'update','url'=>$url,'order_id'=>$orderid))}">修改</a>
                 </div>
             </div>
         </div>
@@ -30,14 +30,14 @@
     </div>
     <script>
 function jumpurl(){
-    window.location.href = "{:url('index/address',array('flag'=>'add'))}";
+    window.location.href = "{:url('index/address',array('flag'=>'add','url'=>$url,'order_id'=>$orderid))}";
 }
 function del(id)
 {
     if(confirm('确定要删除吗')){
         $.ajax({
             type:'post',
-            url:'deladdress',
+            url:"{:url('index/deladdress')}",
             data:{'address_id':id},
             dataType:'json',
             success:function(data){
@@ -56,6 +56,10 @@ function del(id)
             }
         })
     }
+}
+
+function getaddress(id,url,orderid) {
+    window.location.href = "http://www.yilingjiu.cn/index/index/"+url+"?address_id="+id+"&order_id="+orderid;
 }
         </script>
     {include file="common/footer" /}

@@ -1,42 +1,189 @@
 ﻿
 {include file='common/header' /}
 <body style="background-color: #F4F4F4;">
+   {notempty name="$data"}
     <div class="shopTop clearfixed">
-        <div class="li blackImg"><img src="__IMG__/black.png" alt=""></div>
-        <div class="topTitle li">日常家居</div>
+        <div class="topTitle li">{$data.type_name}</div>
     </div>
     <div class="detail">
         <div class="ul clearfixed">
             <div class="li">订单号</div>
-            <div class="li gr fr">233</div>
+            <div class="li gr fr">{$data.order_num}</div>
         </div>
         <div class="ul clearfixed top">
             <div class="li">商品名称</div>
-            <div class="li gr fr">二锅头</div>
+            <div class="li gr fr">{$data.goods_name}</div>
         </div>
         <div class="ul clearfixed">
             <div class="li">单价</div>
-            <div class="li gr fr bl">￥ <span>2.00</span>元</div>
+            <div class="li gr fr bl"><span>{$data.integral}</span>积分</div>
         </div>
         <div class="ul clearfixed">
             <div class="li">邮费</div>
-            <div class="li gr fr">包邮</div>
+            <div class="li gr fr">{$data.freight}元</div>
+        </div>
+        <div class="ul clearfixed">
+            <div class="li">数量</div>
+            <div class="li gr fr">{$data.stock}个</div>
         </div>
         <div class="ul clearfixed">
             <div class="li">总价</div>
-            <div class="li bl fr">￥ <span>2.00</span>元</div>
+            <div class="li bl fr"><span>{$data.totalintegral}</span>积分</div>
         </div>
         <div class="ul clearfixed">
             <div class="li">收货地址</div>
             <div class="li fr clearfixed">
                 <div class="li">
-                    <input type="text" placeholder="请填写收货地址" class="defaultInput">
+                    {empty name="$address"}
+                    <input type="text" placeholder="请选择收货地址" class="defaultInput" readonly>
+                    {else /}
+                    <input type="text" placeholder="请选择收货地址" class="defaultInput" value="{$address.position}{$address.address}" readonly>
+                    {/empty}
                 </div>
                 <div class="arrow li" style="margin-top:0.15rem;">
+                    <a href="{:url('index/address',array('order_id'=>$data['order_id'],'member_id'=>$data['member_id'],'url'=>'orderPay'))}">
                     <img src="__IMG__/arrow.png" alt="">
+                    </a>
                 </div>
+
             </div>
         </div>
-        <div class="shopBtn">确认兑换</div>
+        <div class="shopBtn" onclick="return qrdh({$address_id},{$data['order_id']},{$data['totalintegral']},{$data['freight']});">确认兑换</div>
     </div>
+   <div class="gold_yin" style="display: none;width: 100vw;height: 100vh;position: fixed;left: 0;top: 0;background: rgba(0,0,0,0.8);z-index: 999;">
+       <div id="js_msg" style="display: none;background: #fff;width: 60%;height: 150px;margin: 40% auto;color: #999;border-radius: 20px;">
+           <p class="tip" style="text-align: center;line-height: 80px;margin-bottom: 10px;font-size: 24px;"></p>
+           <span id="close_btn"
+                 style="display:inline-block;
+                          border-radius:10px;
+                          margin-left: 40%;
+                          width: 20%;
+                          height: 40px;
+                          line-height: 40px;
+                          text-align: center;
+                          background: #000;color: #fff;">关闭</span>
+       </div>
+       <div id="js_msg_error" style="display: none;background: #fff;width: 40%;height: 80px;margin: 40% auto;
+                text-align: center;color: #999;overflow: hidden;border-radius: 10px;">
+           <span class="tip_error" style="display: inline-block;line-height: 80px;font-size: 24px;">11</span>
+       </div>
+   </div>
+    {else /}
+       系统错误
+    {/notempty}
+   <script>
+       function qrdh(addressid,id,totalintegral,freight)
+       {
+           if(parseInt(addressid) == 0){
+               layer.msg('收货地址必填');
+               return false;
+           }
+           if(confirm('确定要兑换吗，将会扣除您'+totalintegral+'积分和花费'+freight+'元')){
+               var yin = document.getElementsByClassName('gold_yin')[0];
+               yin.style.display = 'block';
+               document.getElementById('js_msg_error').style.display = 'none';
+               document.getElementById('js_msg').style.display = 'none';
+               //判断是否有运费
+               if(freight>0){
+                   $.ajax({
+                       type:'post',
+                       url:"{:url('index/payqrdh')}",
+                       data:{'order_id':id,'address_id':addressid,'freight':freight},
+                       dataType:'json',
+                       success:function(data){
+                           console.log(data);
+                           if(data.code == 200){
+                               var arr = JSON.parse(data.msg);
+                               function onBridgeReady(){
+                                   WeixinJSBridge.invoke(
+                                       'getBrandWCPayRequest', {
+                                           "appId":arr['appId'],     //公众号名称，由商户传入
+                                           "timeStamp":arr['timeStamp'],         //时间戳，自1970年以来的秒数
+                                           "nonceStr":arr['nonceStr'], //随机串
+                                           "package":arr['package'],
+                                           "signType":"MD5",         //微信签名方式：
+                                           "paySign":arr['paySign'] //微信签名
+                                       },
+                                       function(res){
+                                           //alert(res);
+                                           var tipmsg = '';
+                                           if(res.err_msg == "get_brand_wcpay_request:ok" ){
+                                               tipmsg = '兑换成功';
+                                               document.getElementById('close_btn').onclick = function(){
+                                                   yin.style.display = 'none';
+                                                   window.location.href = "http://www.yilingjiu.cn/index/index/exchangeShop";
+                                               }
+                                           }else{
+                                               //删除订单arr['id']
+                                               console.log(arr['id']);
+                                               tipmsg = '兑换失败';
+                                               // var order_id = arr['id'];
+                                               // $.ajax({
+                                               //     type:'post',
+                                               //     url:"{:url('index/delgoodsorder')}",
+                                               //     data:{'order_id':order_id},
+                                               //     dataType:'json',
+                                               //     success:function () {
+                                               //
+                                               //     },
+                                               //     error:function () {
+                                               //
+                                               //     }
+                                               // });
+                                               document.getElementById('close_btn').onclick = function(){
+                                                   yin.style.display = 'none';
+                                               }
+                                           }
+                                           document.getElementsByClassName('tip')[0].innerHTML = tipmsg;
+                                           document.getElementById('js_msg_error').style.display = 'none';
+                                           document.getElementById('js_msg').style.display = 'block';
+                                       });
+                               }
+                               if (typeof WeixinJSBridge == "undefined"){
+                                   if( document.addEventListener ){
+                                       document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+                                   }else if (document.attachEvent){
+                                       document.attachEvent('WeixinJSBridgeReady', onBridgeReady);
+                                       document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+                                   }
+                               }else{
+                                   onBridgeReady();
+                               }
+                           }else{
+                               document.getElementsByClassName('tip')[0].innerHTML = data.msg;
+                               document.getElementById('js_msg_error').style.display = 'none';
+                               document.getElementById('js_msg').style.display = 'block';
+                               document.getElementById('close_btn').onclick = function(){
+                                   yin.style.display = 'none';
+                               }
+                           }
+                       },
+                       error:function(data){
+                           console.log(data);
+                       }
+                   })
+               }else{
+                   $.ajax({
+                       type:'post',
+                       url:"{:url('index/qrdh')}",
+                       data:{'order_id':id,'address_id':addressid},
+                       dataType:'json',
+                       success:function(data){
+                           if(data.code==200) {
+                               layer.msg(data.msg);
+                               setTimeout(function () {
+                                   window.location.href = "http://www.yilingjiu.cn/index/index/exchangeShop";
+                               }, 1000);
+                           }else{
+                               layer.msg(data.msg);
+                           }
+                       },
+                       error:function(data){
+                           console.log(data);
+                       }
+                   })
+               }
+           }
+       }
+   </script>
     {include file='common/footer' /}

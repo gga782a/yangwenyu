@@ -40,6 +40,7 @@ class Store extends Common
     public static $table_store_member  = 'store_member'; // 商户会员
     public static $table_vipcard_order = 'vipcard_order'; //会员卡订单
     public static $table_store_config  = 'store_config'; //商户设置
+    public static $table_dcode_log  = 'dcode_log'; //兑奖记录
 
     public $time;
     public function __construct(Request $request = null)
@@ -1554,6 +1555,8 @@ class Store extends Common
     {
         if(Request::instance()->isAjax()){
             $smember_id = input('smember_id');
+            $member_id  = input('member_id');
+            //dd($member_id);
             $jf = (int)input('jf');
             //获取商户可用积分
             $where = [
@@ -1570,6 +1573,9 @@ class Store extends Common
                 //增加商户会员积分
                 db(self::$table_store_member)->where($where)->where(['smember_id'=>$smember_id])->setInc('totalintegral',$jf);
                 db(self::$table_store_member)->where($where)->where(['smember_id'=>$smember_id])->setInc('integral',$jf);
+                //增加会员积分
+                db(self::$table_member)->where(['member_id'=>$member_id])->setInc('totalintegral',$jf);
+                db(self::$table_member)->where(['member_id'=>$member_id])->setInc('integral',$jf);
                 //减少商户可用积分
                 db(self::$table_store)->where($where)->setDec('integral',$jf);
                 Db::commit();
@@ -1671,6 +1677,68 @@ class Store extends Common
             ]);
         }
     }
+    /************************************************兑奖管理************************************************************/
+    public function dcodelog()
+    {
+        //获取商户下所有门店ID
+        $shopids = db(self::$table_shop)->where(['store_id'=>$this->store_id])->column('shop_id');
+        //获取所有兑奖记录
+        $where = [
+            'shop_id' => ['in',$shopids],
+        ];
+        $data = db(self::$table_dcode_log)->where($where)->page(input('page',1),input('pageshow',15))->select();
+        return view('dcodelog',[
+            'data'  => $data,
+        ]);
+    }
+
+    //兑奖
+
+   public function duijiang()
+   {
+       if(Request::instance()->isAjax()){
+           $dcode = input('dcode');
+           if(empty($dcode)){
+               return json(array('code'=>400,'msg'=>'兑奖码缺失'));
+           }
+           //查找是否已经对过奖了
+           //获取商户下所有门店ID
+           $shopids = db(self::$table_shop)->where(['store_id'=>$this->store_id])->column('shop_id');
+           $where = [
+               'shop_id' => ['in',$shopids],
+               'dcode'   => $dcode,
+           ];
+           $count = db(self::$table_dcode_log)->where($where)->count();
+           if($count > 0){
+               return json(array('code'=>400,'msg'=>'兑奖码已经兑换过'));
+           }
+           //存入兑奖记录
+           $where['status'] = 1;
+           $order = db(self::$table_active_order)->where($where)->find();
+           if($order){
+               $member = db(self::$table_member)->where('member_id',$order['member_id'])->field('name,cover')->find();
+               $data = [
+                   'shop_id'    => $order['shop_id'],
+                   'dcode'      => $dcode,
+                   'member_id'  => $order['member_id'],
+                   'name'       => $member['name'],
+                   'cover'      => $member['cover'],
+                   'shop_name'  => $order['shop_name'],
+                   'kefu_phone' => $order['kefu_phone'],
+                   'prize_name' => $order['prize_name'],
+                   'created_at' => time(),
+               ];
+               $id = db(self::$table_dcode_log)->insertGetId($data);
+               if($id){
+                   return json(array('code'=>200,'msg'=>'兑奖成功'));
+               }else{
+                   return json(array('code'=>400,'msg'=>'兑奖失败'));
+               }
+           }else{
+               return json(array('code'=>400,'msg'=>'兑奖码无效'));
+           }
+       }
+   }
 }
 
 

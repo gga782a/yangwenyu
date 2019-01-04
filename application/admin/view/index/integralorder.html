@@ -29,7 +29,7 @@
         <div class="col-sm-12">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
-                    <h5>水订购列表</h5>
+                    <h5>积分订购列表</h5>
                     <div class="ibox-tools">
                         <a class="collapse-link">
                             <i class="fa fa-chevron-up"></i>
@@ -41,17 +41,14 @@
                         <thead>
                         <tr>
                             <th>订单序号</th>
-                            <th>水名称</th>
-                            <th>购水量</th>
-                            <th>水单价</th>
-                            <th>总支付</th>
+                            <th>购买积分</th>
+                            <th>支付金额</th>
                             <th>订单号</th>
                             <th>购买人</th>
                             <th>购买人电话</th>
-                            <th>购买人地址</th>
+                            <th>购买人类型</th>
                             <th>状态</th>
-                            <th>购水时间</th>
-                            <th>操作</th>
+                            <th>购买时间</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -60,31 +57,14 @@
                         {volist name='data' id="vo"}
                         <tr class="">
                             <td>{$vo.order_id}</td>
-                            <td>{$vo.name}</td>
-                            <td>{$vo.stock}</td>
-                            <td>{$vo.price}</td>
+                            <td>{$vo.jifen}</td>
                             <td>{$vo.needpay}</td>
                             <td>{$vo.order_num}</td>
-                            <td>{$vo.receiver}</td>
-                            <td>{$vo.receiverphone}</td>
-                            <td>{$vo.receiveraddress}</td>
-                            <td>{$vo.statusname}</td>
+                            <td>{$vo.name}</td>
+                            <td>{$vo.phone}</td>
+                            <td>{$vo.type}</td>
+                            <td>{$vo.status == 1?'已支付':'未支付'}</td>
                             <td>{$vo.created_at|date="Y-m-d H:i:s",###}</td>
-                            <td>
-                                {if condition=" $vo['status'] == 1 "}
-                                <span>
-                                    <a onclick="return fahuo({$vo['order_id']})">
-                                        确认发货
-                                    </a>
-                                </span>
-                                {elseif condition=" $vo['status'] == 0 " /}
-                                <!--<span>-->
-                                    <!--<a onclick="return del({$vo['order_id']})">-->
-                                        <!--删除订单-->
-                                    <!--</a>-->
-                                <!--</span>-->
-                                {/if}
-                            </td>
                             <!--<td>Internet Explorer 4.0-->
                             <!--</td>-->
                             <!--<td>Win 95+</td>-->
@@ -122,12 +102,12 @@
         //         return {"row_id": this.parentNode.getAttribute("id"), "column": oTable.fnGetPosition(this)[2]}
         //     }, "width": "90%", "height": "100%"
         // })
-        setInterval("autodel()",5000);
+        setInterval("autodeljf()",5000);
     });
-    function autodel() {
+    function autodeljf() {
         $.ajax({
             type:'post',
-            url:"{:url('index/autodel')}",
+            url:"{:url('index/autodeljf')}",
             data:'',
             dataType: 'json',
             success:function(data){
@@ -141,56 +121,6 @@
 
     function fnClickAddRow() {
         $("#editable").dataTable().fnAddData(["Custom row", "New row", "New row", "New row", "New row", "New row", "New row"])
-    }
-    function del(id)
-    {
-        if(confirm('确定要删除吗')){
-            $.ajax({
-                type:'post',
-                url:"{:url('deputy/delgoushuiorder')}",
-                data:{'order_id':id},
-                dataType:'json',
-                success:function(data){
-                    if(data.code==200) {
-                        layer.msg(data.msg);
-                        setTimeout(function () {
-                            window.location.reload();
-                        }, 1000);
-                    }else{
-                        layer.msg(data.msg);
-
-                    }
-                },
-                error:function(data){
-                    console.log(data);
-                }
-            })
-        }
-    }
-    function fahuo(id)
-    {
-        if(confirm('确定要发货吗')){
-            $.ajax({
-                type:'post',
-                url:"{:url('index/fahuo')}",
-                data:{'order_id':id},
-                dataType:'json',
-                success:function(data){
-                    if(data.code==200) {
-                        layer.msg(data.msg);
-                        setTimeout(function () {
-                            window.location.reload();
-                        }, 1000);
-                    }else{
-                        layer.msg(data.msg);
-
-                    }
-                },
-                error:function(data){
-                    console.log(data);
-                }
-            })
-        }
     }
 </script>
 
