@@ -7,10 +7,13 @@
         {volist name="data" id="vo" key='key'}
         <div style="background: rgb(0,0,0);border-radius: 5px;height:200px;color:#fff;overflow: hidden;position: relative;margin-bottom: 5px;">
             <div style="margin-top: 10px;">
-                <span style="padding: 10px;">有效期{$vo.validity == 0?'永久':$vo.validity.'个月'}</span>
+                <span style="padding: 10px;">有效期永久</span>
+                {if condition=" $vo['givemoney'] > 0 "}
                 <span style="background: #e1143a;padding: 3px 15px;border: 1px solid #FFB032;font-size: 12px;border-radius: 10px;position: absolute;right:10px;top:-3px;">
-                    {$vo.type == 1?'满减卡':'折扣卡'}
+                    赠送{$vo['givemoney']}元
                 </span>
+                {else /}
+                {/if}
             </div>
             <div style="clear: both;"></div>
             <div style="text-align:center;width: 100%;">
@@ -19,11 +22,7 @@
                 </span>
             </div>
             <div style="font-size: 21px;margin-top: 10px;text-align: center;">
-                {if condition=" $vo['type'] == 1"}
-                满{$vo.usecondition}元 减{$vo.discount}元
-                {else /}
-                满{$vo.usecondition}元 打{$vo.discount}折
-                {/if}
+                储值金额{$vo['storedmoney']}元
             </div>
             <div style="font-size: 16px;position: absolute;bottom:10px;left: 0;text-align: center;width: 100%;">
                 <button class="btn" onclick="getcard(
@@ -32,7 +31,8 @@
                     {$member_id},
                     {$vo['card_id']},
                     {$vo['needpay']},
-                    {$vo['validity']},
+                    {$vo['givemoney']},
+                    {$vo['storedmoney']},
                     {$shop_id}
                     )"
                         style="color:#e1143a;font-weight:bold;padding: 2px 35%;border: 1px solid #e1143a;background: #0C0C0C;border-radius: 10px;">
@@ -60,7 +60,7 @@
         </div>
         {/volist}
         {else /}
-           该门店尚未设置会员卡
+        该门店尚未设置储值卡
         {/notempty}
     </div>
 </div>
@@ -68,8 +68,8 @@
     // $(".btn").on("click",function(){
     //
     // });
-    var locktime = 10;
-    function getcard(appid,storeid,memberid,cardid,needpay,validity,shopid) {
+    //var locktime = 10;
+    function getcard(appid,storeid,memberid,cardid,needpay,givemoney,storedmoney,shopid) {
         var yin = document.getElementsByClassName('gold_yin')[0];
         yin.style.display = 'block';
         document.getElementById('js_msg_error').style.display = 'none';
@@ -78,9 +78,9 @@
             //免费领取
             $.ajax({
                 type:'post',
-                url:"{:url('index/recievecard')}",
+                url:"{:url('index/recievestoredcard')}",
                 data:{'app_id':appid,'store_id':storeid,'member_id':memberid,'card_id':cardid,
-                    'needpay':needpay,'validity':validity,'shop_id':shopid},
+                    'needpay':needpay,'givemoney':givemoney,'storedmoney':storedmoney,'shop_id':shopid},
                 dataType:'json',
                 success:function (data) {
                     console.log(data);
@@ -103,9 +103,9 @@
         }else{
             $.ajax({
                 type:'post',
-                url:"{:url('index/recievecardorder')}",
+                url:"{:url('index/recievestoredcardorder')}",
                 data:{'app_id':appid,'store_id':storeid,'member_id':memberid,'card_id':cardid,
-                    'needpay':needpay,'validity':validity,'shop_id':shopid},
+                    'needpay':needpay,'givemoney':givemoney,'storedmoney':storedmoney,'shop_id':shopid},
                 dataType:'json',
                 success:function (data) {
                     console.log(data);
@@ -133,7 +133,7 @@
                                         var order_id = arr['id'];
                                         $.ajax({
                                             type:'post',
-                                            url:"{:url('index/delvipcardorder')}",
+                                            url:"{:url('index/delstoredcardorder')}",
                                             data:{'order_id':order_id},
                                             dataType:'json',
                                             success:function () {
@@ -183,5 +183,5 @@
         }
     }
 
-    </script>
+</script>
 {include file='common/footer' /}

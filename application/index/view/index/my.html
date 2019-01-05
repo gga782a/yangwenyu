@@ -2,32 +2,32 @@
 {include file='common/header' /}
 <body style="background-color: #F4F4F4;">
     <div class="shopTop clearfixed">
-        <div class="li blackImg"><img src="img/black.png" alt=""></div>
+        <!--<div class="li blackImg"><img src="img/black.png" alt=""></div>-->
         <div class="topTitle li">我的</div>
     </div>
     <div class="myTop">
         <div class="clearfixed">
             <div class="li myTopPortRait">
-                <img src="img/rule_popups1.png" alt="">
+                <img src="{$member.cover}" alt="">
             </div>
             <div class="li clearfixed">
-                <div class="myNmae">微信名字</div>
-                <div class="llow">积分: <span>5963</span></div>
+                <div class="myNmae">{$member.name}</div>
+                <div class="llow">积分: <span>{$member.integral}</span></div>
             </div>
         </div>
     </div>
     <div class="detail">
-        <a href="#">
+        <a href="{:url('index/tabs')}">
         <div class="ul clearfixed top">
             <div class="li">
                 <div class="myIcon">
-                    <img src="img/my1.png" alt="">
+                    <img src="__IMG__/my1.png" alt="">
                 </div>
             </div>
             <div class="li">我的钱包和会员卡</div>
             <div class="li fr">
                 <div class="arrow" style="margin-top:0.1rem;">
-                    <img src="img/arrow.png" alt="">
+                    <img src="__IMG__/arrow.png" alt="">
                 </div>
             </div>
         </div>
@@ -36,13 +36,13 @@
         <div class="ul clearfixed">
             <div class="li">
                 <div class="myIcon">
-                    <img src="img/my2.png" alt="">
+                    <img src="__IMG__/my2.png" alt="">
                 </div>
             </div>
             <div class="li">兑换记录</div>
             <div class="li fr">
                 <div class="arrow">
-                    <img src="img/arrow.png" alt="">
+                    <img src="__IMG__/arrow.png" alt="">
                 </div>
             </div>
         </div>
@@ -51,13 +51,13 @@
         <div class="ul clearfixed">
             <div class="li">
                 <div class="myIcon">
-                    <img src="img/my3.png" alt="">
+                    <img src="__IMG__/my3.png" alt="">
                 </div>
             </div>
             <div class="li">积分商城</div>
             <div class="li fr">
                 <div class="arrow">
-                    <img src="img/arrow.png" alt="">
+                    <img src="__IMG__/arrow.png" alt="">
                 </div>
             </div>
         </div>
@@ -66,13 +66,13 @@
         <div class="ul clearfixed">
             <div class="li">
                 <div class="myIcon">
-                    <img src="img/my4.png" alt="">
+                    <img src="__IMG__/my4.png" alt="">
                 </div>
             </div>
             <div class="li">收货地址</div>
             <div class="li fr">
                 <div class="arrow">
-                    <img src="img/arrow.png" alt="">
+                    <img src="__IMG__/arrow.png" alt="">
                 </div>
             </div>
         </div>
@@ -81,13 +81,13 @@
         <div class="ul clearfixed top">
             <div class="li">
                 <div class="myIcon">
-                    <img src="img/my5.png" alt="">
+                    <img src="__IMG__/my5.png" alt="">
                 </div>
             </div>
             <div class="li">收益详情</div>
             <div class="li fr">
                 <div class="arrow">
-                    <img src="img/arrow.png" alt="">
+                    <img src="__IMG__/arrow.png" alt="">
                 </div>
             </div>
         </div>
@@ -96,13 +96,13 @@
         <div class="ul clearfixed">
             <div class="li">
                 <div class="myIcon">
-                    <img src="img/my6.png" alt="">
+                    <img src="__IMG__/my6.png" alt="">
                 </div>
             </div>
             <div class="li">邀请注册</div>
             <div class="li fr">
                 <div class="arrow">
-                    <img src="img/arrow.png" alt="">
+                    <img src="__IMG__/arrow.png" alt="">
                 </div>
             </div>
         </div>
@@ -114,7 +114,7 @@
             <div class="li">
                 <a href="#">
                 <div class="footerImg">
-                    <img src="img/footer1.png" alt="">
+                    <img src="__IMG__/footer1.png" alt="">
                 </div>
                 <div class="footerText cen">首页</div>
                 </a>
@@ -122,7 +122,7 @@
             <div class="li activeFoot">
                 <a href="#">
                 <div class="footerImg">
-                    <img src="img/footer2_0.png" alt="">
+                    <img src="__IMG__/footer2_0.png" alt="">
                 </div>
                 <div class="footerText cen">优惠储值</div>
             </a>
@@ -130,7 +130,7 @@
             <div class="li activeFoot">
                 <a href="#">
                 <div class="footerImg">
-                    <img src="img/footer3_0.png" alt="">
+                    <img src="__IMG__/footer3_0.png" alt="">
                 </div>
                 <div class="footerText cen">用户中心</div>
             </a>

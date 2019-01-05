@@ -210,10 +210,12 @@ class Jsapipay extends Controller
                     db('ceshi')->insertGetId(array('text1'=>2222,'text2'=>'s2222'));
                     $insert['app_id']   = $order['app_id'];
                     $insert['store_id'] = $order['store_id'];
+                    $insert['shop_id']  = $order['shop_id'];
                     $insert['member_id']= $order['member_id'];
                     $insert['card_id']  = $order['card_id'];
                     $insert['money']    = floatval($order['needpay']);
-                    if ($validity == 0) {
+                    $insert['type']     = 1;
+                     if ($validity == 0) {
                         $insert['endtime'] = null;
                     } else {
                         $validitytime = $validity * 24 * 3600;
@@ -309,6 +311,80 @@ class Jsapipay extends Controller
                     ];
                     db(self::$table_user)->where($wheres)->setInc('income',$order['needpay']);
                     db('ceshi')->insertGetId(array('text1'=>'recieve222','text2'=>'3uuu'));
+                    Db::commit();
+                    $result = true;
+                }catch (Exception $exception){
+                    Db::rollback();
+                    $result = false;
+                }
+            }else{
+                $result = false;
+            }
+        }else{
+            $result = false;
+        }
+        // 返回状态给微信服务器
+        if ($result) {
+            $str='<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>';
+        }else{
+            $str='<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[签名失败]]></return_msg></xml>';
+        }
+        return $result;
+    }
+
+    //notify_storedcard
+
+    public function notify_storedcard()
+    {
+        $xml = file_get_contents("php://input");
+        //转换成数组
+        $data = $this->xmlToArray($xml);
+        $attach = $data['attach'];
+        //db('ceshi')->insertGetId(array('text1'=>json_encode($data),'text2'=>'card'));
+        db('ceshi')->insertGetId(array('text1'=>$attach,'text2'=>'ssaaa'));
+        $mch_key = db('pay_setting')->where('app_id',1)->value('mch_key');
+        $this->key = $mch_key;
+        //比较签名
+        $data_sign = $data['sign'];
+        unset($data['sign']);
+        $sign=$this->getSign($data);
+        if ( ($sign===$data_sign) && ($data['return_code']=='SUCCESS') && ($data['result_code']=='SUCCESS') ){
+            //查找订单
+            $order = db(self::$table_vipcard_order)->where(['order_id'=>$attach,'status'=>0])->find();
+            db('ceshi')->insertGetId(array('text1'=>333,'text2'=>'s2222'));
+            if($order){
+                Db::startTrans();
+                try{
+                    //更改状态
+                    db(self::$table_vipcard_order)->where(['order_id'=>$attach,'status'=>0])->update(['status'=>1,'paytime'=>time()]);
+                    db('ceshi')->insertGetId(array('text1'=>1111,'text2'=>'s2222'));
+                    //添加我的会员卡
+                    db('ceshi')->insertGetId(array('text1'=>2222,'text2'=>'s2222'));
+                    $insert['app_id']   = $order['app_id'];
+                    $insert['store_id'] = $order['store_id'];
+                    $insert['shop_id']  = $order['shop_id'];
+                    $insert['member_id']= $order['member_id'];
+                    $insert['card_id']  = $order['card_id'];
+                    $insert['money']    = floatval($order['givemoney'])+floatval($order['storedmoney']);
+                    $insert['type']     = 2;
+                    $insert['endtime'] = null;
+                    $insert['created_at'] = time();
+                    db(self::$table_recievr_vipcard)->insertGetId($insert);
+                    db('ceshi')->insertGetId(array('text1'=>'recieve','text2'=>'s5555'));
+                    //更改商户会员钱或者添加
+                    $totalmoney   = floatval($order['givemoney'])+floatval($order['storedmoney']);
+                    $storedmoney  = floatval($order['givemoney'])+floatval($order['storedmoney']);
+
+                    $wheres = [
+                        'member_id'     => $order['member_id'],
+                    ];
+                    db(self::$table_member)->where($wheres)->setInc('totalmoney',$totalmoney);
+                    db(self::$table_member)->where($wheres)->setInc('storedmoney',$storedmoney);
+                    db('ceshi')->insertGetId(array('text1'=>'recieve222','text2'=>'s55533333'));
+                    //给商户表增添金额
+                    db(self::$table_store)->where('store_id',$order['store_id'])->setInc('totalmoney',$order['needpay']);
+                    db(self::$table_store)->where('store_id',$order['store_id'])->setInc('money',$order['needpay']);
+                    db('ceshi')->insertGetId(array('text1'=>'2222222','text2'=>'store_id'));
                     Db::commit();
                     $result = true;
                 }catch (Exception $exception){

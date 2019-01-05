@@ -1,6 +1,21 @@
 ﻿{include file="common/header" /}
 
 <body style="background-color: #F4F4F4;">
+<div class="shopTop clearfixed">
+    <!--<div class="li blackImg"><img src="img/black.png" alt=""></div>-->
+    <div class="topTitle li">我的钱包和卡包</div>
+</div>
+<div class="myTop">
+    <div class="clearfixed">
+        <div class="li myTopPortRait">
+            <img src="{$member.cover}" alt="">
+        </div>
+        <div class="li clearfixed">
+            <div class="myNmae">{$member.name}</div>
+            <div class="llow">可用余额: <span>{$member.storedmoney}</span>元</div>
+        </div>
+    </div>
+</div>
     <div class="shopTop clearfixed">
         <div class="li blackImg"><img src="img/black.png" alt=""></div>
         <div class="topTitle li">选项卡</div>
@@ -17,116 +32,235 @@
     </div>
     <div class="tabbodys">
         <div class="shopListBox">
+            {notempty name="$vipcard"}
+            {volist name="vipcard" id="vo1"}
             <div class="dl top">
+                {empty name="$vo1['shop']"}
+                {else /}
                 <a href="#">
-                <div class="dt clearfixed">
-                    <div class="li shopListImg">
-                        <img src="img/rule_popups.png" alt="">
-                    </div>
-                    <div class="shopListext li">
-                        <div class="shopListname ellipsis">商店名字</div>
-                        <div class="shopListnum clearfixed">
-                            <div class="li">会员卡</div>
+                    <div class="dt clearfixed">
+                        <div class="li shopListImg">
+                            <?php
+                            $pic = trim($vo1['shop']['pic_arr'],',');
+                            //echo $pic;
+                            if($pic){
+                            $pic = explode(',',$pic);
+                            $str = '';
+                            foreach($pic as $v){
+                                    $str = '<img src="'.$v.'" alt="">';
+                            }
+                            echo $str;
+                            }else{
+                            $str = '<img src="__IMG__/rule_popups.png" alt="">';
+                            echo $str;
+                            }
+                            ?>
                         </div>
-                        <div class="clearfixed">
-                            <div class="clearfixed li shopListTime redT">
-                                <div class="li">地址:</div>
-                                <div class="li">哈尔滨市香坊区</div>
+                        <div class="shopListext li">
+                            <div class="shopListname ellipsis">{$vo1['shop']['shop_name']}</div>
+                            <div class="shopListnum clearfixed">
+                                <div class="li">会员卡:{$vo1['cardname']}</div>
                             </div>
-                            
-                        </div>
-                        <div class="shopListnum clearfixed">
-                            <div class="li">商家电话:</div>
-                            <div class="li ellipsis">13216489756</div>
+                            <div class="clearfixed">
+                                <div class="clearfixed li shopListTime redT">
+                                    <div class="li">地址:</div>
+                                    <div class="li">{$vo1['shop']['position']}</div>
+                                </div>
+
+                            </div>
+                            <div class="shopListnum clearfixed">
+                                <div class="li">商家电话:</div>
+                                <div class="li ellipsis">{$vo1['shop']['kefu_phone']}</div>
+                            </div>
                         </div>
                     </div>
-                </div>
                 </a>
+                {/empty}
             </div>
+            {/volist}
+            {else /}
             <div class="dl top">
-                <a href="#">
-                <div class="dt clearfixed">
-                    <div class="li shopListImg">
-                        <img src="img/rule_popups.png" alt="">
-                    </div>
-                    <div class="shopListext li">
-                        <div class="shopListname ellipsis">商店名字:</div>
-                        <div class="shopListnum clearfixed">
-                            <div class="li">会员卡</div>
-                        </div>
-                        <div class="clearfixed">
-                            <div class="clearfixed li shopListTime redT">
-                                <div class="li">地址:</div>
-                                <div class="li">哈尔滨市香坊区</div>
-                            </div>
-                            
-                        </div>
-                        <div class="shopListnum clearfixed">
-                            <div class="li">商家电话:</div>
-                            <div class="li ellipsis">13216489756</div>
-                        </div>
-                    </div>
-                </div>
-                </a>
+                当前没有领取会员卡
             </div>
+            {/notempty}
         </div>
-        <div class="shopListBox hide">
+        <div class="shopListBox hide" id="storedcard">
             <div class="dl top">
                 <a href="#">
-                <div class="dt clearfixed">
-                    <div class="li shopListImg">
-                        <img src="img/rule_popups.png" alt="">
-                    </div>
-                    <div class="shopListext li">
-                        <div class="shopListname ellipsis">商店名字</div>
-                        <div class="shopListnum clearfixed">
-                            <div class="li">余额</div>
-                            <div class="li ellipsis">1</div>
+                    <div class="dt clearfixed">
+                        <div class="li shopListImg">
+                            <img src="__IMG__/rule_popups.png" alt="">
                         </div>
-                        <div class="clearfixed">
-                            <div class="clearfixed li shopListTime redT">
-                                <div class="li">地址:</div>
-                                <div class="li">哈尔滨市香坊区</div>
+                        <div class="shopListext li">
+                            <div class="shopListname ellipsis">商店名字</div>
+                            <div class="shopListnum clearfixed">
+                                <div class="li">余额</div>
+                                <div class="li ellipsis">1</div>
                             </div>
-                            
-                        </div>
-                        <div class="shopListnum clearfixed">
-                            <div class="li">商家电话:</div>
-                            <div class="li ellipsis">13216489756</div>
-                            <div class="li fr gray">距离<span>3.4</span>km</div>
-                        </div>
-                    </div>
-                </div>
-                </a>
-            </div>
-            <div class="dl top">
-                <a href="#">
-                <div class="dt clearfixed">
-                    <div class="li shopListImg">
-                        <img src="img/rule_popups.png" alt="">
-                    </div>
-                    <div class="shopListext li">
-                        <div class="shopListname ellipsis">商店名字:</div>
-                        <div class="shopListnum clearfixed">
-                            <div class="li">余额:</div>
-                            <div class="li ellipsis">1</div>
-                        </div>
-                        <div class="clearfixed">
-                            <div class="clearfixed li shopListTime redT">
-                                <div class="li">地址:</div>
-                                <div class="li">哈尔滨市香坊区</div>
+                            <div class="clearfixed">
+                                <div class="clearfixed li shopListTime redT">
+                                    <div class="li">地址:</div>
+                                    <div class="li">哈尔滨市香坊区</div>
+                                </div>
+
                             </div>
-                            
-                        </div>
-                        <div class="shopListnum clearfixed">
-                            <div class="li">商家电话:</div>
-                            <div class="li ellipsis">13216489756</div>
-                            <div class="li fr gray">距离<span>3.4</span>km</div>
+                            <div class="shopListnum clearfixed">
+                                <div class="li">商家电话:</div>
+                                <div class="li ellipsis">13216489756</div>
+                                <div class="li fr gray">距离<span>3.4</span>km</div>
+                            </div>
                         </div>
                     </div>
-                </div>
                 </a>
             </div>
         </div>
     </div>
+<script src="http://res.wx.qq.com/open/js/jweixin-1.4.0.js"></script>
+<script src="https://cdn.staticfile.org/jquery/2.1.4/jquery.min.js"></script>
+    <script>
+        wx.config({
+            debug: false,
+            appId: '{$signPackage["appId"]}',
+            timestamp: {$signPackage["timestamp"]},
+            nonceStr: '{$signPackage["nonceStr"]}',
+            signature: '{$signPackage["signature"]}',
+            jsApiList: [
+                // 所有要调用的 API 都要加到这个列表中
+                'checkJsApi',
+                'openLocation',
+                'getLocation'
+            ]
+        });
+        wx.ready(function () {
+            //var shopid = $("#js_moreAdd").attr('data_shop_id');
+            //alert(shopid);
+            wx.checkJsApi({
+                jsApiList: ['getLocation'], // 需要检测的JS接口列表，所有JS接口列表见附录2,
+                success: function(res) {
+                    if (res.checkResult.getLocation == false) {
+                        alert('你的微信版本太低，不支持微信JS接口，请升级到最新的微信版本！');
+
+                    }
+                }
+            });
+            wx.getLocation({
+                type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+                success: function (res) {
+                    var latitude = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+                    var longitude = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+                    var speed = res.speed; // 速度，以米/每秒计
+                    var accuracy = res.accuracy; // 位置精度
+                    console.log(longitude);
+                    console.log(latitude);
+                    console.log(111111);
+                    $.ajax({
+                       type:'post',
+                       url:"{:url('index/getstoredcard')}",
+                       data:{'lng':longitude,'lag':latitude},
+                       dataType:'json',
+                       success:function (data1) {
+                            console.log(data1.msg);
+                            var str = '<div class="dl top">';
+                            if(data1.code == 200){
+                                var len1 = data1.msg.length;
+                                for(var i = 0;i < len1;i++) {
+                                    if(data1.msg[i].shop){
+                                        str += '<a href="#">';
+                                        str += '<div class="dt clearfixed">';
+                                        str += '<div class="li shopListImg">';
+                                        str += '<img src="'+data1.msg[i].shop.pic+'" alt="">';
+                                        str += '</div>';
+                                        str += '<div class="shopListext li">';
+                                        str += '<div class="shopListname ellipsis">'+data1.msg[i].shop.shop_name+'</div>';
+                                        str += '<div class="shopListnum clearfixed">';
+                                        str += '<div class="li">储值卡名：</div>';
+                                        str += '<div class="li ellipsis">'+data1.msg[i].cardname+'</div>';
+                                        str += '</div>';
+                                        str += '<div class="clearfixed">';
+                                        str += '<div class="clearfixed li shopListTime redT">';
+                                        str += '<div class="li">地址:</div>';
+                                        str += '<div class="li">'+data1.msg[i].shop.position+'</div>';
+                                        str += '</div>';
+
+                                        str += '</div>';
+                                        str += '<div class="shopListnum clearfixed">';
+                                        str += '<div class="li">商家电话:</div>';
+                                        str += '<div class="li ellipsis">'+data1.msg[i].shop.kefu_phone+'</div>';
+                                        str += '<div class="li fr gray">距离<span>'+data1.msg[i].shop.distance+'</span></div>';
+                                        str += '</div>';
+                                        str += '</div>';
+                                        str += '</div>';
+                                        str += '</a>';
+                                        // console.log(data1.msg[i].shop);
+
+                                        // str += '<a href="#">';
+                                        //
+                                        //  str += '<div class="dt clearfixed">';
+                                        //
+                                        //   str += '<div class="li shopListImg">';
+                                        //
+                                        //    str += '<img src="'+data1.msg[i].shop.pic+'" alt="">';
+                                        //
+                                        //   str += '</div>';
+                                        //
+                                        //   str += '<div class="shopListext li">';
+                                        //
+                                        //    str += '<div class="shopListname ellipsis">'+data1.msg[i].shop.shop_name+'</div>';
+                                        //
+                                        //    str += '<div class="shopListnum clearfixed">';
+                                        //
+                                        //     str += '<div class="li">会员卡:'+data1.msg[i].cardname+'</div>';
+                                        //
+                                        //    str += '</div>';
+                                        //   str += '<div class="clearfixed">';
+                                        // str += '<div class="clearfixed li shopListTime redT">';
+                                        // str += '<div class="li">地址:</div>';
+                                        // str += '<div class="li">'+data1.msg[i].shop.position+'</div>';
+                                        // str += '</div>';
+                                        // str += '</div>';
+                                        // str += '<div class="shopListnum clearfixed">';
+                                        // str += '<div class="li">商家电话:</div>';
+                                        // str += '<div class="li ellipsis">'+data1.msg[i].shop.kefu_phone+'</div>';
+                                        //
+                                        // str += '<div class="li fr gray">距离<span>'+data1.msg[i].shop.distance+'</span></div>';
+                                        //
+                                        // str += '</div>';
+                                        //
+                                        // str += '</div>';
+                                        //
+                                        // str += '</a>';
+                                        // }
+                                        // str += '</div>';
+                                    }
+                                }
+                            }else{
+                                console.log(11);
+                               str += data.msg;
+                            }
+                            str += '</div>';
+                            console.log(str);
+                            $('#storedcard').html(str);
+                       },
+                        error:function () {
+                            layer.msg('网络错误');
+                        }
+                    });
+                },
+                cancel: function (res) {
+                    alert('用户拒绝授权获取地理位置');
+                }
+            });
+            wx.openLocation({
+                latitude: 0, // 纬度，浮点数，范围为90 ~ -90
+                longitude: 0, // 经度，浮点数，范围为180 ~ -180。
+                name: '', // 位置名
+                address: '', // 地址详情说明
+                scale: 1, // 地图缩放级别,整形值,范围从1~28。默认为最大
+                infoUrl: '' // 在查看位置界面底部显示的超链接,可点击跳转
+            });
+        });
+        wx.error(function(res){
+            console.log(11111);
+        });
+        </script>
     {include file="common/footer" /}

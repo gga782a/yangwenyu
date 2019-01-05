@@ -2,35 +2,23 @@
 
 <body>
     <div class="ul font12">
+        {empty name="$duihuan"}
+        <div class="clearfixed paddingTrbl shopList" style="text-align: center;">
+            <span style="font-size: 18px;">暂无兑换</span>
+        </div>
+        {else /}
+        {volist name="duihuan" id="vo"}
         <div class="clearfixed paddingTrbl shopList">
             <div class="li shoopDtlImg">
-                <img src="img/rule_popups.png" alt="">
+                <img src="{$vo.cover}" alt="">
             </div>
             <div class="li">
-                <div class="shoopDtlname">名字</div>
-                <div class="shoopDtlnum"><span>3</span>件</div>
-                <div class="shoopDtltime">购买时间: <span>2018-10-24</span></div>
+                <div class="shoopDtlname">{$vo.name}</div>
+                <div class="shoopDtlnum"><span>1</span>件</div>
+                <div class="shoopDtltime">购买时间: <span>{$vo.paytime|date="Y-m-d",###}</span></div>
             </div>
         </div>
-        <div class="clearfixed paddingTrbl shopList">
-            <div class="li shoopDtlImg">
-                <img src="img/rule_popups.png" alt="">
-            </div>
-            <div class="li">
-                <div class="shoopDtlname">名字</div>
-                <div class="shoopDtlnum"><span>3</span>件</div>
-                <div class="shoopDtltime">购买时间: <span>2018-10-24</span></div>
-            </div>
-        </div>
-        <div class="clearfixed paddingTrbl shopList">
-            <div class="li shoopDtlImg">
-                <img src="img/rule_popups.png" alt="">
-            </div>
-            <div class="li">
-                <div class="shoopDtlname">名字</div>
-                <div class="shoopDtlnum"><span>3</span>件</div>
-                <div class="shoopDtltime">购买时间: <span>2018-10-24</span></div>
-            </div>
-        </div>
+        {/volist}
+        {/empty}
     </div>
     {include file="common/footer" /}

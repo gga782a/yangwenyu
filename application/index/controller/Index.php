@@ -36,6 +36,7 @@ class Index extends Common
     public static $table_vipcard = 'vipcard';
     public static $table_recieve_vipcard = 'recieve_vipcard';
     public static $table_vipcard_order = 'vipcard_order';
+    public static $table_storedcard = 'storedcard';
     //商户会员列表
     public static $table_store_member = 'store_member';
     public static $table_express_templete = 'express_templete';
@@ -522,6 +523,7 @@ class Index extends Common
         if(!$this->member_id){
             return redirecturl('discountTabs');
         }
+
         return view('discountTabs');
     }
 
@@ -560,7 +562,14 @@ class Index extends Common
         if(!$this->member_id){
             return redirecturl('my');
         }
-        return view('my');
+        //获取我的信息
+        $member = $this->getmember($this->member_id);
+        if($member === false){
+            return $this->error('没有此会员');
+        }
+        return view('my',[
+            'member'  => $member,
+        ]);
     }
 
     public function orderPay()
@@ -885,7 +894,25 @@ class Index extends Common
         if(!$this->member_id){
             return redirecturl('shopDetailList');
         }
-        return view('shopDetailList');
+        //dd($data);
+        //兑换记录
+        $duihuan = db(self::$table_goods_order)
+            ->where(['goods_id'=>input('goods_id'),'status'=>1])
+            ->order('paytime desc')
+            ->select();
+        if(!empty($duihuan)){
+            foreach ($duihuan as $k=>$v){
+                $member = db(self::$table_member)
+                    ->where('member_id',$v['member_id'])
+                    ->field('cover,name')
+                    ->find();
+                $duihuan[$k]['name'] = $member['name'];
+                $duihuan[$k]['cover']= $member['cover'];
+            }
+        }
+        return view('shopDetailList',[
+            'duihuan'=> $duihuan,
+        ]);
     }
     public function shopIndex()
     {
@@ -917,7 +944,103 @@ class Index extends Common
         if(!$this->member_id){
             return redirecturl('tabs');
         }
-        return view('tabs');
+        $getSignPackage = json_decode($this->getSignPackage(),true);
+        $vipcard = $this->getvipcard();
+        $memeber = $this->getmember($this->member_id);
+        return view('tabs',[
+            'member'     => $memeber,
+            'signPackage'=> $getSignPackage,
+            'vipcard'    => $vipcard,
+        ]);
+    }
+
+    //获取会员卡信息
+
+    public function getstoredcard()
+    {
+        if(Request::instance()->isAjax()){
+            $lng = input('lng');
+            $lag = input('lag');
+            //dd($lng.$lag);
+            $where = [
+                'member_id'  => $this->member_id,
+                'type'       => 2,
+            ];
+
+            $vipcard = db(self::$table_recieve_vipcard)->where($where)->select();
+            //dd($vipcard);
+            if(count($vipcard)>0){
+                foreach ($vipcard as $k=>$v){
+                    //获取所有门店按距离排序
+                    $shop = db(self::$table_shop)
+                        ->where('shop_id',$v['shop_id'])
+                        ->find();
+                    if($shop) {
+                        $pic = trim($shop['pic_arr'],',');
+                        //echo $pic;
+                        if($pic){
+                            $pic = explode(',',$pic);
+                            $str = '';
+                            foreach($pic as $vv){
+                                $str = $vv;
+                            }
+                        }else{
+                            $str = "__IMG__/rule_popups.png";
+                        }
+                        $shop['pic'] = $str;
+                        //获取当前距离
+                        if($lng&&$lag){
+                            //dd(111);
+                            $return = getdistance($shop['longitude'],$shop['latitude'],$lng,$lag);
+                            if($return/1000 > 1){
+                                $distance = round($return/1000,2).'km';
+                            }else{
+                                $distance = $return.'m';
+                            }
+                            $shop['distance'] = $distance;
+                            //dd($shop);
+                            //dd($shop);
+                        }else{
+                            $shop['distance'] = '未知';
+                            $return = 0;
+                        }
+                    }
+                    $vipcard[$k]['distances'] = $return;
+                    $vipcard[$k]['shop'] = $shop;
+                    $vipcard[$k]['cardname'] = db(self::$table_storedcard)
+                        ->where('card_id',$v['card_id'])
+                        ->value('cardname');
+                }
+                $vipcard = arr_sort($vipcard,'distances','asc');
+                return json(array('code'=>200,'msg'=>$vipcard));
+            }else{
+                return json(array('code'=>400,'msg'=>'还没有领取储值卡呦，要赶快领取嘞'));
+            }
+        }
+    }
+
+    //获取会员卡信息
+
+    private function getvipcard()
+    {
+        $where = [
+            'member_id'  => $this->member_id,
+            'type'       => 1,
+        ];
+        $vipcard = db(self::$table_recieve_vipcard)->where($where)->select();
+        if(count($vipcard)>0){
+            foreach ($vipcard as $k=>$v){
+                $vipcard[$k]['shop'] = db(self::$table_shop)
+                    ->where('shop_id',$v['shop_id'])
+                    ->find();
+                $vipcard[$k]['cardname'] = db(self::$table_vipcard)
+                    ->where('card_id',$v['card_id'])
+                    ->value('cardname');
+            }
+            return $vipcard;
+        }else{
+            return [];
+        }
     }
 
     public function zipCode()
@@ -1282,6 +1405,7 @@ class Index extends Common
             'data'      => $vipcards,
             'member_id' => $this->member_id,
             'store_id'  => $store_id,
+            'shop_id'   => $shop_id,
         ]);
     }
 
@@ -1297,6 +1421,7 @@ class Index extends Common
                 'store_id'      => input('store_id'),
                 'member_id'     => input('member_id'),
                 'card_id'       => input('card_id'),
+                'type'          => 1,
             ];
             $count = db(self::$table_recieve_vipcard)->where($where)->count();
             if ($count > 0) {
@@ -1305,6 +1430,7 @@ class Index extends Common
             $validity = (int)input('validity');
             $insert['app_id']   = input('app_id');
             $insert['store_id'] = input('store_id');
+            $insert['shop_id']  = input('shop_id');
             $insert['member_id']= input('member_id');
             $insert['card_id']  = input('card_id');
             $insert['money']    = input('needpay');
@@ -1362,6 +1488,7 @@ class Index extends Common
                 'store_id'      => input('store_id'),
                 'member_id'     => input('member_id'),
                 'card_id'       => input('card_id'),
+                'type'          => 1,
             ];
             $count = db(self::$table_recieve_vipcard)->where($where)->count();
             if ($count > 0) {
@@ -1369,6 +1496,7 @@ class Index extends Common
             }
             $insert['app_id']   = input('app_id');
             $insert['store_id'] = input('store_id');
+            $insert['shop_id']  = input('shop_id');
             $insert['member_id']= input('member_id');
             $insert['card_id']  = input('card_id');
             $insert['needpay']  = floatval(input('needpay'));
@@ -1427,6 +1555,205 @@ class Index extends Common
         }
     }
 
+    //储值卡列表
+
+    public function storedcardlist()
+    {
+        if(!$this->member_id){
+            //获取签名信息
+
+            return redirecturl('storedcardlist');
+        }
+        $shop_id = input('shop_id');
+        $store_id = input('store_id');
+        //获取门店会员卡
+        $vipcards = $this->getstoredcards($shop_id,$store_id);
+        //dd($vipcards);
+        return view('storedcardlist',[
+            'data'      => $vipcards,
+            'member_id' => $this->member_id,
+            'store_id'  => $store_id,
+            'shop_id'   => $shop_id,
+        ]);
+    }
+
+    //获取门店会员卡
+
+    private function getstoredcards($shopid,$storeid)
+    {
+        $cards = db(self::$table_storedcard)
+            ->where(['status'=>1,'store_id'=>$storeid])
+            ->select();
+        //dd($cards);
+        $applycards = [];
+        if(!empty($cards)){
+            foreach($cards as $k=>$v){
+                if($v['applyshop'] == 0){
+                    $applycards[$k] = $v;
+                }else{
+                    $v['applyshop'] = explode(',',$v['applyshop']);
+                    if(in_array($shopid,$v['applyshop'])){
+                        $applycards[$k] = $v;
+                    }
+                }
+            }
+        }
+        $vipcards = [];
+        //dd($applycards);
+        if(!empty($applycards)){
+            foreach($applycards as $val){
+                $vipcards[] = $val;
+            }
+            return $vipcards;
+        }else{
+            return [];
+        }
+    }
+
+    //领取会员卡
+
+    public function recievestoredcard()
+    {
+        if(Request::instance()->isAjax()) {
+            //dd(1);
+            //判断是否领取过会员卡
+            $where = [
+                'app_id'        => input('app_id'),
+                'store_id'      => input('store_id'),
+                'member_id'     => input('member_id'),
+                'card_id'       => input('card_id'),
+                'type'          => 2,
+            ];
+            $count = db(self::$table_recieve_vipcard)->where($where)->count();
+            if ($count > 0) {
+                return json(array('code' => 400, 'msg'=>'已经领取过了'));
+            }
+            $insert['app_id']   = input('app_id');
+            $insert['store_id'] = input('store_id');
+            $insert['shop_id']  = input('shop_id');
+            $insert['member_id']= input('member_id');
+            $insert['card_id']  = input('card_id');
+            $insert['money']    = input('givemoney')+input('storedmoney');
+            $insert['type']     = 2;
+            $insert['endtime']  = null;
+            $insert['created_at'] = time();
+
+            $totalmoney   = input('givemoney')+input('storedmoney');
+            $storedmoney   = input('givemoney')+input('storedmoney');
+
+
+            //存入我的会员卡 存入会员列表
+            Db::startTrans();
+            try {
+                db(self::$table_recieve_vipcard)->insertGetId($insert);
+                //判断是否已是商户会员
+                $wheres = [
+                    'member_id'     => input('member_id'),
+                ];
+                db(self::$table_member)->where($wheres)->setInc('totalmoney',$totalmoney);
+                db(self::$table_member)->where($wheres)->setInc('storedmoney',$storedmoney);
+                Db::commit();
+                return json(array('code' => 200, 'msg'=>'领取成功'));
+            } catch (Exception $e) {
+                Db::rollback();
+                return json(array('code' => 400, 'msg'=>'领取失败'));
+            }
+        }
+    }
+
+    //recievestoredcardorder
+
+    //付费领取储值卡订单
+    public function recievestoredcardorder(){
+        if(Request::instance()->isAjax())
+        {
+            //判断是否领取过会员卡
+            $where = [
+                'app_id'        => input('app_id'),
+                'store_id'      => input('store_id'),
+                'member_id'     => input('member_id'),
+                'card_id'       => input('card_id'),
+                'type'          => 2,
+            ];
+            $count = db(self::$table_recieve_vipcard)->where($where)->count();
+            if ($count > 0) {
+                return json(array('code' => 400, 'msg'=>'已经领取过了'));
+            }
+            $insert['app_id']   = input('app_id');
+            $insert['store_id'] = input('store_id');
+            $insert['shop_id']  = input('shop_id');
+            $insert['member_id']= input('member_id');
+            $insert['card_id']  = input('card_id');
+            $insert['needpay']  = floatval(input('needpay'));
+            $insert['givemoney']  = floatval(input('givemoney'));
+            $insert['storedmoney']  = floatval(input('storedmoney'));
+            $insert['type']     = 4;
+            $insert['status']   = 0;
+            $insert['order_num']= input('store_id').time().rand(100000,999999);
+            $insert['created_at']= time();
+            //dd($insert);
+            $id = db(self::$table_vipcard_order)->insertGetId($insert);
+            if($id){
+                $return['id'] = $id;
+                $return['appId'] = $this->appId;
+                $return['nonceStr'] = $this->createNoncestr();
+                $return['timeStamp'] = time();
+                //获取h5调起微信支付
+                $result = $this->storedcardjsapipay($insert,$id);
+                if($result['return_code']=='SUCCESS'&&$result['result_code']=='SUCCESS'){
+                    $return['package'] = "prepay_id=".$result['prepay_id'];
+                    $return['signType'] = 'MD5';
+                    //重新进行签名
+                    $sign = $this->createsign($return['timeStamp'],$return['nonceStr'],$return['package'],$return['signType']);
+                    $return['paySign'] = $sign;
+                    return json(array('code'=>200,'msg'=>json_encode($return)));
+                }else{
+                    return json(array('code'=>400,'msg'=>$result['return_msg']));
+                }
+            }else{
+                return json(array('code'=>400,'msg'=>'操作失败'));
+            }
+        }
+    }
+
+    //获取jsapi微信支付
+
+    public function storedcardjsapipay($insert,$id)
+    {
+        $notify_url = 'http://www.yilingjiu.cn/wechat/Jsapipay/notify_storedcard';
+        $openid = db(self::$table_member)->where('member_id',$insert['member_id'])->value('openid');//'os-5N1ZgTUrkGgasKpmQHpFc5R5E';
+        $attach = $id;
+        $pay = new Jsapipay('',$openid, $mch_id='1514213421', $key='c56d0e9a7ccec67b4ea131655038d604',$insert['order_num'],'领取会员卡',$total_fee=0.01,$attach,$notify_url,'JSAPI');
+        $return = $pay->pay();
+        //dd($return);
+        return $return;
+    }
+
+    //不支付就删除订单
+    public function delstoredcardorder()
+    {
+        if(Request::instance()->isAjax()){
+            $order_id = input('order_id');
+            $where = [
+                'order_id'  => $order_id,
+                'status'    => 0,
+            ];
+            db(self::$table_vipcard_order)->where($where)->delete();
+        }
+    }
+    /*****************************************************个人中心*********************************************************/
+
+    //我的
+
+    private function getmember($memberid)
+    {
+        $member = db(self::$table_member)->where(['member_id'=>$memberid])->find();
+        if($member){
+            return $member;
+        }else{
+            return false;
+        }
+    }
 }
 
 

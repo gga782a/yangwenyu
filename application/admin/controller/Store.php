@@ -42,6 +42,8 @@ class Store extends Common
     public static $table_store_config  = 'store_config'; //商户设置
     public static $table_dcode_log  = 'dcode_log'; //兑奖记录
 
+    public static $table_storedcard  = 'storedcard'; //储值卡
+
     public $time;
     public function __construct(Request $request = null)
     {
@@ -1420,7 +1422,7 @@ class Store extends Common
                 'card_id'   => $this->parme('card_id'),
             ];
             //判断会员卡是否被领取
-            $count = db(self::$table_recieve_vipcard)->where($where)->count();
+            $count = db(self::$table_recieve_vipcard)->where($where)->where('type',1)->count();
             if($count>0){
                 return json(array('code' => 400, 'msg' => '会员卡被领取了'));
             }else {
@@ -1442,6 +1444,7 @@ class Store extends Common
             'app_id'   => $this->app_id,
             'store_id' => $this->store_id,
             'card_id'  => $this->parme('card_id'),
+            'type'     => 1,
         ];
         $data = db(self::$table_recieve_vipcard)
             ->where($where)
@@ -1462,6 +1465,168 @@ class Store extends Common
          ]);
 
     }
+
+    /************************************************储值卡设置************************************************************/
+    //设置储值卡
+
+    public function storedcard()
+    {
+        $flag = input('flag');
+        $where = [
+            'app_id'    => $this->app_id,
+            'store_id'  => $this->store_id,
+        ];
+        if(Request::instance()->isPost()){
+            $shop = $this->parme('shop');
+            if(is_array($shop)){
+                $applyshop = implode(',',$shop);
+            }else{
+                $applyshop = 0;
+            }
+            //dd(input());
+            $data = [
+                'cardname'       => input('cardname'),
+                'applyshop'      => $applyshop,
+                'storedmoney'    => floatval(input('storedmoney')),
+                'givemoney'      => floatval(input('givemoney')),
+                'needpay'        => floatval(input('needpay')),
+                'updated_at'     => time(),
+            ];
+            if($flag == 'add'){
+                $data['app_id']  = $this->app_id;
+                $data['store_id']= $this->store_id;
+                $data['status']  = 1;
+                $data['created_at']= time();
+                $id = db(self::$table_storedcard)->insertGetId($data);
+                if($id){
+                    return $this->redirect('store/storedcard');
+                }else{
+                    return $this->error('操作失败');
+                }
+            }else{
+                $where['card_id'] = input('card_id');
+                $res = db(self::$table_storedcard)->where($where)->update($data);
+                if($res!==false){
+                    return $this->redirect('store/storedcard');
+                }else{
+                    return $this->error('操作失败');
+                }
+            }
+        }else{
+            if($flag == 'add'){
+                //获取商户下所有门店信息
+                $shop = db(self::$table_shop)
+                    ->where($where)
+                    ->field('shop_id,shop_name')
+                    ->select();
+                return view('addstoredcard',[
+                    'shop' => $shop,
+                ]);
+            }elseif($flag == 'update'){
+                //获取商户下所有门店信息
+                $shop = db(self::$table_shop)
+                    ->where($where)
+                    ->field('shop_id,shop_name')
+                    ->select();
+                $where['card_id'] = input('card_id');
+                $data = db(self::$table_storedcard)->where($where)->find();
+                $applyshop = $data['applyshop'];
+                if($applyshop == 0){
+                    $applyshop = [];
+                }else{
+                    $applyshop = explode(',',$applyshop);
+                }
+                return view('editstoredcard',[
+                    'data' => $data,
+                    'shop' => $shop,
+                    'applyshop' => $applyshop,
+                ]);
+            }else{
+                $data = db(self::$table_storedcard)
+                    ->where($where)
+                    ->page(input('page',1),input('pageshow',15))
+                    ->select();
+                if(count($data)>0){
+                    foreach($data as $k=>$v){
+                        if($v['applyshop'] == 0){
+                            $applyshopname = '全门店通用';
+                        }else{
+                            $applyshopname = '';
+                            $applyshop = trim($v['applyshop'],',');
+                            $applyshop = explode(',',$applyshop);
+                            foreach($applyshop as $k1=>$v1){
+                                $where['shop_id'] = $v1;
+                                $applyshopname .= db(self::$table_shop)
+                                        ->where($where)
+                                        ->value('shop_name').',';
+                            }
+
+                        }
+                        $data[$k]['applyshopname'] = trim($applyshopname,',');
+                    }
+                }
+
+                return view('storedcardlist',[
+                    'data'  => $data,
+                ]);
+            }
+        }
+    }
+
+    //删除会员卡
+
+    public function delstoredcard()
+    {
+        if(Request::instance()->isAjax()){
+            $where = [
+                'app_id'    => $this->app_id,
+                'store_id'  => $this->store_id,
+                'card_id'   => $this->parme('card_id'),
+            ];
+            //判断会员卡是否被领取
+            $count = db(self::$table_recieve_vipcard)->where($where)->where('type',2)->count();
+            if($count>0){
+                return json(array('code' => 400, 'msg' => '储值卡被领取了'));
+            }else {
+                $res = db(self::$table_storedcard)->where($where)->delete();
+                if ($res) {
+                    return json(array('code' => 200, 'msg' => '操作成功'));
+                } else {
+                    return json(array('code' => 400, 'msg' => '操作失败'));
+                }
+            }
+        }
+    }
+
+    //领取储值卡详情
+
+    public function recievestoredcard()
+    {
+        $where = [
+            'app_id'   => $this->app_id,
+            'store_id' => $this->store_id,
+            'card_id'  => $this->parme('card_id'),
+            'type'     => 2,
+        ];
+        $data = db(self::$table_recieve_vipcard)
+            ->where($where)
+            ->page(input('page', 1), input('pageshow', 15))
+            ->select();
+        if(!empty($data)){
+            foreach($data as $k=>$v){
+                $member = db(self::$table_member)
+                    ->where(['member_id'=>$v['member_id']])
+                    ->field('name,cover')
+                    ->find();
+                $data[$k]['member_name'] = $member['name'];
+                $data[$k]['member_cover'] = $member['cover'];
+            }
+        }
+        return view('recievestoredcard',[
+            'data' => $data,
+        ]);
+    }
+
     /************************************************会员管理************************************************************/
     /**
      *购买商户下的会员卡即为商户下的会员
