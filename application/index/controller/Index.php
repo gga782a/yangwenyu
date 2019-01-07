@@ -40,6 +40,7 @@ class Index extends Common
     //商户会员列表
     public static $table_store_member = 'store_member';
     public static $table_express_templete = 'express_templete';
+    public static $table_active = 'active';
     private  $key;
     public function __construct(Request $request = null)
     {
@@ -523,8 +524,217 @@ class Index extends Common
         if(!$this->member_id){
             return redirecturl('discountTabs');
         }
+        $getSignPackage = json_decode($this->getSignPackage(),true);
+        //获取储值商家
+        $storedshops = $this->czshop();
+        return view('discountTabs',[
+            'signPackage'=> $getSignPackage,
+            'storedshops'=> $storedshops,
+        ]);
+    }
 
-        return view('discountTabs');
+    //获取储值商家
+
+    private function czshop()
+    {
+        //获取所有储值商户
+        $storedids  = $this->getstoredids();
+        $arr = [];
+        if(!empty($storedids)){
+            foreach($storedids as $k=>$v){
+                if($v['applyshop'] == 0){ //全门店通用
+                    $applyshop = $this->getshopids($v['store_id']);
+                }else{
+                    $applyshop = explode(',',$v['applyshop']);
+                }
+                //dd($applyshop);
+                //获取所有储值商家
+                $shop = $this->getshops($applyshop);
+                //dd($shop);
+                if($shop !== false){
+                    foreach ($shop as $kk=>$vv){
+                        $shop[$kk]['card_id'] = $v['card_id'];
+                    }
+                    $arr[] = $shop;
+                }
+            }
+        }
+        return $arr;
+    }
+
+    //获取所有储值商户
+
+    private function getstoredids()
+    {
+        $where = [
+            'status' => 1,
+        ];
+
+        $storedids = db(self::$table_storedcard)->where($where)->field('store_id,card_id,applyshop')->select();
+        //dd($storedids);
+        return $storedids;
+    }
+
+    //获取所有储值商家
+
+    private function getshops($ids)
+    {
+        $where = [
+            'shop_id'   => ['in',$ids],
+            'status'     => 1,
+        ];
+
+        $shops = db(self::$table_shop)->where($where)->field('shop_id,shop_name,pic_arr')->select();
+        $pic = '';
+        if(!empty($shops)){
+            foreach($shops as $k=>$shop){
+                if(!empty($shop['pic_arr'])){
+                    $pic = trim($shop['pic_arr'],',');
+                    $pic = explode(',',$pic);
+                    $pic = $pic[0];
+                }
+                $shops[$k]['pic'] = $pic;
+            }
+            return $shops;
+        }else{
+            return false;
+        }
+
+    }
+
+    //获取优惠活动
+
+    public function getyhactive()
+    {
+        if(Request::instance()->isAjax()){
+            $lng = input('lng');
+            $lag = input('lag');
+            //获取所有代理
+            $deputyids = $this->getdeputyids();
+            //获取所有商户
+            $storeids  = $this->getstoreids($deputyids);
+            //获取所有优惠活动
+            $active = $this->getallactive($storeids,$lng,$lag);
+            if(!empty($active)){
+                return json(array('code'=>200,'msg'=>$active));
+            }else{
+                return json(array('code'=>400,'msg'=>'暂无数据'));
+            }
+        }
+    }
+    //获取所有代理
+
+    private function getdeputyids()
+    {
+        $where = [
+            'status'  => 1,
+        ];
+        $deputyids = db(self::$table_deputy)->where($where)->column('deputy_id');
+        return $deputyids;
+    }
+
+    //获取所有商户
+
+    private function getstoreids($ids)
+    {
+        $where = [
+            'deputy_id'  => ['in',$ids],
+            'status'     => 1,
+        ];
+
+        $storeids = db(self::$table_store)->where($where)->column('store_id');
+
+        return $storeids;
+    }
+
+    //获取所有门店
+
+    private function getshopids($ids)
+    {
+        $where = [
+            'store_id'  => ['in',$ids],
+            'status'     => 1,
+        ];
+
+        $shopids = db(self::$table_shop)->where($where)->column('shop_id');
+
+        return $shopids;
+    }
+
+    //获取所有优惠活动
+
+    private function getallactive($ids,$lng,$lag)
+    {
+        $where = [
+            'store_id'  => ['in',$ids],
+            'status'    => 1,
+            'type'      => 1,
+        ];
+
+        $data = db(self::$table_active)->where($where)->select();
+        $newarr = [];
+        if(count($data) >0){
+//            $arr    = [];
+            //根据门店排序
+            foreach($data as $k=>$v){
+                $v['stime'] = date("Y-m-d",$v['stime']);
+                $v['etime'] = date("Y-m-d",$v['etime']);
+                if($v['applyshop'] == 0){ //全门店通用 则获取该商户下所有门店
+                    $shopids = $this->getshopids($ids);
+                }else{
+                    $applyshop = trim($v['applyshop'],',');
+                    $shopids = explode(',',$applyshop);
+                }
+                //获取门店
+                foreach ($shopids as $kk=>$vv){
+                    $getshopdistance = $this->getshopdistance($vv,$lng,$lag);
+                    if($getshopdistance !== false){
+                        $newarrlen = count($newarr);
+                        $newarr[$newarrlen] = $v;
+                        foreach ($getshopdistance['shop'] as $kkk=>$vvv){
+                            $newarr[$newarrlen][$kkk] = $vvv;
+                        }
+//                        $data[$k]['distances'][$kk] = $getshopdistance['distances'];
+                    }else{
+                        unset($shopids[$kk]);
+                    }
+                }
+            }
+            //dd(11);
+            $newarr = arr_sort($newarr,'distances','asc');
+        }
+        return $newarr;
+    }
+
+    //获取门店距离
+
+    private function getshopdistance($shopid,$lng,$lag)
+    {
+        //获取所有门店按距离排序
+        $shop = db(self::$table_shop)
+            ->where('shop_id',$shopid)
+            ->field('position,longitude,latitude,kefu_phone,shop_id')
+            ->find();
+        if($shop) {
+            //获取当前距离
+            if($lng&&$lag){
+                //dd(111);
+                $return = getdistance($shop['longitude'],$shop['latitude'],$lng,$lag);
+                if($return/1000 > 1){
+                    $distance = round($return/1000,2).'km';
+                }else{
+                    $distance = round($return,2).'m';
+                }
+                $shop['distance'] = $distance;
+            }else{
+                $shop['distance'] = '未知';
+                $return = 0;
+            }
+            $shop['distances'] = $return;
+            return array('shop'=>$shop);
+        }else{
+            return false;
+        }
     }
 
     public function exchange()
@@ -1634,6 +1844,7 @@ class Index extends Common
             $insert['member_id']= input('member_id');
             $insert['card_id']  = input('card_id');
             $insert['money']    = input('givemoney')+input('storedmoney');
+            $insert['cashmoney']= input('givemoney')+input('storedmoney');
             $insert['type']     = 2;
             $insert['endtime']  = null;
             $insert['created_at'] = time();

@@ -366,6 +366,7 @@ class Jsapipay extends Controller
                     $insert['member_id']= $order['member_id'];
                     $insert['card_id']  = $order['card_id'];
                     $insert['money']    = floatval($order['givemoney'])+floatval($order['storedmoney']);
+                    $insert['cashmoney']= floatval($order['givemoney'])+floatval($order['storedmoney']);
                     $insert['type']     = 2;
                     $insert['endtime'] = null;
                     $insert['created_at'] = time();

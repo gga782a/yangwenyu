@@ -71,6 +71,7 @@ function getdistance($lng1, $lat1, $lng2, $lat2) {
 
 //二维数组 排序
 function arr_sort($array,$key,$order="asc"){//asc是升序 desc是降序
+    //dd($key);
     $arr_nums = $arr = array();
     foreach($array as $k => $v){
         $arr_nums[$k] = $v[$key];
@@ -89,6 +90,7 @@ function arr_sort($array,$key,$order="asc"){//asc是升序 desc是降序
         $arr[$i]=$array[$k];
         $i++;
     }
+    //dd($arr);
     return $arr;
 }
 

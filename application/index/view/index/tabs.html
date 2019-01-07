@@ -37,7 +37,7 @@
             <div class="dl top">
                 {empty name="$vo1['shop']"}
                 {else /}
-                <a href="#">
+                <a href="{:url('index/shopdes',array('store_id'=>$vo1['store_id'],'shop_id'=>$vo1['shop_id']))}">
                     <div class="dt clearfixed">
                         <div class="li shopListImg">
                             <?php
@@ -85,34 +85,34 @@
             {/notempty}
         </div>
         <div class="shopListBox hide" id="storedcard">
-            <div class="dl top">
-                <a href="#">
-                    <div class="dt clearfixed">
-                        <div class="li shopListImg">
-                            <img src="__IMG__/rule_popups.png" alt="">
-                        </div>
-                        <div class="shopListext li">
-                            <div class="shopListname ellipsis">商店名字</div>
-                            <div class="shopListnum clearfixed">
-                                <div class="li">余额</div>
-                                <div class="li ellipsis">1</div>
-                            </div>
-                            <div class="clearfixed">
-                                <div class="clearfixed li shopListTime redT">
-                                    <div class="li">地址:</div>
-                                    <div class="li">哈尔滨市香坊区</div>
-                                </div>
+            <!--<div class="dl top">-->
+                <!--<a href="#">-->
+                    <!--<div class="dt clearfixed">-->
+                        <!--<div class="li shopListImg">-->
+                            <!--<img src="__IMG__/rule_popups.png" alt="">-->
+                        <!--</div>-->
+                        <!--<div class="shopListext li">-->
+                            <!--<div class="shopListname ellipsis">商店名字</div>-->
+                            <!--<div class="shopListnum clearfixed">-->
+                                <!--<div class="li">余额</div>-->
+                                <!--<div class="li ellipsis">1</div>-->
+                            <!--</div>-->
+                            <!--<div class="clearfixed">-->
+                                <!--<div class="clearfixed li shopListTime redT">-->
+                                    <!--<div class="li">地址:</div>-->
+                                    <!--<div class="li">哈尔滨市香坊区</div>-->
+                                <!--</div>-->
 
-                            </div>
-                            <div class="shopListnum clearfixed">
-                                <div class="li">商家电话:</div>
-                                <div class="li ellipsis">13216489756</div>
-                                <div class="li fr gray">距离<span>3.4</span>km</div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
+                            <!--</div>-->
+                            <!--<div class="shopListnum clearfixed">-->
+                                <!--<div class="li">商家电话:</div>-->
+                                <!--<div class="li ellipsis">13216489756</div>-->
+                                <!--<div class="li fr gray">距离<span>3.4</span>km</div>-->
+                            <!--</div>-->
+                        <!--</div>-->
+                    <!--</div>-->
+                <!--</a>-->
+            <!--</div>-->
         </div>
     </div>
 <script src="http://res.wx.qq.com/open/js/jweixin-1.4.0.js"></script>
@@ -165,7 +165,7 @@
                                 var len1 = data1.msg.length;
                                 for(var i = 0;i < len1;i++) {
                                     if(data1.msg[i].shop){
-                                        str += '<a href="#">';
+                                        str += '<a href="http://www.yilingjiu.cn/index/index/shopdes?store_id='+data1.msg[i].store_id+'&shop_id='+data1.msg[i].shop_id+'">';
                                         str += '<div class="dt clearfixed">';
                                         str += '<div class="li shopListImg">';
                                         str += '<img src="'+data1.msg[i].shop.pic+'" alt="">';
@@ -173,8 +173,8 @@
                                         str += '<div class="shopListext li">';
                                         str += '<div class="shopListname ellipsis">'+data1.msg[i].shop.shop_name+'</div>';
                                         str += '<div class="shopListnum clearfixed">';
-                                        str += '<div class="li">储值卡名：</div>';
-                                        str += '<div class="li ellipsis">'+data1.msg[i].cardname+'</div>';
+                                        str += '<div class="li">余额：</div>';
+                                        str += '<div class="li ellipsis">'+data1.msg[i].cashmoney+'元</div>';
                                         str += '</div>';
                                         str += '<div class="clearfixed">';
                                         str += '<div class="clearfixed li shopListTime redT">';
