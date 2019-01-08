@@ -115,6 +115,7 @@ class Store extends Common
     public function uploadone($validate = ['size'=>10240000,'ext'=>'jpg,png,gif']){
         $files = request()->file('fileList');
         //dd($files);
+        //var_dump($files);
         //判断是不是多图上传
         $dir = ROOT_PATH . 'public' . DS . 'uploads' . DS;
         //dd($dir);
@@ -124,11 +125,16 @@ class Store extends Common
         if (!file_exists($path)) {
             mkdir($path, 0775, true);
         }
+        //dd($files);
         if (empty($files)) {
+            //dd(22);
             return false;
         } else {
+            //var_dump(11);
+            //dd($files);
             // 移动到框架应用根目录/public/uploads/ 目录下
             $info = $files->validate($validate)->rule('uniqid')->move($path);
+            //dd($info);
             if ($info) {
                 $pic_arr = '/public/uploads/'.$date.$info->getFilename();
                 return trim($pic_arr);

@@ -25,19 +25,29 @@
     <div class="li four" style="width: 100%;">
         <div class="dl">
             <label>门店活动：</label>
-            <a href="{:url('index/index',array('shop_id'=>$shop['shop_id']))}" style="display:inline-block;padding: 5px 15px;border: 1px solid #FFB032;border-radius: 5px;">
+            <a href="{:url('index/index',array('shop_id'=>$shop['shop_id']))}" style="display:inline-block;padding: 5px 15px;border: 1px solid #FFB032;border-radius: 5px;margin: 5px;">
                 <span>
                     大转盘
                 </span>
             </a>
-            <a href="{:url('index/vipcardlist',array('shop_id'=>$shop['shop_id'],'store_id'=>$shop['store_id']))}" style="display:inline-block;padding: 5px 15px;border: 1px solid #FFB032;border-radius: 5px;">
+            <a href="{:url('index/vipcardlist',array('shop_id'=>$shop['shop_id'],'store_id'=>$shop['store_id']))}" style="display:inline-block;padding: 5px 15px;border: 1px solid #FFB032;border-radius: 5px;margin: 5px;">
                 <span>
                     会员卡
                 </span>
             </a>
-            <a href="{:url('index/storedcardlist',array('shop_id'=>$shop['shop_id'],'store_id'=>$shop['store_id']))}" style="display:inline-block;padding: 5px 15px;border: 1px solid #FFB032;border-radius: 5px;">
+            <a href="{:url('index/storedcardlist',array('shop_id'=>$shop['shop_id'],'store_id'=>$shop['store_id']))}" style="display:inline-block;padding: 5px 15px;border: 1px solid #FFB032;border-radius: 5px;margin: 5px;">
                 <span>
                     储值卡
+                </span>
+            </a>
+            <a href="{:url('index/activelist',array('shop_id'=>$shop['shop_id'],'store_id'=>$shop['store_id']))}" style="display:inline-block;padding: 5px 15px;border: 1px solid #FFB032;border-radius: 5px;margin: 5px;">
+                <span>
+                    优惠活动
+                </span>
+            </a>
+            <a href="{:url('index/payment',array('shop_id'=>$shop['shop_id'],'store_id'=>$shop['store_id']))}" style="display:inline-block;padding: 5px 15px;border: 1px solid #FFB032;border-radius: 5px;margin: 5px;">
+                <span>
+                    优惠买单
                 </span>
             </a>
         </div>

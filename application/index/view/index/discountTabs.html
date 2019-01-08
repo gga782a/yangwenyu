@@ -44,36 +44,31 @@
 
         </div>
         <div class="shopListBox hide">
+            {notempty name="$storedshops"}
+            {volist name="storedshops" id="vo"}
             <div class="dl top">
-                <a href="#">
+                <a href="{:url('index/shopdes',array('shop_id'=>$vo['shop_id']))}">
                 <div class="dt clearfixed">
                     <div class="li shopListImg">
-                        <img src="img/rule_popups.png" alt="">
+                        <img src="{$vo['pic']}" alt="">
                     </div>
                     <div class="shopListext li">
-                        <div class="shopListname ellipsis">商店名字(多门店)</div>
+                        <div class="shopListname ellipsis">{$vo.shop_name}</div>
                         <div class="shopListnum clearfixed">
-                            <div class="li">充值储蓄卡</div>
+                            <div class="li">地址:</div>
+                            <div class="li">{$vo.position}</div>
+                        </div>
+                        <div class="clearfixed paddTb redT">
+                            <div class="li">电话:</div>
+                            <div class="li">{$vo.kefu_phone}</div>
+                            <div class="gray li fr">去储值</div>
                         </div>
                     </div>
                 </div>
                 </a>
             </div>
-            <div class="dl top">
-                <a href="#">
-                <div class="dt clearfixed">
-                    <div class="li shopListImg">
-                        <img src="img/rule_popups.png" alt="">
-                    </div>
-                    <div class="shopListext li">
-                        <div class="shopListname ellipsis">商店名字(多门店)</div>
-                        <div class="shopListnum clearfixed">
-                            <div class="li">充值储蓄卡</div>
-                        </div>
-                    </div>
-                </div>
-                </a>
-            </div>
+            {/volist}
+            {/notempty}
         </div>
     </div>
     <script src="http://res.wx.qq.com/open/js/jweixin-1.4.0.js"></script>

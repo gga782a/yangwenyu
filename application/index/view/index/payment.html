@@ -18,7 +18,11 @@
                 </div>
             </div>
             <div class="paymentBalance clearfixed top">
-                <div class="li">可用余额 <span class="redT">533.3</span><span class="redT">元</span>支付</div>
+                <div class="li">选择会员卡</div>
+                <div class="li fr">
+                    <input type="text" class="defaultInput" required lay-verify="required" readonly placeholder="会员卡会有优惠呦">
+                    <a href="{:url('index/myvipcard',array('store_id'=>$data['store_id']))}"><img src="__IMG__/black.png" alt="" style="width:10px;transform: rotateY(180deg);"></a>
+                </div>
                 <div class="li fr">
                     <input type="checkbox" name="yyy" lay-skin="switch" lay-text="ON|OFF" checked>
                 </div>

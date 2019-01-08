@@ -1,0 +1,42 @@
+{include file='common/header' /}
+<body style="background-color: #F4F4F4;">
+<div class="shopTop clearfixed">
+    <div class="li blackImg"><img src="__IMG__/black.png" onclick="go();" alt=""></div>
+    <div class="topTitle li">优惠活动</div>
+</div>
+<div class="tabbodys">
+    <div class="shopListBox" id="js_yhactive">
+        {notempty name="$data"}
+        {volist name="data" id="vo"}
+        <div class="dl top discountTabs">
+            <div class="discountTabsBg">
+                <div class="disTitle gray">{$vo.title}</div>
+                <div class="disCon top">
+                    <div class="disConTitle">活动说明:{$vo.introduce}</div>
+                    <!--<div class="disAdd clearfixed paddTb">-->
+                        <!--<div class="li">地址:</div>-->
+                        <!--<div class="li">哈尔滨市</div>-->
+                    <!--</div>-->
+                    <!--<div class="clearfixed paddTb redT">-->
+                        <!--<div class="li">电话:</div>-->
+                        <!--<div class="li">13697854683</div>-->
+                        <!--<div class="gray li fr">距离 <span>3.4</span>km</div>-->
+                    <!--</div>-->
+                    <div class="disTime gray clearfixed paddTb">
+                        <div class="li">活动时间</div>
+                        <div class="li">{$vo.stime|date="Y-m-d",###}-{$vo.etime|date="Y-m-d",###}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {/volist}
+        {else /}
+        <div class="dl top discountTabs">
+            暂无优惠活动
+        </div>
+        {/notempty}
+    </div>
+</div>
+<script src="http://res.wx.qq.com/open/js/jweixin-1.4.0.js"></script>
+<script src="https://cdn.staticfile.org/jquery/2.1.4/jquery.min.js"></script>
+{include file='common/footer' /}

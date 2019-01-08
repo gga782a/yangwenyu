@@ -526,11 +526,26 @@ class Index extends Common
         }
         $getSignPackage = json_decode($this->getSignPackage(),true);
         //获取储值商家
-        $storedshops = $this->czshop();
+        $storedshops = $this->arrytotwo($this->czshop());
+        //多维数组变二维
+        //dd($storedshops);
         return view('discountTabs',[
             'signPackage'=> $getSignPackage,
             'storedshops'=> $storedshops,
         ]);
+    }
+
+    //三维数组变二维
+
+    private function arrytotwo($arr)
+    {
+        $newarr = [];
+        foreach($arr as $k=>$v){
+            foreach($v as $kk=>$vv){
+                $newarr[] = $vv;
+            }
+        }
+        return $newarr;
     }
 
     //获取储值商家
@@ -584,7 +599,7 @@ class Index extends Common
             'status'     => 1,
         ];
 
-        $shops = db(self::$table_shop)->where($where)->field('shop_id,shop_name,pic_arr')->select();
+        $shops = db(self::$table_shop)->where($where)->field('shop_id,shop_name,pic_arr,position,kefu_phone')->select();
         $pic = '';
         if(!empty($shops)){
             foreach($shops as $k=>$shop){
@@ -600,6 +615,36 @@ class Index extends Common
             return false;
         }
 
+    }
+
+    //商家优惠活动
+
+    public function activelist()
+    {
+        $where = [
+            'store_id'  => input('store_id'),
+            'status'    => 1,
+        ];
+
+        $active = db(self::$table_active)->where($where)->select();
+        $data = [];
+        if(!empty($active)){
+            foreach ($active as $k=>$v) {
+                if($v['applyshop'] == 0){
+                    $data[] = $v;
+                }else{
+                    $applyshop = explode(',',trim($v['applyshop'],','));
+                    if(in_array(input('shop_id'),$applyshop)){
+                        $data[] = $v;
+                    }else{
+                        continue;
+                    }
+                }
+            }
+        }
+        return view('activelist',[
+            'data' => $data,
+        ]);
     }
 
     //获取优惠活动
